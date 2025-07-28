@@ -5,6 +5,7 @@ using System.Drawing.Printing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static Custom_QBSI.Clients.NHC.Dataclass_NHC;
 
 namespace Custom_QBSI.Clients.NHC
 {
@@ -32,25 +33,25 @@ namespace Custom_QBSI.Clients.NHC
         StringFormat sfAlignLeftCenter = new StringFormat { Alignment = StringAlignment.Near, LineAlignment = StringAlignment.Center };
         StringFormat sfAlignLeftBottom = new StringFormat { Alignment = StringAlignment.Near, LineAlignment = StringAlignment.Far };
 
-        public void PrintPage_NHC(object sender, PrintPageEventArgs e, int layoutIndex)
+        public void PrintPage_NHC(object sender, PrintPageEventArgs e, List<InvoiceData> invoiceData, int layoutIndex)
         {
             switch (layoutIndex)
             {
                 case 1:
-                    Layout_SalesInvoice(e);
+                    Layout_SalesInvoice(e, invoiceData, sfAlignCenterRight, sfAlignCenter, sfAlignLeftCenter);
                     break;
                 default:
                     throw new NotImplementedException();
             }
         }
 
-        private void Layout_SalesInvoice(PrintPageEventArgs e)
+        private void Layout_SalesInvoice(PrintPageEventArgs e, List<InvoiceData> invoiceData, StringFormat sfAlignCenterRight, StringFormat sfAlignCenter, StringFormat sfAlignLeftCenter)
         {
 
             Image image = Properties.Resources.NATURE_SI;
             e.Graphics.DrawImage(image, e.PageBounds);
 
-            Font font_Data = font_EightBold;
+            Font font_Data = font_Eight;
 
             Rectangle rectDate = new Rectangle(670, 110, 120, 25);
             Rectangle rectSoldTo = new Rectangle(145, 140, 285, 20);
@@ -59,11 +60,11 @@ namespace Custom_QBSI.Clients.NHC
             Rectangle rectBusinessAdd = new Rectangle(145, 180, 285, 25);
 
 
-            string Date = "04/15/2001";
-            string invoiceSoldTo = "Mercury Drug Corporation";
-            string invoiceBusinessStyle = "Mercury Drug Corporation";
-            string invoiceTin = "000-388-474-0000";
-            string invoiceBusinessAdd = "Bacoor City Habay";
+            string Date = invoiceData[0].TxnDate.ToString("MM/dd/yyyy");
+            string invoiceSoldTo = invoiceData[0].CustomerName.ToString();
+            string invoiceBusinessStyle = invoiceData[0].CustomerName.ToString(); //NEED FOR CUSTOM OR JUST ADD BUSINESS STYLE NAMES INPUT ON PROGRAM
+            string invoiceTin = invoiceData[0].TINNO.ToString();
+            string invoiceBusinessAdd = invoiceData[0].BillAddress1.ToString() + invoiceData[0].BillAddress2.ToString() + invoiceData[0].BillAddress3.ToString() + invoiceData[0].BillAddress4.ToString() + invoiceData[0].BillAddress5.ToString();
 
 
             e.Graphics.DrawString(Date, font_Data, Brushes.Black, rectDate, sfAlignCenter);
@@ -77,10 +78,11 @@ namespace Custom_QBSI.Clients.NHC
             Rectangle rectStoreCode = new Rectangle(145, 220, 285, 15);
             Rectangle rectTerms = new Rectangle(145, 235, 285, 15);
 
-            string invoicePoNo = "404642500336";
-            string invoiceStoreCode = "0464";
-            string invoiceTerms = "30 Days";
+            string invoicePoNo = invoiceData[0].PONumber.ToString();
+            string invoiceStoreCode = "0464"; // CUSTOM STORE CODE
+            string invoiceTerms = invoiceData[0].Terms.ToString();
 
+            
 
             e.Graphics.DrawString(invoicePoNo, font_Data, Brushes.Black, rectPoNo);
             e.Graphics.DrawString(invoiceStoreCode, font_Data, Brushes.Black, rectStoreCode);

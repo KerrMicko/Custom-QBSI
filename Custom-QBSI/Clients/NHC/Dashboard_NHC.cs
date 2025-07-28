@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static Custom_QBSI.Clients.NHC.Dataclass_NHC;
 
 namespace Custom_QBSI.Clients.NHC
 {
@@ -151,6 +152,12 @@ namespace Custom_QBSI.Clients.NHC
                 {
                     string refNumber = textBox_ReferenceNumber.Text;
 
+                    Queries_NHC accessQueries = new Queries_NHC();
+                    List<Dataclass_NHC.InvoiceData> invoice = new List<Dataclass_NHC.InvoiceData>();
+
+                    invoice = accessQueries.GetInvoiceData(refNumber);
+
+
                     Layout_NHC layout_NHC = new Layout_NHC();
                     PaperSize paperSize = new PaperSize("Custom", 850, 1100);
 
@@ -159,7 +166,7 @@ namespace Custom_QBSI.Clients.NHC
                     printDocument.PrinterSettings.DefaultPageSettings.PaperSize = paperSize;
                     printDocument.PrintPage += (s, ev) =>
                     {
-                        layout_NHC.PrintPage_NHC(s, ev, 1);
+                        layout_NHC.PrintPage_NHC(s, ev, invoice, comboBox_Forms.SelectedIndex);
                     };
                     printPreviewControl.Document = printDocument;
                     printPreviewControl.Visible = true;

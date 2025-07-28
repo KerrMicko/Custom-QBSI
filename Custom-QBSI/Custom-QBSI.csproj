@@ -54,8 +54,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Clients\NHC\AccessToDatabase_NHC.cs" />
     <Compile Include="Clients\NHC\Dashboard_NHC.cs" />
+    <Compile Include="Clients\NHC\Dataclass_NHC.cs" />
     <Compile Include="Clients\NHC\Layout_NHC.cs" />
+    <Compile Include="Clients\NHC\Queries_NHC.cs" />
     <Compile Include="Dashboard.cs" />
     <Compile Include="Dashboard.Designer.cs">
       <DependentUpon>Dashboard.cs</DependentUpon>
