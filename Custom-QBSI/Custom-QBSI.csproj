@@ -54,6 +54,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AccessDatabase.cs" />
     <Compile Include="Clients\NHC\AccessToDatabase_NHC.cs" />
     <Compile Include="Clients\NHC\Dashboard_NHC.cs" />
     <Compile Include="Clients\NHC\Dataclass_NHC.cs" />

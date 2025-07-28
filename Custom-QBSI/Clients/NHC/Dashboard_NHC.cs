@@ -10,10 +10,11 @@ using static Custom_QBSI.Clients.NHC.Dataclass_NHC;
 
 namespace Custom_QBSI.Clients.NHC
 {
-
-
     public class Dashboard_NHC
     {
+        private static readonly List<string> tableNames = new List<string> { "Account", 
+            "Company", "Customer", "Invoice", "InvoiceLine", "InvoiceLinkedTxn" };
+
         private PrintDocument printDocument;
         private PrintPreviewControl printPreviewControl;
 
@@ -39,6 +40,105 @@ namespace Custom_QBSI.Clients.NHC
             panel_Main.Controls.Add(printPreviewControl);
 
             return panel_Main;
+        }
+
+        public Panel TitlePanel()
+        {
+            Panel panel_Title = new Panel
+            {
+                Dock = DockStyle.Top,
+                Padding = new Padding(5),
+                Height = 50,
+                BackColor = Color.FromArgb(51, 160, 90),
+
+            };
+
+            FlowLayoutPanel panel_Left = new FlowLayoutPanel
+            {
+                Dock = DockStyle.Left,
+                FlowDirection = FlowDirection.LeftToRight,
+                //BackColor = Color.Red,
+                Width = 750,
+                Padding = new Padding(2),
+            };
+
+            Button button_SyncData = new Button
+            {
+                Parent = panel_Left,
+                Text = "Sync Data",
+                Font = new Font("Microsoft Sans Serif", 8),
+                Width = 90,
+                Height = 32,
+                BackColor = Color.White,
+            };
+            button_SyncData.Click += async (sender, e) =>
+            {
+                //ExportToJSON();
+                try
+                {
+                    DialogResult result = MessageBox.Show("Do you want to sync data from QuickBooks?",
+                                         "Sync Confirmation",
+                                         MessageBoxButtons.YesNo,
+                                         MessageBoxIcon.Question);
+
+                    if (result == DialogResult.Yes)
+                    {
+                        AccessDatabase accessDatabase = new AccessDatabase();
+
+                        using (var progressForm = new Form())
+                        {
+                            progressForm.StartPosition = FormStartPosition.CenterScreen;
+                            progressForm.Size = new System.Drawing.Size(300, 100);
+                            progressForm.FormBorderStyle = FormBorderStyle.FixedDialog;
+                            progressForm.MaximizeBox = false;
+                            progressForm.MinimizeBox = false;
+                            progressForm.ControlBox = false;
+                            progressForm.Text = "Syncing";
+
+                            var label = new Label
+                            {
+                                Text = "Syncing data from QuickBooks. Please wait...",
+                                Dock = DockStyle.Fill,
+                                TextAlign = System.Drawing.ContentAlignment.MiddleCenter
+                            };
+
+                            progressForm.Controls.Add(label);
+                            progressForm.ShowDialog();
+
+                            await accessDatabase.FetchCreateAndSaveData(tableNames);
+
+                            progressForm.Close();
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("An error occurred while syncing data: " + ex.Message);
+                }
+            };
+
+            Panel panel_Right = new Panel
+            {
+                Dock = DockStyle.Right,
+                //BackColor = Color.Blue,
+                Width = 750,
+            };
+
+            Label labelTop = new Label
+            {
+                Parent = panel_Right,
+                Font = new Font("Microsoft Sans Serif", 12, FontStyle.Regular),
+                Dock = DockStyle.Fill,
+                //Text = "QUICKBOOKS SALES INVOICE",
+                Text = "Q B S I",
+                TextAlign = ContentAlignment.MiddleRight,
+                ForeColor = Color.White,
+            };
+
+            panel_Left.Parent = panel_Title;
+            panel_Right.Parent = panel_Title;
+
+            return panel_Title;
         }
 
         public Panel SidebarPanel()

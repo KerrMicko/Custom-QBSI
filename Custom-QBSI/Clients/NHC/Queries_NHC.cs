@@ -15,7 +15,7 @@ namespace Custom_QBSI.Clients.NHC
         public List<InvoiceData> GetInvoiceData(string refNumber)
         {
             List<InvoiceData> invoices = new List<InvoiceData>();
-            string accessConnectionString = GetAccessConnectionString();
+            string accessConnectionString = AccessDatabase.GetAccessConnectionString();
 
             try
             {
