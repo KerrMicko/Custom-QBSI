@@ -9,6 +9,8 @@ using System.Windows.Forms;
 
 namespace Custom_QBSI.Clients.NHC
 {
+
+
     public class Dashboard_NHC
     {
         private PrintDocument printDocument;
