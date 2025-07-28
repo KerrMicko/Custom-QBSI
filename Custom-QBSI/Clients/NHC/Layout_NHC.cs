@@ -82,8 +82,50 @@ namespace Custom_QBSI.Clients.NHC
 
 
 
+            //MIDDLE TABLE
+
+            int tab1XStart = 68;
+            int tab1YStart = 280;
+            int tab1DataHeight = 26;
+
+            int widthItemQuantity = 75;
+            int widthItemUOM = 67;
+            int widthItemDesc = 340;
+            int widthItemUnitPrice = 119;
+            int widthItemAmount = 120;
+
+            int xStartItemQty = tab1XStart;
+            int xStartItemUOM = tab1XStart + xStartItemQty + 8;
+            int xStartItemDesc = tab1XStart + xStartItemUOM;
+            int xStartItemUnitPrice = tab1XStart + xStartItemQty + xStartItemUOM + xStartItemDesc + 61;
+            int xStartItemAmount = tab1XStart + xStartItemUnitPrice + 51;
 
 
+            Rectangle rectItemQuantity = new Rectangle(xStartItemQty, tab1YStart, widthItemQuantity, tab1DataHeight);
+            Rectangle rectItemUOM = new Rectangle(xStartItemUOM, tab1YStart, widthItemUOM, tab1DataHeight);
+            Rectangle rectItemDescription = new Rectangle(xStartItemDesc, tab1YStart, widthItemDesc, tab1DataHeight);
+            Rectangle rectItemUnitPrice = new Rectangle(xStartItemUnitPrice, tab1YStart, widthItemUnitPrice, tab1DataHeight);
+            Rectangle rectItemAmount = new Rectangle(xStartItemAmount, tab1YStart, widthItemAmount, tab1DataHeight);
+
+            /*e.Graphics.DrawRectangle(Pens.Red, rectItemQuantity);
+            e.Graphics.DrawRectangle(Pens.Blue, rectItemUOM);
+            e.Graphics.DrawRectangle(Pens.Yellow, rectItemDescription);
+            e.Graphics.DrawRectangle(Pens.Orange, rectItemUnitPrice);
+            e.Graphics.DrawRectangle(Pens.Pink, rectItemAmount);*/
+
+
+            string ItemQuantity = "200";
+            string ItemUOM = "cs";
+            string ItemDescription = "Capilano Honey UD - 8 x 340g";
+            double ItemUnitPrice = 2311.61;
+            double ItemAmount = 4623.21;
+
+
+            e.Graphics.DrawString(ItemQuantity.ToString(), font_Eight, Brushes.Black, rectItemQuantity, sfAlignCenter);
+            e.Graphics.DrawString(ItemUOM.ToString(), font_Eight, Brushes.Black, rectItemUOM, sfAlignCenter);
+            e.Graphics.DrawString(ItemDescription.ToString(), font_Eight, Brushes.Black, rectItemDescription, sfAlignLeftCenter);
+            e.Graphics.DrawString(ItemUnitPrice.ToString("N2"), font_Eight, Brushes.Black, rectItemUnitPrice, sfAlignCenterRight);
+            e.Graphics.DrawString(ItemAmount.ToString("N2"), font_Eight, Brushes.Black, rectItemAmount, sfAlignCenterRight);
 
 
             //LEFT TABLE
