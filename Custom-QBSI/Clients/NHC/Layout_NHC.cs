@@ -52,17 +52,23 @@ namespace Custom_QBSI.Clients.NHC
 
             Font font_Data = font_EightBold;
 
+            Rectangle rectDate = new Rectangle(670, 110, 120, 25);
             Rectangle rectSoldTo = new Rectangle(145, 140, 285, 20);
+            Rectangle rectBusinessStyle = new Rectangle(325, 160, 285, 20);
             Rectangle rectTIN = new Rectangle(145, 160, 285, 20);
             Rectangle rectBusinessAdd = new Rectangle(145, 180, 285, 25);
 
 
+            string Date = "04/15/2001";
             string invoiceSoldTo = "Mercury Drug Corporation";
+            string invoiceBusinessStyle = "Mercury Drug Corporation";
             string invoiceTin = "000-388-474-0000";
             string invoiceBusinessAdd = "Bacoor City Habay";
 
 
+            e.Graphics.DrawString(Date, font_Data, Brushes.Black, rectDate, sfAlignCenter);
             e.Graphics.DrawString(invoiceSoldTo, font_Data, Brushes.Black, rectSoldTo);
+            e.Graphics.DrawString(invoiceBusinessStyle, font_Data, Brushes.Black, rectBusinessStyle);
             e.Graphics.DrawString(invoiceTin, font_Data, Brushes.Black, rectTIN);
             e.Graphics.DrawString(invoiceBusinessAdd, font_Data, Brushes.Black, rectBusinessAdd);
 
