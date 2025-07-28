@@ -103,7 +103,8 @@ namespace Custom_QBSI.Clients.NHC
                             };
 
                             progressForm.Controls.Add(label);
-                            progressForm.ShowDialog();
+                            progressForm.Show();
+                            progressForm.BringToFront();
 
                             await accessDatabase.FetchCreateAndSaveData(tableNames);
 
