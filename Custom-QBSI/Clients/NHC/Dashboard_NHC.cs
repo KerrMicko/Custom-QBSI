@@ -12,36 +12,129 @@ namespace Custom_QBSI.Clients.NHC
 {
     public class Dashboard_NHC
     {
-        private static readonly List<string> tableNames = new List<string> { "Account", 
-            "Company", "Customer", 
-            "Invoice", "InvoiceLine", "InvoiceLinkedTxn", 
+        private static readonly List<string> tableNames = new List<string> { "Account",
+            "Company", "Customer",
+            "Invoice", "InvoiceLine", "InvoiceLinkedTxn",
             "Item" };
 
         private PrintDocument printDocument;
         private PrintPreviewControl printPreviewControl;
 
         private ComboBox comboBox_Forms;
+
+        private CheckBox checkBox_EnableExpDate;
+        private TextBox textBox_Note;
+        private TextBox textBox_BusinessStyle;
+        private TextBox textBox_PWDSignature;
+
         private FlowLayoutPanel panel_Printing;
+        private FlowLayoutPanel panel_Details;
 
         static int sideBarWidth = 250;
         public Panel MainPanel()
         {
-            Panel panel_Main = new Panel
+            Panel panel_Container = new Panel
             {
-                BackColor = Color.LightGray,
                 Dock = DockStyle.Fill,
+                BackColor = Color.White,
                 Padding = new Padding(sideBarWidth, 50, 0, 0),
-                //Height = 300,
             };
 
+            Panel panel_Main = new Panel
+            {
+                Parent = panel_Container,
+                BackColor = Color.LightGray,
+                Dock = DockStyle.Fill,
+                //Height = 300,
+            };
             printPreviewControl = new PrintPreviewControl();
             printPreviewControl.Dock = DockStyle.Fill;
             printPreviewControl.Zoom = 1;
             printPreviewControl.Visible = false;
 
+            FlowLayoutPanel panel_Details = Main_PanelDetails();
+            panel_Details.Parent = panel_Container;
+
             panel_Main.Controls.Add(printPreviewControl);
 
-            return panel_Main;
+            return panel_Container;
+        }
+
+        private FlowLayoutPanel Main_PanelDetails()
+        {
+            int panelDetailsWidth = sideBarWidth + 30;
+            int componentWidth = panelDetailsWidth - 20;
+
+            panel_Details = new FlowLayoutPanel
+            {
+                Dock = DockStyle.Left,
+                Width = panelDetailsWidth,
+                Padding = new Padding(5),
+                BackColor = Color.LightGray,
+                BorderStyle = BorderStyle.FixedSingle,
+                Visible = false,
+            };
+
+            Label label_NoteText = new Label
+            {
+                Parent = panel_Details,
+                Width = componentWidth,
+                Text = "Note:",
+                TextAlign = ContentAlignment.MiddleLeft,
+                Font = font_Label,
+            };
+
+            textBox_Note = new TextBox
+            {
+                Parent = panel_Details,
+                Width = componentWidth,
+                Font = font_Label,
+                Multiline = true,
+                Height = 50,
+            };
+
+            Label label_BusinessStyle = new Label
+            {
+                Parent = panel_Details,
+                Width = componentWidth,
+                Text = "Business Style/Name:",
+                TextAlign = ContentAlignment.MiddleLeft,
+                Font = font_Label,
+            };
+
+            textBox_BusinessStyle = new TextBox
+            {
+                Parent = panel_Details,
+                Width = componentWidth,
+                Font = font_Label,
+            };
+
+            Label label_PWDSignature = new Label
+            {
+                Parent = panel_Details,
+                Width = componentWidth,
+                Text = "SC/PWD Signature:",
+                TextAlign = ContentAlignment.MiddleLeft,
+                Font = font_Label,
+            };
+
+            textBox_PWDSignature = new TextBox
+            {
+                Parent = panel_Details,
+                Width = componentWidth,
+                Font = font_Label,
+            };
+
+            checkBox_EnableExpDate = new CheckBox
+            {
+                Parent = panel_Details,
+                Text = "Enable Amount | Item Code | Exp. Date",
+                Width = componentWidth,
+                Font = font_Label,
+                Checked = true,
+            };
+
+            return panel_Details;
         }
 
         public Panel TitlePanel()
@@ -205,6 +298,7 @@ namespace Custom_QBSI.Clients.NHC
                 "Delivery Receipt",
             });
             comboBox_Forms.SelectedIndex = 1;
+            comboBox_Forms.SelectedIndexChanged += ComboBox_Forms_SelectedIndexChanged;
 
             return panel_Forms;
         }
@@ -256,6 +350,12 @@ namespace Custom_QBSI.Clients.NHC
                     else if (comboBox_Forms.SelectedIndex != 0 && textBox_ReferenceNumber.Text != "")
                     {
                         string refNumber = textBox_ReferenceNumber.Text;
+
+                        string note = textBox_Note.Text;
+                        string businessStyle = textBox_BusinessStyle.Text;
+                        string pwdSignature = textBox_PWDSignature.Text;
+                        bool isEnableExpDateChecked = checkBox_EnableExpDate.Checked;
+
                         Queries_NHC accessQueries = new Queries_NHC();
                         List<Dataclass_NHC.InvoiceData> invoice = accessQueries.GetInvoiceData(refNumber);
 
@@ -273,7 +373,11 @@ namespace Custom_QBSI.Clients.NHC
                         printDocument.PrinterSettings.DefaultPageSettings.PaperSize = paperSize;
                         printDocument.PrintPage += (s, ev) =>
                         {
-                            layout_NHC.PrintPage_NHC(s, ev, invoice, comboBox_Forms.SelectedIndex);
+                            //layout_NHC.PrintPage_NHC(s, ev, invoice, comboBox_Forms.SelectedIndex, note, businessStyle, pwdSignature, isEnableExpDateChecked);
+                            if (comboBox_Forms.SelectedIndex == 1)
+                                layout_NHC.Layout_SalesInvoice(ev, invoice);
+                            else if (comboBox_Forms.SelectedIndex == 2)
+                                layout_NHC.Layout_DeliveryReceipt(ev, invoice, note, businessStyle, pwdSignature, isEnableExpDateChecked);
                         };
                         printPreviewControl.Document = printDocument;
                         printPreviewControl.Visible = true;
@@ -367,6 +471,25 @@ namespace Custom_QBSI.Clients.NHC
             };
 
             return panel_Printing;
+        }
+
+
+        private void ComboBox_Forms_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (comboBox_Forms.SelectedIndex == 1)
+            {
+                panel_Details.Visible = false;
+                panel_Details.Width = 0;
+            }
+            else if (comboBox_Forms.SelectedIndex == 2)
+            {
+                panel_Details.Visible = true;
+                panel_Details.Width = sideBarWidth + 30;
+            }
+            else
+            {
+
+            }
         }
     }
 }

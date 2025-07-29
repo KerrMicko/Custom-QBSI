@@ -33,22 +33,22 @@ namespace Custom_QBSI.Clients.NHC
         StringFormat sfAlignLeftCenter = new StringFormat { Alignment = StringAlignment.Near, LineAlignment = StringAlignment.Center };
         StringFormat sfAlignLeftBottom = new StringFormat { Alignment = StringAlignment.Near, LineAlignment = StringAlignment.Far };
 
-        public void PrintPage_NHC(object sender, PrintPageEventArgs e, List<InvoiceData> invoiceData, int layoutIndex)
+        /*public void PrintPage_NHC(object sender, PrintPageEventArgs e, List<InvoiceData> invoiceData, int layoutIndex, string note, string businessStyle, string pwdSignature, bool isEnableExpDateChecked)
         {
             switch (layoutIndex)
             {
                 case 1:
-                    Layout_SalesInvoice(e, invoiceData, sfAlignCenterRight, sfAlignCenter, sfAlignLeftCenter);
+                    Layout_SalesInvoice(e, invoiceData);
                     break;
                 case 2:
-                    Layout_DeliveryReceipt(e, invoiceData, sfAlignCenterRight, sfAlignCenter, sfAlignLeftCenter);
+                    Layout_DeliveryReceipt(e, invoiceData, note, businessStyle, pwdSignature, isEnableExpDateChecked);
                     break;
                 default:
                     throw new NotImplementedException();
             }
-        }
+        }*/
 
-        private void Layout_SalesInvoice(PrintPageEventArgs e, List<InvoiceData> invoiceData, StringFormat sfAlignCenterRight, StringFormat sfAlignCenter, StringFormat sfAlignLeftCenter)
+        public void Layout_SalesInvoice(PrintPageEventArgs e, List<InvoiceData> invoiceData)
         {
 
             Image image = Properties.Resources.NATURE_SI;
@@ -220,7 +220,7 @@ namespace Custom_QBSI.Clients.NHC
 
         }
 
-        private void Layout_DeliveryReceipt(PrintPageEventArgs e, List<InvoiceData> invoiceData, StringFormat sfAlignCenterRight, StringFormat sfAlignCenter, StringFormat sfAlignLeftCenter)
+        public void Layout_DeliveryReceipt(PrintPageEventArgs e, List<InvoiceData> invoiceData, string note, string businessStyle, string pwdSignature, bool isEnableExpDateChecked)
         {
             Image image = Properties.Resources.NATURE_DR;
             e.Graphics.DrawImage(image, e.PageBounds);
@@ -291,10 +291,10 @@ namespace Custom_QBSI.Clients.NHC
 
             /*e.Graphics.DrawRectangle(Pens.Black, rectItemQuantity);
             e.Graphics.DrawRectangle(Pens.Red, rectItemUnit);
-            e.Graphics.DrawRectangle(Pens.Pink, rectItemDescription);*/
-            //e.Graphics.DrawRectangle(Pens.Blue, rectItemAmount);
+            e.Graphics.DrawRectangle(Pens.Pink, rectItemDescription);
+            e.Graphics.DrawRectangle(Pens.Blue, rectItemAmount);*/
 
-
+            decimal totalAmount = 0;
             int itemHeight = 0;
             int counter = 1;
 
@@ -304,16 +304,35 @@ namespace Custom_QBSI.Clients.NHC
                 {
                     e.Graphics.DrawString(lineItem.Quantity.ToString("N2"), font_Data, Brushes.Black, new Rectangle(xStartItemQuantity, tabYStart + itemHeight, widthItemQuantity, tabDataHeight), sfAlignCenter);
                     e.Graphics.DrawString(lineItem.UnitOfMeasure, font_Data, Brushes.Black, new Rectangle(xStartItemUnit, tabYStart + itemHeight, widthItemUnit, tabDataHeight), sfAlignCenter);
-                    e.Graphics.DrawString(lineItem.Description +"(Exp."+ lineItem.ExpirationDate + ")", font_Data, Brushes.Black, new Rectangle(xStartItemDescription, tabYStart + itemHeight, widthItemDescription, tabDataHeight), sfAlignLeftCenter);
-                    e.Graphics.DrawString(lineItem.Amount.ToString("N2"), font_Data, Brushes.Black, new Rectangle(xStartItemAmount, tabYStart + itemHeight, widthItemDescription, tabDataHeight), sfAlignCenterRight);
+                    
+                    if (isEnableExpDateChecked)
+                    {
+                        e.Graphics.DrawString(lineItem.Description + "(Exp." + lineItem.ExpirationDate + ")", font_Data, Brushes.Black, new Rectangle(xStartItemDescription, tabYStart + itemHeight, widthItemDescription, tabDataHeight), sfAlignLeftCenter);
+                        e.Graphics.DrawString(lineItem.Amount.ToString("N2"), font_Data, Brushes.Black, new Rectangle(xStartItemAmount, tabYStart + itemHeight, widthItemDescription, tabDataHeight), sfAlignCenterRight);
+                        totalAmount += lineItem.Amount;
+                    }
+                    else
+                    {
+                        e.Graphics.DrawString(lineItem.Description, font_Data, Brushes.Black, new Rectangle(xStartItemDescription, tabYStart + itemHeight, widthItemDescription, tabDataHeight), sfAlignLeftCenter);
+                    }
+                    
 
                     itemHeight += tabDataHeight;
                     counter++;
                 }
             }
 
+            Rectangle rectTotalAmount = new Rectangle(xStartItemAmount, tabYStart + itemHeight, widthItemDescription, tabDataHeight);
+            Rectangle rectNote = new Rectangle(50, tabYStart + itemHeight, widthItemDescription, tabDataHeight);
+
+            if (isEnableExpDateChecked)
+            {
+                e.Graphics.DrawString(totalAmount.ToString("N2"), font_Data, Brushes.Black, rectTotalAmount, sfAlignCenterRight);
+            }
+            e.Graphics.DrawString("Note: " + note, font_Data, Brushes.Black, rectNote, sfAlignLeftCenter);
+
             // Signatory
-            string Signatory = "Kerr Micko Lanante";
+            string Signatory = "Danil Jeus Ampatin";
 
             Rectangle rectAuthorized = new Rectangle(555, 915, 230, 18);
 
