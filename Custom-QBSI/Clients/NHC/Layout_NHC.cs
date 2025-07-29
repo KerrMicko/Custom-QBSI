@@ -231,6 +231,97 @@ namespace Custom_QBSI.Clients.NHC
             e.Graphics.DrawImage(image, e.PageBounds);
 
             Font font_Data = font_Eight;
+
+            Rectangle rectDate = new Rectangle(690, 90, 120, 25);
+            Rectangle rectSoldTo = new Rectangle(125, 135, 285, 20);
+            Rectangle rectBusinessStyle = new Rectangle(615, 138, 205, 20);
+            Rectangle rectTIN = new Rectangle(125, 155, 285, 20);
+            Rectangle rectBusinessAdd = new Rectangle(125, 175, 285, 25);
+
+            /*e.Graphics.DrawRectangle(Pens.Orange, rectDate);
+            e.Graphics.DrawRectangle(Pens.Orange, rectSoldTo);
+            e.Graphics.DrawRectangle(Pens.Orange, rectBusinessStyle);
+            e.Graphics.DrawRectangle(Pens.Blue, rectTIN);
+            e.Graphics.DrawRectangle(Pens.Green, rectBusinessAdd);*/
+
+            string Date = invoiceData[0].TxnDate.ToString("MM/dd/yyyy");
+            string invoiceSoldTo = invoiceData[0].CustomerName.ToString();
+            string invoiceBusinessStyle = invoiceData[0].CustomerName.ToString();
+            string invoiceTin = invoiceData[0].TINNO.ToString();
+            string invoiceBusinessAdd = invoiceData[0].BillAddress1.ToString() + invoiceData[0].BillAddress2.ToString() + invoiceData[0].BillAddress3.ToString() + invoiceData[0].BillAddress4.ToString() + invoiceData[0].BillAddress5.ToString();
+
+
+            e.Graphics.DrawString(Date, font_Data, Brushes.Black, rectDate, sfAlignCenter);
+            e.Graphics.DrawString(invoiceSoldTo, font_Data, Brushes.Black, rectSoldTo);
+            e.Graphics.DrawString(invoiceBusinessStyle, font_Data, Brushes.Black, rectBusinessStyle);
+            e.Graphics.DrawString(invoiceTin, font_Data, Brushes.Black, rectTIN);
+            e.Graphics.DrawString(invoiceBusinessAdd, font_Data, Brushes.Black, rectBusinessAdd);
+
+            Rectangle rectPoNo = new Rectangle(125, 205, 285, 15);
+            Rectangle rectStoreCode = new Rectangle(125, 220, 285, 15);
+            Rectangle rectTerms = new Rectangle(125, 235, 285, 15);
+
+            /*e.Graphics.DrawRectangle(Pens.Red, rectPoNo);
+            e.Graphics.DrawRectangle(Pens.Yellow, rectStoreCode);
+            e.Graphics.DrawRectangle(Pens.Pink, rectTerms);*/
+
+            string invoicePoNo = invoiceData[0].PONumber.ToString();
+            string invoiceStoreCode = "0464"; // CUSTOM STORE CODE
+            string invoiceTerms = invoiceData[0].Terms.ToString();
+
+            e.Graphics.DrawString(invoicePoNo, font_Data, Brushes.Black, rectPoNo);
+            e.Graphics.DrawString(invoiceStoreCode, font_Data, Brushes.Black, rectStoreCode);
+            e.Graphics.DrawString(invoiceTerms, font_Data, Brushes.Black, rectTerms);
+
+            // TABLE MIDDLE CALCULATION
+            int tabXStart = 50;
+            int tabYStart = 285;
+
+            int tabDataHeight = 30;
+
+            int widthItemNo = 67;
+            int widthItemQuantity = 75;
+            int widthItemUnit = 45;
+            int widthItemDescription = 640;
+
+            int xStartItemQuantity = tabXStart;
+            int xStartItemUnit = tabXStart + widthItemQuantity;
+            int xStartItemDescription = tabXStart + widthItemNo + widthItemQuantity + widthItemUnit - 67;
+
+            Rectangle rectItemQuantity = new Rectangle(xStartItemQuantity, tabYStart, widthItemQuantity, tabDataHeight);
+            Rectangle rectItemUnit = new Rectangle(xStartItemUnit, tabYStart, widthItemUnit, tabDataHeight);
+            Rectangle rectItemDescription = new Rectangle(xStartItemDescription, tabYStart, widthItemDescription, tabDataHeight);
+
+            /*e.Graphics.DrawRectangle(Pens.Black, rectItemQuantity);
+            e.Graphics.DrawRectangle(Pens.Red, rectItemUnit);
+            e.Graphics.DrawRectangle(Pens.Pink, rectItemDescription);*/
+
+
+            int itemHeight = 0;
+            int counter = 1;
+
+            foreach (var invoice in invoiceData)
+            {
+                foreach (var lineItem in invoice.LineItems)
+                {
+                    e.Graphics.DrawString(lineItem.Quantity.ToString("N2"), font_Data, Brushes.Black, new Rectangle(xStartItemQuantity, tabYStart + itemHeight, widthItemQuantity, tabDataHeight), sfAlignCenter);
+                    e.Graphics.DrawString(lineItem.UnitOfMeasure, font_Data, Brushes.Black, new Rectangle(xStartItemUnit, tabYStart + itemHeight, widthItemUnit, tabDataHeight), sfAlignCenter);
+                    e.Graphics.DrawString(lineItem.Description, font_Data, Brushes.Black, new Rectangle(xStartItemDescription, tabYStart + itemHeight, widthItemDescription, tabDataHeight), sfAlignLeftCenter);
+
+                    itemHeight += tabDataHeight;
+                    counter++;
+                }
+            }
+
+            // Signatory
+            string Signatory = "Kerr Micko Lanante";
+
+            Rectangle rectAuthorized = new Rectangle(555, 915, 230, 18);
+
+            //e.Graphics.DrawRectangle(Pens.Black, rectAuthorized);
+
+            e.Graphics.DrawString(Signatory, font_Data, Brushes.Black, rectAuthorized, sfAlignCenter);
+
         }
     }
 }
