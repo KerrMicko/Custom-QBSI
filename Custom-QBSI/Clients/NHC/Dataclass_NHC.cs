@@ -15,6 +15,8 @@ namespace Custom_QBSI.Clients.NHC
             public string PONumber { get; set; }
             public string DrNo { get; set; }
             public string PwdNo { get; set; }
+            public string BussinessStyle { get; set; }
+            public string StoreCode { get; set; }
             public string JobOrderNo { get; set; }
             public string BillAddress1 { get; set; }
             public string BillAddress2 { get; set; }

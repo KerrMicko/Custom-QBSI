@@ -65,7 +65,7 @@ namespace Custom_QBSI.Clients.NHC
 
             string Date = invoiceData[0].TxnDate.ToString("MM/dd/yyyy");
             string invoiceSoldTo = invoiceData[0].CustomerName.ToString();
-            string invoiceBusinessStyle = invoiceData[0].CustomerName.ToString(); //NEED FOR CUSTOM OR JUST ADD BUSINESS STYLE NAMES INPUT ON PROGRAM
+            string invoiceBusinessStyle = invoiceData[0].BussinessStyle.ToString(); //NEED FOR CUSTOM OR JUST ADD BUSINESS STYLE NAMES INPUT ON PROGRAM
             string invoiceTin = invoiceData[0].TINNO.ToString();
             string invoiceBusinessAdd = invoiceData[0].BillAddress1.ToString() + invoiceData[0].BillAddress2.ToString() + invoiceData[0].BillAddress3.ToString() + invoiceData[0].BillAddress4.ToString() + invoiceData[0].BillAddress5.ToString();
 
@@ -82,7 +82,7 @@ namespace Custom_QBSI.Clients.NHC
             Rectangle rectTerms = new Rectangle(145, 235, 285, 15);
 
             string invoicePoNo = invoiceData[0].PONumber.ToString();
-            string invoiceStoreCode = "0464"; // CUSTOM STORE CODE
+            string invoiceStoreCode = invoiceData[0].StoreCode.ToString(); // CUSTOM STORE CODE
             string invoiceTerms = invoiceData[0].Terms.ToString();
 
 
@@ -246,7 +246,7 @@ namespace Custom_QBSI.Clients.NHC
 
             string Date = invoiceData[0].TxnDate.ToString("MM/dd/yyyy");
             string invoiceSoldTo = invoiceData[0].CustomerName.ToString();
-            string invoiceBusinessStyle = invoiceData[0].CustomerName.ToString();
+            string invoiceBusinessStyle = invoiceData[0].BussinessStyle.ToString();
             string invoiceTin = invoiceData[0].TINNO.ToString();
             string invoiceBusinessAdd = invoiceData[0].BillAddress1.ToString() + invoiceData[0].BillAddress2.ToString() + invoiceData[0].BillAddress3.ToString() + invoiceData[0].BillAddress4.ToString() + invoiceData[0].BillAddress5.ToString();
 
@@ -266,7 +266,7 @@ namespace Custom_QBSI.Clients.NHC
             e.Graphics.DrawRectangle(Pens.Pink, rectTerms);*/
 
             string invoicePoNo = invoiceData[0].PONumber.ToString();
-            string invoiceStoreCode = "0464"; // CUSTOM STORE CODE
+            string invoiceStoreCode = invoiceData[0].StoreCode.ToString(); // CUSTOM STORE CODE
             string invoiceTerms = invoiceData[0].Terms.ToString();
 
             e.Graphics.DrawString(invoicePoNo, font_Data, Brushes.Black, rectPoNo);
