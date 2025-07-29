@@ -33,8 +33,9 @@ namespace Custom_QBSI
         {
             string odbcConnectionString = GetQBConnectionString();
             string accessConnectionString = GetAccessConnectionString();
+           
+            DeleteSpecifiedTablesData(tableNames);
 
-            
             using (OdbcConnection odbcConnection = new OdbcConnection(odbcConnectionString))
             {
                 try

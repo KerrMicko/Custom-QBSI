@@ -41,7 +41,7 @@ namespace Custom_QBSI.Clients.NHC
                                     PwdNo = reader["CustomFieldPWDNO"] != DBNull.Value ? reader["CustomFieldPWDNO"].ToString() : string.Empty,
                                     DrNo = reader["CustomFieldDRNO"] != DBNull.Value ? reader["CustomFieldDRNO"].ToString() : string.Empty,
                                     JobOrderNo = reader["CustomFieldJOBORDERNO"] != DBNull.Value ? reader["CustomFieldJOBORDERNO"].ToString() : string.Empty,
-                                    BussinessStyle = reader["CustomFieldBUSSINESSSTYLE"] != DBNull.Value ? reader["CustomFieldBUSSINESSSTYLE"].ToString() : string.Empty,
+                                    BusinessStyle = reader["CustomFieldBUSSINESSSTYLE"] != DBNull.Value ? reader["CustomFieldBUSSINESSSTYLE"].ToString() : string.Empty,
                                     StoreCode = reader["CustomFieldSTORECODE"] != DBNull.Value ? reader["CustomFieldSTORECODE"].ToString() : string.Empty,
                                     CustomerName = reader["CustomerRefFullName"] != DBNull.Value ? reader["CustomerRefFullName"].ToString() : string.Empty,
                                     PONumber = reader["PONumber"] != DBNull.Value ? reader["PONumber"].ToString() : string.Empty,

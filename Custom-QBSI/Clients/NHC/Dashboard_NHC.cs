@@ -13,7 +13,9 @@ namespace Custom_QBSI.Clients.NHC
     public class Dashboard_NHC
     {
         private static readonly List<string> tableNames = new List<string> { "Account", 
-            "Company", "Customer", "Invoice", "InvoiceLine", "InvoiceLinkedTxn" };
+            "Company", "Customer", 
+            "Invoice", "InvoiceLine", "InvoiceLinkedTxn", 
+            "Item" };
 
         private PrintDocument printDocument;
         private PrintPreviewControl printPreviewControl;
