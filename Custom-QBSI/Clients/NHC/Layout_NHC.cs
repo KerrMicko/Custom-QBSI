@@ -287,14 +287,17 @@ namespace Custom_QBSI.Clients.NHC
             int xStartItemQuantity = tabXStart;
             int xStartItemUnit = tabXStart + widthItemQuantity;
             int xStartItemDescription = tabXStart + widthItemNo + widthItemQuantity + widthItemUnit - 67;
+            int xStartItemAmount = tabXStart + widthItemNo + widthItemQuantity + widthItemUnit - 67;
 
             Rectangle rectItemQuantity = new Rectangle(xStartItemQuantity, tabYStart, widthItemQuantity, tabDataHeight);
             Rectangle rectItemUnit = new Rectangle(xStartItemUnit, tabYStart, widthItemUnit, tabDataHeight);
             Rectangle rectItemDescription = new Rectangle(xStartItemDescription, tabYStart, widthItemDescription, tabDataHeight);
+            Rectangle rectItemAmount = new Rectangle(xStartItemAmount, tabYStart, widthItemDescription, tabDataHeight);
 
             /*e.Graphics.DrawRectangle(Pens.Black, rectItemQuantity);
             e.Graphics.DrawRectangle(Pens.Red, rectItemUnit);
             e.Graphics.DrawRectangle(Pens.Pink, rectItemDescription);*/
+            //e.Graphics.DrawRectangle(Pens.Blue, rectItemAmount);
 
 
             int itemHeight = 0;
@@ -307,6 +310,7 @@ namespace Custom_QBSI.Clients.NHC
                     e.Graphics.DrawString(lineItem.Quantity.ToString("N2"), font_Data, Brushes.Black, new Rectangle(xStartItemQuantity, tabYStart + itemHeight, widthItemQuantity, tabDataHeight), sfAlignCenter);
                     e.Graphics.DrawString(lineItem.UnitOfMeasure, font_Data, Brushes.Black, new Rectangle(xStartItemUnit, tabYStart + itemHeight, widthItemUnit, tabDataHeight), sfAlignCenter);
                     e.Graphics.DrawString(lineItem.Description, font_Data, Brushes.Black, new Rectangle(xStartItemDescription, tabYStart + itemHeight, widthItemDescription, tabDataHeight), sfAlignLeftCenter);
+                    e.Graphics.DrawString(lineItem.Amount.ToString("N2"), font_Data, Brushes.Black, new Rectangle(xStartItemAmount, tabYStart + itemHeight, widthItemDescription, tabDataHeight), sfAlignCenterRight);
 
                     itemHeight += tabDataHeight;
                     counter++;
