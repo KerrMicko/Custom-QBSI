@@ -66,7 +66,7 @@ namespace Custom_QBSI.Clients.NHC
                                 };
 
                                 // Additional query to fetch line items for the current invoice
-                                string lineItemQuery = "SELECT InvoiceLineQuantity, SalesRepRefFullName, InvoiceLineDesc, ItemSalesTaxRefFullName, SalesTaxTotal, BalanceRemaining, InvoiceLineUnitOfMeasure, InvoiceLineSalesTaxCodeRefFullName, InvoiceLineRate, InvoiceLineAmount, InvoiceLineItemRefListID " +
+                                string lineItemQuery = "SELECT InvoiceLineQuantity, SalesRepRefFullName, CustomFieldInvoiceLineOther1, InvoiceLineDesc, ItemSalesTaxRefFullName, SalesTaxTotal, BalanceRemaining, InvoiceLineUnitOfMeasure, InvoiceLineSalesTaxCodeRefFullName, InvoiceLineRate, InvoiceLineAmount, InvoiceLineItemRefListID " +
                                                 "FROM InvoiceLine WHERE RefNumber = ?";
 
                                 using (OleDbCommand lineItemCommand = new OleDbCommand(lineItemQuery, connection))
@@ -84,6 +84,7 @@ namespace Custom_QBSI.Clients.NHC
                                                 Quantity = lineReader["InvoiceLineQuantity"] != DBNull.Value ? Convert.ToDecimal(lineReader["InvoiceLineQuantity"]) : 0,
                                                 Description = lineReader["InvoiceLineDesc"] as string,
                                                 Tax = lineReader["InvoiceLineSalesTaxCodeRefFullName"] as string,
+                                                ExpirationDate = lineReader["CustomFieldInvoiceLineOther1"] as string,
                                                 UnitOfMeasure = lineReader["InvoiceLineUnitOfMeasure"] as string,
                                                 TaxesName = lineReader["ItemSalesTaxRefFullName"] as string,
                                                 Rate = lineReader["InvoiceLineRate"] != DBNull.Value ? Convert.ToDecimal(lineReader["InvoiceLineRate"]) : 0,
