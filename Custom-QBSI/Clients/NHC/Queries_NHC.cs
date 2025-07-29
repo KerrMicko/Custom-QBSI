@@ -6,7 +6,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using static Custom_QBSI.Clients.NHC.Dataclass_NHC;
-using static Custom_QBSI.Clients.NHC.AccessToDatabase_NHC;
 
 namespace Custom_QBSI.Clients.NHC
 {

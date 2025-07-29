@@ -55,7 +55,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AccessDatabase.cs" />
-    <Compile Include="Clients\NHC\AccessToDatabase_NHC.cs" />
     <Compile Include="Clients\NHC\Dashboard_NHC.cs" />
     <Compile Include="Clients\NHC\Dataclass_NHC.cs" />
     <Compile Include="Clients\NHC\Layout_NHC.cs" />
@@ -100,6 +99,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\NATURE SI.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\NATURE DR.jpg" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

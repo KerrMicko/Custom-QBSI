@@ -40,6 +40,9 @@ namespace Custom_QBSI.Clients.NHC
                 case 1:
                     Layout_SalesInvoice(e, invoiceData, sfAlignCenterRight, sfAlignCenter, sfAlignLeftCenter);
                     break;
+                case 2:
+                    Layout_DeliveryReceipt(e, invoiceData, sfAlignCenterRight, sfAlignCenter, sfAlignLeftCenter);
+                    break;
                 default:
                     throw new NotImplementedException();
             }
@@ -82,7 +85,7 @@ namespace Custom_QBSI.Clients.NHC
             string invoiceStoreCode = "0464"; // CUSTOM STORE CODE
             string invoiceTerms = invoiceData[0].Terms.ToString();
 
-            
+
 
             e.Graphics.DrawString(invoicePoNo, font_Data, Brushes.Black, rectPoNo);
             e.Graphics.DrawString(invoiceStoreCode, font_Data, Brushes.Black, rectStoreCode);
@@ -220,6 +223,14 @@ namespace Custom_QBSI.Clients.NHC
 
             e.Graphics.DrawString(Signatory, font_Data, Brushes.Black, rectAuthorized, sfAlignCenter);
 
+        }
+
+        private void Layout_DeliveryReceipt(PrintPageEventArgs e, List<InvoiceData> invoiceData, StringFormat sfAlignCenterRight, StringFormat sfAlignCenter, StringFormat sfAlignLeftCenter)
+        {
+            Image image = Properties.Resources.NATURE_DR;
+            e.Graphics.DrawImage(image, e.PageBounds);
+
+            Font font_Data = font_Eight;
         }
     }
 }
