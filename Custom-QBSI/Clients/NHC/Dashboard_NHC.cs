@@ -245,37 +245,46 @@ namespace Custom_QBSI.Clients.NHC
             };
             button_SearchRefNum.Click += (sender, e) =>
             {
-                if (comboBox_Forms.SelectedIndex == 0)
+                try
                 {
-                    MessageBox.Show("Please select a form.", "Notice", MessageBoxButtons.OK);
-                }
-                else if (comboBox_Forms.SelectedIndex != 0 && textBox_ReferenceNumber.Text != "")
-                {
-                    string refNumber = textBox_ReferenceNumber.Text;
-
-                    Queries_NHC accessQueries = new Queries_NHC();
-                    List<Dataclass_NHC.InvoiceData> invoice = new List<Dataclass_NHC.InvoiceData>();
-
-                    invoice = accessQueries.GetInvoiceData(refNumber);
-
-
-                    Layout_NHC layout_NHC = new Layout_NHC();
-                    PaperSize paperSize = new PaperSize("Custom", 850, 1100);
-
-                    printDocument = new PrintDocument();
-                    printDocument.DefaultPageSettings.PaperSize = paperSize;
-                    printDocument.PrinterSettings.DefaultPageSettings.PaperSize = paperSize;
-                    printDocument.PrintPage += (s, ev) =>
+                    if (comboBox_Forms.SelectedIndex == 0)
                     {
-                        layout_NHC.PrintPage_NHC(s, ev, invoice, comboBox_Forms.SelectedIndex);
-                    };
-                    printPreviewControl.Document = printDocument;
-                    printPreviewControl.Visible = true;
-                    panel_Printing.Visible = true;
+                        MessageBox.Show("Please select a form.", "Notice", MessageBoxButtons.OK);
+                    }
+                    else if (comboBox_Forms.SelectedIndex != 0 && textBox_ReferenceNumber.Text != "")
+                    {
+                        string refNumber = textBox_ReferenceNumber.Text;
+                        Queries_NHC accessQueries = new Queries_NHC();
+                        List<Dataclass_NHC.InvoiceData> invoice = accessQueries.GetInvoiceData(refNumber);
+
+                        if (invoice.Count == 0)
+                        {
+                            MessageBox.Show("No invoice found for the given reference number.", "Notice", MessageBoxButtons.OK);
+                            return;
+                        }
+
+                        Layout_NHC layout_NHC = new Layout_NHC();
+                        PaperSize paperSize = new PaperSize("Custom", 850, 1100);
+
+                        printDocument = new PrintDocument();
+                        printDocument.DefaultPageSettings.PaperSize = paperSize;
+                        printDocument.PrinterSettings.DefaultPageSettings.PaperSize = paperSize;
+                        printDocument.PrintPage += (s, ev) =>
+                        {
+                            layout_NHC.PrintPage_NHC(s, ev, invoice, comboBox_Forms.SelectedIndex);
+                        };
+                        printPreviewControl.Document = printDocument;
+                        printPreviewControl.Visible = true;
+                        panel_Printing.Visible = true;
+                    }
+                    else
+                    {
+                        MessageBox.Show("Please enter a reference number.", "Notice", MessageBoxButtons.OK);
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    MessageBox.Show("Please enter a reference number.", "Notice", MessageBoxButtons.OK);
+                    MessageBox.Show($"An error occurred: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             };
 
