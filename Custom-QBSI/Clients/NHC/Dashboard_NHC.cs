@@ -375,7 +375,7 @@ namespace Custom_QBSI.Clients.NHC
                         {
                             //layout_NHC.PrintPage_NHC(s, ev, invoice, comboBox_Forms.SelectedIndex, note, businessStyle, pwdSignature, isEnableExpDateChecked);
                             if (comboBox_Forms.SelectedIndex == 1)
-                                layout_NHC.Layout_SalesInvoice(ev, invoice);
+                                layout_NHC.Layout_SalesInvoice(ev, invoice, businessStyle);
                             else if (comboBox_Forms.SelectedIndex == 2)
                                 layout_NHC.Layout_DeliveryReceipt(ev, invoice, note, businessStyle, pwdSignature, isEnableExpDateChecked);
                         };

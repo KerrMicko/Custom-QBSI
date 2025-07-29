@@ -48,7 +48,7 @@ namespace Custom_QBSI.Clients.NHC
             }
         }*/
 
-        public void Layout_SalesInvoice(PrintPageEventArgs e, List<InvoiceData> invoiceData)
+        public void Layout_SalesInvoice(PrintPageEventArgs e, List<InvoiceData> invoiceData, string businessStyle)
         {
 
             Image image = Properties.Resources.NATURE_SI;
@@ -62,10 +62,18 @@ namespace Custom_QBSI.Clients.NHC
             Rectangle rectTIN = new Rectangle(145, 160, 285, 20);
             Rectangle rectBusinessAdd = new Rectangle(145, 180, 285, 25);
 
-
+            string refNumber = invoiceData[0].RefNumber.ToString();
             string Date = invoiceData[0].TxnDate.ToString("MM/dd/yyyy");
             string invoiceSoldTo = invoiceData[0].CustomerName.ToString();
-            string invoiceBusinessStyle = invoiceData[0].BusinessStyle.ToString(); //NEED FOR CUSTOM OR JUST ADD BUSINESS STYLE NAMES INPUT ON PROGRAM
+            string invoiceBusinessStyle = "";
+            if (businessStyle == "")
+            {
+                invoiceBusinessStyle = invoiceData[0].BusinessStyle.ToString();
+            }
+            else
+            {
+                invoiceBusinessStyle = businessStyle;
+            }
             string invoiceTin = invoiceData[0].TINNO.ToString();
             string invoiceBusinessAdd = invoiceData[0].BillAddress1.ToString() + invoiceData[0].BillAddress2.ToString() + invoiceData[0].BillAddress3.ToString() + invoiceData[0].BillAddress4.ToString() + invoiceData[0].BillAddress5.ToString();
 
@@ -91,7 +99,6 @@ namespace Custom_QBSI.Clients.NHC
 
 
             //MIDDLE TABLE
-
             int tab1XStart = 68;
             int tab1YStart = 280;
             int tab1DataHeight = 26;
@@ -121,20 +128,26 @@ namespace Custom_QBSI.Clients.NHC
             e.Graphics.DrawRectangle(Pens.Orange, rectItemUnitPrice);
             e.Graphics.DrawRectangle(Pens.Pink, rectItemAmount);*/
 
+            int itemHeight = 0;
+            foreach (var invoice in invoiceData)
+            {
+                foreach (var lineItem in invoice.LineItems)
+                {
+                    string ItemQuantity = lineItem.Quantity.ToString("N2");
+                    string ItemUOM = lineItem.UnitOfMeasure;
+                    string ItemDescription = lineItem.Description;
+                    decimal ItemUnitPrice = lineItem.Rate;
+                    decimal ItemAmount = lineItem.Amount;
 
-            string ItemQuantity = "200";
-            string ItemUOM = "cs";
-            string ItemDescription = "Capilano Honey UD - 8 x 340g";
-            double ItemUnitPrice = 2311.61;
-            double ItemAmount = 4623.21;
+                    e.Graphics.DrawString(ItemQuantity, font_Eight, Brushes.Black, new Rectangle(rectItemQuantity.X, rectItemQuantity.Y + itemHeight, rectItemQuantity.Width, rectItemQuantity.Height), sfAlignCenter);
+                    e.Graphics.DrawString(ItemUOM, font_Eight, Brushes.Black, new Rectangle(rectItemUOM.X, rectItemUOM.Y + itemHeight, rectItemUOM.Width, rectItemUOM.Height), sfAlignCenter);
+                    e.Graphics.DrawString(ItemDescription, font_Eight, Brushes.Black, new Rectangle(rectItemDescription.X, rectItemDescription.Y + itemHeight, rectItemDescription.Width, rectItemDescription.Height), sfAlignLeftCenter);
+                    e.Graphics.DrawString(ItemUnitPrice.ToString("N2"), font_Eight, Brushes.Black, new Rectangle(rectItemUnitPrice.X, rectItemUnitPrice.Y + itemHeight, rectItemUnitPrice.Width, rectItemUnitPrice.Height), sfAlignCenterRight);
+                    e.Graphics.DrawString(ItemAmount.ToString("N2"), font_Eight, Brushes.Black, new Rectangle(rectItemAmount.X, rectItemAmount.Y + itemHeight, rectItemAmount.Width, rectItemAmount.Height), sfAlignCenterRight);
 
-
-            e.Graphics.DrawString(ItemQuantity.ToString(), font_Eight, Brushes.Black, rectItemQuantity, sfAlignCenter);
-            e.Graphics.DrawString(ItemUOM.ToString(), font_Eight, Brushes.Black, rectItemUOM, sfAlignCenter);
-            e.Graphics.DrawString(ItemDescription.ToString(), font_Eight, Brushes.Black, rectItemDescription, sfAlignLeftCenter);
-            e.Graphics.DrawString(ItemUnitPrice.ToString("N2"), font_Eight, Brushes.Black, rectItemUnitPrice, sfAlignCenterRight);
-            e.Graphics.DrawString(ItemAmount.ToString("N2"), font_Eight, Brushes.Black, rectItemAmount, sfAlignCenterRight);
-
+                    itemHeight += tab1DataHeight;
+                }
+            }
 
             //LEFT TABLE
             int tab1LeftDataHeight = 18;
@@ -241,7 +254,15 @@ namespace Custom_QBSI.Clients.NHC
 
             string Date = invoiceData[0].TxnDate.ToString("MM/dd/yyyy");
             string invoiceSoldTo = invoiceData[0].CustomerName.ToString();
-            string invoiceBusinessStyle = invoiceData[0].BusinessStyle.ToString();
+            string invoiceBusinessStyle = "";
+            if (businessStyle == "")
+            {
+                invoiceBusinessStyle = invoiceData[0].BusinessStyle.ToString();
+            }
+            else
+            {
+                invoiceBusinessStyle = businessStyle;
+            }
             string invoiceTin = invoiceData[0].TINNO.ToString();
             string invoiceBusinessAdd = invoiceData[0].BillAddress1.ToString() + invoiceData[0].BillAddress2.ToString() + invoiceData[0].BillAddress3.ToString() + invoiceData[0].BillAddress4.ToString() + invoiceData[0].BillAddress5.ToString();
 
