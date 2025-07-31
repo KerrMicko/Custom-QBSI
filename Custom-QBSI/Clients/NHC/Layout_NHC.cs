@@ -48,7 +48,7 @@ namespace Custom_QBSI.Clients.NHC
             }
         }*/
 
-        public void Layout_SalesInvoice(PrintPageEventArgs e, List<InvoiceData> invoiceData, string businessStyle)
+        public void Layout_SalesInvoice(PrintPageEventArgs e, List<InvoiceData> invoiceData, string vatType, string businessStyle)
         {
 
             Image image = Properties.Resources.NATURE_SI;
@@ -144,6 +144,15 @@ namespace Custom_QBSI.Clients.NHC
                     e.Graphics.DrawString(ItemDescription, font_Eight, Brushes.Black, new Rectangle(rectItemDescription.X, rectItemDescription.Y + itemHeight, rectItemDescription.Width, rectItemDescription.Height), sfAlignLeftCenter);
                     e.Graphics.DrawString(ItemUnitPrice.ToString("N2"), font_Eight, Brushes.Black, new Rectangle(rectItemUnitPrice.X, rectItemUnitPrice.Y + itemHeight, rectItemUnitPrice.Width, rectItemUnitPrice.Height), sfAlignCenterRight);
                     e.Graphics.DrawString(ItemAmount.ToString("N2"), font_Eight, Brushes.Black, new Rectangle(rectItemAmount.X, rectItemAmount.Y + itemHeight, rectItemAmount.Width, rectItemAmount.Height), sfAlignCenterRight);
+
+                    if (vatType == "Inclusive")
+                    {
+                        // VAT Inclusive
+                    }
+                    else if (vatType == "Exclusive")
+                    {
+                        // VAT Exclusive 
+                    }
 
                     itemHeight += tab1DataHeight;
                 }

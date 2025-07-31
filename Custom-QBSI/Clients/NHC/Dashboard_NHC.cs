@@ -26,6 +26,8 @@ namespace Custom_QBSI.Clients.NHC
         private TextBox textBox_Note;
         private TextBox textBox_BusinessStyle;
         private TextBox textBox_PWDSignature;
+        private RadioButton radioButton_VATInclusive;
+        private RadioButton radioButton_VATExclusive;
 
         private FlowLayoutPanel panel_Printing;
         private FlowLayoutPanel panel_Details;
@@ -72,7 +74,7 @@ namespace Custom_QBSI.Clients.NHC
                 Padding = new Padding(5),
                 BackColor = Color.LightGray,
                 BorderStyle = BorderStyle.FixedSingle,
-                Visible = false,
+                Visible = true,
             };
 
             Label label_NoteText = new Label
@@ -133,6 +135,24 @@ namespace Custom_QBSI.Clients.NHC
                 Font = font_Label,
                 Checked = true,
             };
+
+            radioButton_VATInclusive = new RadioButton
+            {
+                Parent = panel_Details,
+                Text = "VAT Inclusive",
+                Width = componentWidth / 2 - 10,
+                Font = font_Label,
+                Checked = true,
+            };
+
+            radioButton_VATExclusive = new RadioButton
+            {
+                Parent = panel_Details,
+                Text = "VAT Exclusive",
+                Width = componentWidth / 2 - 10,
+                Font = font_Label,
+            };
+
 
             return panel_Details;
         }
@@ -298,7 +318,7 @@ namespace Custom_QBSI.Clients.NHC
                 "Delivery Receipt",
             });
             comboBox_Forms.SelectedIndex = 1;
-            comboBox_Forms.SelectedIndexChanged += ComboBox_Forms_SelectedIndexChanged;
+            //comboBox_Forms.SelectedIndexChanged += ComboBox_Forms_SelectedIndexChanged;
 
             return panel_Forms;
         }
@@ -351,6 +371,9 @@ namespace Custom_QBSI.Clients.NHC
                     {
                         string refNumber = textBox_ReferenceNumber.Text;
 
+                        string vatType = radioButton_VATInclusive.Checked ? "Inclusive" : "Exclusive";
+                        //bool vatType = radioButton_VATInclusive.Checked ? true : false;
+
                         string note = textBox_Note.Text;
                         string businessStyle = textBox_BusinessStyle.Text;
                         string pwdSignature = textBox_PWDSignature.Text;
@@ -375,7 +398,7 @@ namespace Custom_QBSI.Clients.NHC
                         {
                             //layout_NHC.PrintPage_NHC(s, ev, invoice, comboBox_Forms.SelectedIndex, note, businessStyle, pwdSignature, isEnableExpDateChecked);
                             if (comboBox_Forms.SelectedIndex == 1)
-                                layout_NHC.Layout_SalesInvoice(ev, invoice, businessStyle);
+                                layout_NHC.Layout_SalesInvoice(ev, invoice, vatType, businessStyle);
                             else if (comboBox_Forms.SelectedIndex == 2)
                                 layout_NHC.Layout_DeliveryReceipt(ev, invoice, note, businessStyle, pwdSignature, isEnableExpDateChecked);
                         };
