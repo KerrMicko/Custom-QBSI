@@ -289,76 +289,103 @@ namespace Custom_QBSI.Clients.NHC
                 itemHeight += tab1DataHeight;
             }
 
-            //LEFT TABLE
-            int tab1LeftDataHeight = 18;
-            int tab2LeftDataHeight = 18;
+            // LEFT TABLE
+            int dataHeight = 18;
+            int xStart = 230;
+            int yStart = 770;
+            int width = 170;
 
-            int tab2LeftXStart = 230;
-            int tab2LeftYStart = 770;
-            int tab2LeftWidth = 170;
+            Rectangle rectVATableSales = new Rectangle(xStart, yStart, width, dataHeight);
+            Rectangle rectVATExemptSales = new Rectangle(xStart, yStart + dataHeight, width, dataHeight);
+            Rectangle rectZeroRatedSales = new Rectangle(xStart, yStart - 3 + dataHeight * 2, width, dataHeight);
+            Rectangle rectVatAmount = new Rectangle(xStart, yStart - 3 + dataHeight * 3, width, dataHeight);
 
-
-            Rectangle rectVATableSales = new Rectangle(tab2LeftXStart, tab2LeftYStart, tab2LeftWidth, tab1LeftDataHeight);
-            Rectangle rectVATExemptSales = new Rectangle(tab2LeftXStart, tab2LeftYStart + tab2LeftDataHeight, tab2LeftWidth, tab1LeftDataHeight);
-            Rectangle rectZeroRatedSales = new Rectangle(tab2LeftXStart, tab2LeftYStart - 3 + tab2LeftDataHeight * 2, tab2LeftWidth, tab1LeftDataHeight);
-            Rectangle rectVatAmount = new Rectangle(tab2LeftXStart, tab2LeftYStart - 3 + tab2LeftDataHeight * 3, tab2LeftWidth, tab1LeftDataHeight);
-
-            /*e.Graphics.DrawRectangle(Pens.Red, rectVATableSales);
+            /*
+            e.Graphics.DrawRectangle(Pens.Red, rectVATableSales);
             e.Graphics.DrawRectangle(Pens.Blue, rectVATExemptSales);
-            e.Graphics.DrawRectangle(Pens.Yellow, rectZeroRateSales);
-            e.Graphics.DrawRectangle(Pens.Orange, rectVatAmount);*/
+            e.Graphics.DrawRectangle(Pens.Yellow, rectZeroRatedSales);
+            e.Graphics.DrawRectangle(Pens.Orange, rectVatAmount);
+            */
 
-            double vatAbleSales = 100;
-            double vatExempt = 200;
-            double zeroRatedSales = 300;
-            double vatAmount = 400;
+            decimal amountNetVat = 0;
+
+            foreach (var invoice in invoiceData)
+            {
+                foreach (var lineItem in invoice.LineItems)
+                {
+                    amountNetVat = lineItem.TotalAmount - lineItem.SalesTaxTotal;
+                }
+            }
+
+            bool isVAT = invoiceData[0].LineItems[0].Tax != "Non" || invoiceData[0].LineItems[0].TaxesName == "VAT";
+            bool hasVAT = invoiceData[0].LineItems[0].SalesTaxTotal > 0;
+
+            if (isVAT && hasVAT)
+            {
+                if (amountNetVat > 0)
+                {
+                    e.Graphics.DrawString(amountNetVat.ToString("N2"), font_Data, Brushes.Black, rectVATableSales, sfAlignCenterRight);
+                }
+
+                if (hasVAT)
+                {
+                    e.Graphics.DrawString(invoiceData[0].LineItems[0].SalesTaxTotal.ToString("N2"), font_Data, Brushes.Black, rectVatAmount, sfAlignCenterRight);
+                }
+            }
+            else
+            {
+                e.Graphics.DrawString(amountNetVat.ToString("N2"), font_Data, Brushes.Black, rectZeroRatedSales, sfAlignCenterRight);
+                e.Graphics.DrawString(amountNetVat.ToString("N2"), font_Data, Brushes.Black, rectVATExemptSales, sfAlignCenterRight);
+            }
 
 
-            e.Graphics.DrawString(vatAbleSales.ToString("N2"), font_Data, Brushes.Black, rectVATableSales, sfAlignCenterRight);
-            e.Graphics.DrawString(vatExempt.ToString("N2"), font_Data, Brushes.Black, rectVATExemptSales, sfAlignCenterRight);
-            e.Graphics.DrawString(zeroRatedSales.ToString("N2"), font_Data, Brushes.Black, rectZeroRatedSales, sfAlignCenterRight);
-            e.Graphics.DrawString(vatAmount.ToString("N2"), font_Data, Brushes.Black, rectVatAmount, sfAlignCenterRight);
-
-
-            // RIGHT TABLE
+            // RIGHT TABLE RECTANGLES
             int tab2RightDataHeight = 17;
-
             int tab2RightXStart = 580;
             int tab2RightYStart = 765;
             int tab2RightWidth = 210;
 
-            Rectangle rectR1TotalSales = new Rectangle(tab2RightXStart, tab2RightYStart, tab2RightWidth, tab2RightDataHeight);
-            Rectangle rectR2LessVAT = new Rectangle(tab2RightXStart, tab2RightYStart + tab2RightDataHeight, tab2RightWidth, tab2RightDataHeight);
+            Rectangle rectR1TotalSales = new Rectangle(tab2RightXStart, tab2RightYStart + tab2RightDataHeight * 0, tab2RightWidth, tab2RightDataHeight);
+            Rectangle rectR2LessVAT = new Rectangle(tab2RightXStart, tab2RightYStart + tab2RightDataHeight * 1, tab2RightWidth, tab2RightDataHeight);
             Rectangle rectR3AmountNetofVAT = new Rectangle(tab2RightXStart, tab2RightYStart + tab2RightDataHeight * 2, tab2RightWidth, tab2RightDataHeight);
             Rectangle rectR4LessDiscount = new Rectangle(tab2RightXStart, tab2RightYStart + tab2RightDataHeight * 3, tab2RightWidth, tab2RightDataHeight);
             Rectangle rectR5AddVAT = new Rectangle(tab2RightXStart, tab2RightYStart + tab2RightDataHeight * 4, tab2RightWidth, tab2RightDataHeight);
-            Rectangle rectR6LessWitholdingTax = new Rectangle(tab2RightXStart, tab2RightYStart + tab2RightDataHeight * 5, tab2RightWidth, tab2RightDataHeight);
+            Rectangle rectR6LessWithholdingTax = new Rectangle(tab2RightXStart, tab2RightYStart + tab2RightDataHeight * 5, tab2RightWidth, tab2RightDataHeight);
             Rectangle rectR7TotalAmountDue = new Rectangle(tab2RightXStart, tab2RightYStart + tab2RightDataHeight * 6, tab2RightWidth, tab2RightDataHeight);
 
+            // CALCULATION
+            decimal amountNetVat2 = 0;
+            foreach (var invoice in invoiceData)
+            {
+                foreach (var lineItem in invoice.LineItems)
+                {
+                    amountNetVat2 = lineItem.TotalAmount - lineItem.SalesTaxTotal;
+                }
+            }
 
-            /*e.Graphics.DrawRectangle(Pens.Blue, rectR1TotalSales);
-            e.Graphics.DrawRectangle(Pens.Red, rectR2LessVAT);
-            e.Graphics.DrawRectangle(Pens.Orange, rectR3AmountNetofVAT);
-            e.Graphics.DrawRectangle(Pens.Green, rectR4LessDiscount);
-            e.Graphics.DrawRectangle(Pens.Yellow, rectR5AddVAT);
-            e.Graphics.DrawRectangle(Pens.Violet, rectR6LessWitholdingTax);
-            e.Graphics.DrawRectangle(Pens.Pink, rectR7TotalAmountDue);*/
+            // DRAW STRINGS USING EXISTING LOGIC (unchanged)
+            var firstLineItem = invoiceData[0].LineItems[0];
 
-            double totalSales = 500;
-            double lessVAT = 600;
-            double amountNetOfVAT = 800;
-            double lessDiscount = 900;
-            double addVAT = 1000;
-            double lessWitholdingTax = 1100;
-            double totalAmountDue = 1200;
+            if (firstLineItem.TotalAmount > 0)
+                e.Graphics.DrawString(firstLineItem.TotalAmount.ToString("N2"), font_Data, Brushes.Black, rectR1TotalSales, sfAlignCenterRight);
 
-            e.Graphics.DrawString(totalSales.ToString("N2"), font_Data, Brushes.Black, rectR1TotalSales, sfAlignCenterRight);
-            e.Graphics.DrawString(lessVAT.ToString("N2"), font_Data, Brushes.Black, rectR2LessVAT, sfAlignCenterRight);
-            e.Graphics.DrawString(amountNetOfVAT.ToString("N2"), font_Data, Brushes.Black, rectR3AmountNetofVAT, sfAlignCenterRight);
-            e.Graphics.DrawString(lessDiscount.ToString("N2"), font_Data, Brushes.Black, rectR4LessDiscount, sfAlignCenterRight);
-            e.Graphics.DrawString(addVAT.ToString("N2"), font_Data, Brushes.Black, rectR5AddVAT, sfAlignCenterRight);
-            e.Graphics.DrawString(lessWitholdingTax.ToString("N2"), font_Data, Brushes.Black, rectR6LessWitholdingTax, sfAlignCenterRight);
-            e.Graphics.DrawString(totalAmountDue.ToString("N2"), font_Data, Brushes.Black, rectR7TotalAmountDue, sfAlignCenterRight);
+            if (firstLineItem.SalesTaxTotal > 0)
+                e.Graphics.DrawString(firstLineItem.SalesTaxTotal.ToString("N2"), font_Data, Brushes.Black, rectR2LessVAT, sfAlignCenterRight);
+
+            if (amountNetVat2 > 0)
+                e.Graphics.DrawString(amountNetVat2.ToString("N2"), font_Data, Brushes.Black, rectR3AmountNetofVAT, sfAlignCenterRight);
+
+            // Static or empty fields
+            e.Graphics.DrawString("", font_Data, Brushes.Black, rectR4LessDiscount, sfAlignCenterRight);
+
+            if (firstLineItem.SalesTaxTotal > 0)
+                e.Graphics.DrawString(firstLineItem.SalesTaxTotal.ToString("N2"), font_Data, Brushes.Black, rectR5AddVAT, sfAlignCenterRight);
+
+            e.Graphics.DrawString("", font_Data, Brushes.Black, rectR6LessWithholdingTax, sfAlignCenterRight);
+
+            if (firstLineItem.TotalAmount > 0)
+                e.Graphics.DrawString(firstLineItem.TotalAmount.ToString("N2"), font_Data, Brushes.Black, rectR7TotalAmountDue, sfAlignCenterRight);
+
 
 
 
