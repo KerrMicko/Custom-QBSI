@@ -363,7 +363,6 @@ namespace Custom_QBSI.Clients.NHC
                 }
             }
 
-            // DRAW STRINGS USING EXISTING LOGIC (unchanged)
             var firstLineItem = invoiceData[0].LineItems[0];
 
             if (firstLineItem.TotalAmount > 0)
@@ -380,7 +379,7 @@ namespace Custom_QBSI.Clients.NHC
 
             if (firstLineItem.SalesTaxTotal > 0)
                 e.Graphics.DrawString(firstLineItem.SalesTaxTotal.ToString("N2"), font_Data, Brushes.Black, rectR5AddVAT, sfAlignCenterRight);
-
+            //NEEDED FOR EWT 1% BUTTON FUNCTION
             e.Graphics.DrawString("", font_Data, Brushes.Black, rectR6LessWithholdingTax, sfAlignCenterRight);
 
             if (firstLineItem.TotalAmount > 0)
