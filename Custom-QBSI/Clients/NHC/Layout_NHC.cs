@@ -386,11 +386,29 @@ namespace Custom_QBSI.Clients.NHC
                 e.Graphics.DrawString(firstLineItem.SalesTaxTotal.ToString("N2"), font_Data, Brushes.Black, rectR5AddVAT, sfAlignCenterRight);
 
             // NEED EWT 1% button
-            e.Graphics.DrawString("", font_Data, Brushes.Black, rectR6LessWithholdingTax, sfAlignCenterRight);
+            decimal ewtAmount = 0;
+            if (isLessEWTChecked)
+            {
+                ewtAmount = amountNetVat2 * 0.01m;
+            }
 
-            // Total Amount Due — always shown
-            if (firstLineItem.TotalAmount > 0)
-                e.Graphics.DrawString(firstLineItem.TotalAmount.ToString("N2"), font_Data, Brushes.Black, rectR7TotalAmountDue, sfAlignCenterRight);
+            if (isLessEWTChecked)
+            {
+                e.Graphics.DrawString(ewtAmount.ToString("N2"), font_Data, Brushes.Black, rectR6LessWithholdingTax, sfAlignCenterRight);
+            }
+
+            // Calculate final Total Amount Due
+            decimal totalAmountDue = firstLineItem.TotalAmount;
+            if (isLessEWTChecked)
+            {
+                totalAmountDue -= ewtAmount;
+            }
+
+            // Draw Total Amount Due
+            if (totalAmountDue > 0)
+            {
+                e.Graphics.DrawString(totalAmountDue.ToString("N2"), font_Data, Brushes.Black, rectR7TotalAmountDue, sfAlignCenterRight);
+            }
 
 
 
