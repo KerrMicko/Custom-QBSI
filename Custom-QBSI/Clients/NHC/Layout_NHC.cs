@@ -365,25 +365,33 @@ namespace Custom_QBSI.Clients.NHC
 
             var firstLineItem = invoiceData[0].LineItems[0];
 
-            if (firstLineItem.TotalAmount > 0)
-                e.Graphics.DrawString(firstLineItem.TotalAmount.ToString("N2"), font_Data, Brushes.Black, rectR1TotalSales, sfAlignCenterRight);
+            if (vatType == "Inclusive")
+            {
+                if (firstLineItem.TotalAmount > 0)
+                    e.Graphics.DrawString(firstLineItem.TotalAmount.ToString("N2"), font_Data, Brushes.Black, rectR1TotalSales, sfAlignCenterRight);
 
-            if (firstLineItem.SalesTaxTotal > 0)
-                e.Graphics.DrawString(firstLineItem.SalesTaxTotal.ToString("N2"), font_Data, Brushes.Black, rectR2LessVAT, sfAlignCenterRight);
+                if (firstLineItem.SalesTaxTotal > 0)
+                    e.Graphics.DrawString(firstLineItem.SalesTaxTotal.ToString("N2"), font_Data, Brushes.Black, rectR2LessVAT, sfAlignCenterRight);
+            }
 
+            // Common for both Inclusive and Exclusive
             if (amountNetVat2 > 0)
                 e.Graphics.DrawString(amountNetVat2.ToString("N2"), font_Data, Brushes.Black, rectR3AmountNetofVAT, sfAlignCenterRight);
 
-            // Static or empty fields
+            // Discount — static/blank
             e.Graphics.DrawString("", font_Data, Brushes.Black, rectR4LessDiscount, sfAlignCenterRight);
 
+            
             if (firstLineItem.SalesTaxTotal > 0)
                 e.Graphics.DrawString(firstLineItem.SalesTaxTotal.ToString("N2"), font_Data, Brushes.Black, rectR5AddVAT, sfAlignCenterRight);
-            //NEEDED FOR EWT 1% BUTTON FUNCTION
+
+            // NEED EWT 1% button
             e.Graphics.DrawString("", font_Data, Brushes.Black, rectR6LessWithholdingTax, sfAlignCenterRight);
 
+            // Total Amount Due — always shown
             if (firstLineItem.TotalAmount > 0)
                 e.Graphics.DrawString(firstLineItem.TotalAmount.ToString("N2"), font_Data, Brushes.Black, rectR7TotalAmountDue, sfAlignCenterRight);
+
 
 
 
