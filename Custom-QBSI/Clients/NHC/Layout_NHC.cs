@@ -48,7 +48,7 @@ namespace Custom_QBSI.Clients.NHC
             }
         }*/
 
-        public void Layout_SalesInvoice(PrintPageEventArgs e, List<InvoiceData> invoiceData, string vatType, string businessStyle, string signatoryName)
+        public void Layout_SalesInvoice(PrintPageEventArgs e, List<InvoiceData> invoiceData, string vatType, string businessStyle, string signatoryName, bool isLessEWTChecked)
         {
 
             Image image = Properties.Resources.NATURE_SI;

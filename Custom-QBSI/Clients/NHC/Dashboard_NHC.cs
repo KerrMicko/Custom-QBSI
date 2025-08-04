@@ -24,6 +24,7 @@ namespace Custom_QBSI.Clients.NHC
 
         // Details
         private CheckBox checkBox_EnableExpDate;
+        private CheckBox checkBox_LessEWT;
         private TextBox textBox_Note;
         private TextBox textBox_BusinessStyle;
         private TextBox textBox_PWDSignature;
@@ -122,6 +123,7 @@ namespace Custom_QBSI.Clients.NHC
                 Text = "SC/PWD Signature:",
                 TextAlign = ContentAlignment.MiddleLeft,
                 Font = font_Label,
+                Visible = false,
             };
 
             textBox_PWDSignature = new TextBox
@@ -129,6 +131,7 @@ namespace Custom_QBSI.Clients.NHC
                 Parent = panel_Details,
                 Width = componentWidth,
                 Font = font_Label,
+                Visible = false,
             };
 
             checkBox_EnableExpDate = new CheckBox
@@ -139,6 +142,15 @@ namespace Custom_QBSI.Clients.NHC
                 Font = font_Label,
                 Checked = true,
                 Visible = false,
+            };
+
+            checkBox_LessEWT = new CheckBox
+            {
+                Parent = panel_Details,
+                Text = "Less EWT (1%) ?",
+                Width = componentWidth,
+                Font = font_Label,
+                Checked = false,
             };
 
             radioButton_VATInclusive = new RadioButton
@@ -385,6 +397,7 @@ namespace Custom_QBSI.Clients.NHC
                         string businessStyle = textBox_BusinessStyle.Text;
                         string pwdSignature = textBox_PWDSignature.Text;
                         bool isEnableExpDateChecked = checkBox_EnableExpDate.Checked;
+                        bool isLessEWTChecked = checkBox_LessEWT.Checked;
 
                         string signatoryName = textBox_SignatoryName.Text;
 
@@ -407,7 +420,7 @@ namespace Custom_QBSI.Clients.NHC
                         {
                             //layout_NHC.PrintPage_NHC(s, ev, invoice, comboBox_Forms.SelectedIndex, note, businessStyle, pwdSignature, isEnableExpDateChecked);
                             if (comboBox_Forms.SelectedIndex == 1)
-                                layout_NHC.Layout_SalesInvoice(ev, invoice, vatType, businessStyle, signatoryName);
+                                layout_NHC.Layout_SalesInvoice(ev, invoice, vatType, businessStyle, signatoryName, isLessEWTChecked);
                             else if (comboBox_Forms.SelectedIndex == 2)
                                 layout_NHC.Layout_DeliveryReceipt(ev, invoice, note, businessStyle, pwdSignature, isEnableExpDateChecked, signatoryName);
                         };
@@ -570,12 +583,14 @@ namespace Custom_QBSI.Clients.NHC
                 //panel_Details.Visible = false;
                 //panel_Details.Width = 0;
                 checkBox_EnableExpDate.Visible = false;
+                checkBox_LessEWT.Visible = true;
             }
             else if (comboBox_Forms.SelectedIndex == 2)
             {
                 //panel_Details.Visible = true;
                 //panel_Details.Width = sideBarWidth + 30;
                 checkBox_EnableExpDate.Visible = true;
+                checkBox_LessEWT.Visible = false;
             }
             else
             {
