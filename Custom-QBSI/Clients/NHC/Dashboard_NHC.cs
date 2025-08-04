@@ -22,12 +22,16 @@ namespace Custom_QBSI.Clients.NHC
 
         private ComboBox comboBox_Forms;
 
+        // Details
         private CheckBox checkBox_EnableExpDate;
         private TextBox textBox_Note;
         private TextBox textBox_BusinessStyle;
         private TextBox textBox_PWDSignature;
         private RadioButton radioButton_VATInclusive;
         private RadioButton radioButton_VATExclusive;
+
+        // Signatory
+        private TextBox textBox_SignatoryName;
 
         private FlowLayoutPanel panel_Printing;
         private FlowLayoutPanel panel_Details;
@@ -134,6 +138,7 @@ namespace Custom_QBSI.Clients.NHC
                 Width = componentWidth,
                 Font = font_Label,
                 Checked = true,
+                Visible = false,
             };
 
             radioButton_VATInclusive = new RadioButton
@@ -271,11 +276,13 @@ namespace Custom_QBSI.Clients.NHC
             // ------------------------------------------
             FlowLayoutPanel panel_Forms = Panel_Forms();
             FlowLayoutPanel panel_RefNumber = Panel_RefNumber();
+            FlowLayoutPanel panel_Signatory = Panel_Signatory();
             FlowLayoutPanel panel_Prionting = Panel_Printing();
 
             // ------------------------------------------
             panel_SideBar.Controls.Add(panel_Forms);
             panel_SideBar.Controls.Add(panel_RefNumber);
+            panel_SideBar.Controls.Add(panel_Signatory);
             panel_SideBar.Controls.Add(panel_Prionting);
 
             return panel_SideBar;
@@ -318,7 +325,7 @@ namespace Custom_QBSI.Clients.NHC
                 "Delivery Receipt",
             });
             comboBox_Forms.SelectedIndex = 1;
-            //comboBox_Forms.SelectedIndexChanged += ComboBox_Forms_SelectedIndexChanged;
+            comboBox_Forms.SelectedIndexChanged += ComboBox_Forms_SelectedIndexChanged;
 
             return panel_Forms;
         }
@@ -379,6 +386,8 @@ namespace Custom_QBSI.Clients.NHC
                         string pwdSignature = textBox_PWDSignature.Text;
                         bool isEnableExpDateChecked = checkBox_EnableExpDate.Checked;
 
+                        string signatoryName = textBox_SignatoryName.Text;
+
                         Queries_NHC accessQueries = new Queries_NHC();
                         List<Dataclass_NHC.InvoiceData> invoice = accessQueries.GetInvoiceData(refNumber);
 
@@ -398,9 +407,9 @@ namespace Custom_QBSI.Clients.NHC
                         {
                             //layout_NHC.PrintPage_NHC(s, ev, invoice, comboBox_Forms.SelectedIndex, note, businessStyle, pwdSignature, isEnableExpDateChecked);
                             if (comboBox_Forms.SelectedIndex == 1)
-                                layout_NHC.Layout_SalesInvoice(ev, invoice, vatType, businessStyle);
+                                layout_NHC.Layout_SalesInvoice(ev, invoice, vatType, businessStyle, signatoryName);
                             else if (comboBox_Forms.SelectedIndex == 2)
-                                layout_NHC.Layout_DeliveryReceipt(ev, invoice, note, businessStyle, pwdSignature, isEnableExpDateChecked);
+                                layout_NHC.Layout_DeliveryReceipt(ev, invoice, note, businessStyle, pwdSignature, isEnableExpDateChecked, signatoryName);
                         };
                         printPreviewControl.Document = printDocument;
                         printPreviewControl.Visible = true;
@@ -418,6 +427,63 @@ namespace Custom_QBSI.Clients.NHC
             };
 
             return panel_RefNumber;
+        }
+
+        private FlowLayoutPanel Panel_Signatory()
+        {
+            Queries_NHC queries_NHC = new Queries_NHC();
+
+            FlowLayoutPanel panel = new FlowLayoutPanel
+            {
+                Dock = DockStyle.Top,
+                Height = 115, // 92 || 68
+                Width = sideBarWidth - 10,
+                BackColor = Color.LightGray,
+                Padding = new Padding(5),
+                BorderStyle = BorderStyle.FixedSingle,
+            };
+
+            Label label_SignatoryText = new Label
+            {
+                Parent = panel,
+                Width = sideBarWidth - 30,
+                Text = "SIGNATORY:",
+                TextAlign = ContentAlignment.MiddleLeft,
+                Font = font_Label,
+            };
+
+            Label label_Name = new Label
+            {
+                Parent = panel,
+                Width = sideBarWidth - 30,
+                Text = "Name:",
+                TextAlign = ContentAlignment.MiddleLeft,
+                Font = font_Label,
+            };
+
+            textBox_SignatoryName = new TextBox
+            {
+                Parent = panel,
+                Width = sideBarWidth - 30, // 190
+                Font = font_Label,
+            };
+
+            textBox_SignatoryName.Text = queries_NHC.RetrieveSignatory();
+
+            Button button_Save = new Button
+            {
+                Parent = panel,
+                Height = 26,
+                Width = sideBarWidth - 30,
+                Text = "SAVE",
+                BackColor = Color.Transparent,
+            };
+            button_Save.Click += (sender, e) =>
+            {
+                queries_NHC.UpdateSignatory(textBox_SignatoryName.Text);
+            };
+
+            return panel;
         }
 
         private FlowLayoutPanel Panel_Printing()
@@ -501,13 +567,15 @@ namespace Custom_QBSI.Clients.NHC
         {
             if (comboBox_Forms.SelectedIndex == 1)
             {
-                panel_Details.Visible = false;
-                panel_Details.Width = 0;
+                //panel_Details.Visible = false;
+                //panel_Details.Width = 0;
+                checkBox_EnableExpDate.Visible = false;
             }
             else if (comboBox_Forms.SelectedIndex == 2)
             {
-                panel_Details.Visible = true;
-                panel_Details.Width = sideBarWidth + 30;
+                //panel_Details.Visible = true;
+                //panel_Details.Width = sideBarWidth + 30;
+                checkBox_EnableExpDate.Visible = true;
             }
             else
             {
