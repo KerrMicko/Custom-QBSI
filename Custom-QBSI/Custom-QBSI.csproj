@@ -55,6 +55,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AccessDatabase.cs" />
+    <Compile Include="Clients\Enclosure\Dashboard_Enclosure.cs" />
+    <Compile Include="Clients\Enclosure\DataClass_Enclosure.cs" />
+    <Compile Include="Clients\Enclosure\Layout_Enclosure.cs" />
+    <Compile Include="Clients\Enclosure\Queries_Enclosure.cs" />
     <Compile Include="Clients\NHC\Dashboard_NHC.cs" />
     <Compile Include="Clients\NHC\Dataclass_NHC.cs" />
     <Compile Include="Clients\NHC\Layout_NHC.cs" />
@@ -69,6 +73,7 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="OtherFunctions.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Form1.resx">

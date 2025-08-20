@@ -1,4 +1,5 @@
-﻿using Custom_QBSI.Clients.NHC;
+﻿using Custom_QBSI.Clients.Enclosure;
+using Custom_QBSI.Clients.NHC;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -13,7 +14,12 @@ namespace Custom_QBSI
 {
     public class GlobalVariables
     {
-        public static string client = "NHC";
+        /* 
+         * Current clients:
+         * NHC
+         * Enclosure 
+         */
+        public static string client = "Enclosure";
     }
     public partial class Dashboard : Form
     {
@@ -30,21 +36,40 @@ namespace Custom_QBSI
 
         private Panel ContainerPanel()
         {
-            Dashboard_NHC dashboard_NHC = new Dashboard_NHC();
-
             Panel panel = new Panel
             {
                 Dock = DockStyle.Fill,
                 //BackColor = Color.Aqua,
             };
 
-            Panel panel_Main = dashboard_NHC.MainPanel();
-            Panel panel_Sidebar = dashboard_NHC.SidebarPanel();
-            Panel panel_Title = dashboard_NHC.TitlePanel();
+            if (GlobalVariables.client == "NHC")
+            {
+                Dashboard_NHC dashboard_NHC = new Dashboard_NHC();
+                Panel panel_Main = dashboard_NHC.MainPanel();
+                Panel panel_Sidebar = dashboard_NHC.SidebarPanel();
+                Panel panel_Title = dashboard_NHC.TitlePanel();
 
-            panel.Controls.Add(panel_Sidebar);
-            panel.Controls.Add(panel_Title);
-            panel.Controls.Add(panel_Main);
+                panel.Controls.Add(panel_Sidebar);
+                panel.Controls.Add(panel_Title);
+                panel.Controls.Add(panel_Main);
+            }
+            else if (GlobalVariables.client == "Enclosure")
+            {
+                Dashboard_Enclosure dashboard_Enclosure = new Dashboard_Enclosure();
+                Panel panel_Main = dashboard_Enclosure.MainPanel();
+                Panel panel_Sidebar = dashboard_Enclosure.SidebarPanel();
+                Panel panel_Title = dashboard_Enclosure.TitlePanel();
+
+                panel.Controls.Add(panel_Sidebar);
+                panel.Controls.Add(panel_Title);
+                panel.Controls.Add(panel_Main);
+            }
+            else
+            {
+                // Add logic for other clients if needed
+                throw new NotImplementedException("Client not implemented: " + GlobalVariables.client);
+            }
+
 
             return panel;
         }

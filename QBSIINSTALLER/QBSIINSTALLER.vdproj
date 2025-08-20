@@ -16,24 +16,24 @@
         "Entry"
         {
         "MsmKey" = "8:_1315A280485AE3CAA2409165B07D3E85"
-        "OwnerKey" = "8:_E8478529AF2940DA808A1955F0BF6EE9"
+        "OwnerKey" = "8:_B5AFB94499674C6980F1AA277B951629"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_9F743D4911D64F679EC293A258F323E0"
+        "MsmKey" = "8:_14AF27B6208244CF9CC839FBBDE0CA97"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_E8478529AF2940DA808A1955F0BF6EE9"
+        "MsmKey" = "8:_5CA816EC674047C186FDD18F1CB90B8F"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_E984C97EBCC14D969D7B80AC2047958E"
+        "MsmKey" = "8:_B5AFB94499674C6980F1AA277B951629"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -46,7 +46,7 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_E8478529AF2940DA808A1955F0BF6EE9"
+        "OwnerKey" = "8:_B5AFB94499674C6980F1AA277B951629"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -67,6 +67,14 @@
         "PrivateKeyFile" = "8:"
         "TimeStampServer" = "8:"
         "InstallerBootstrapper" = "3:2"
+            "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
+            {
+            "Enabled" = "11:TRUE"
+            "PromptEnabled" = "11:TRUE"
+            "PrerequisitesLocation" = "2:1"
+            "Url" = "8:"
+            "ComponentsUrl" = "8:"
+            }
         }
         "Release"
         {
@@ -83,6 +91,14 @@
         "PrivateKeyFile" = "8:"
         "TimeStampServer" = "8:"
         "InstallerBootstrapper" = "3:2"
+            "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
+            {
+            "Enabled" = "11:TRUE"
+            "PromptEnabled" = "11:TRUE"
+            "PrerequisitesLocation" = "2:1"
+            "Url" = "8:"
+            "ComponentsUrl" = "8:"
+            }
         }
     }
     "Deployable"
@@ -143,9 +159,9 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_9F743D4911D64F679EC293A258F323E0"
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_14AF27B6208244CF9CC839FBBDE0CA97"
             {
-            "SourcePath" = "8:..\\..\\..\\Documents\\PROGRAMFILES\\logo4.ico"
+            "SourcePath" = "8:..\\..\\..\\..\\..\\Downloads\\_WORK\\logo4.ico"
             "TargetName" = "8:logo4.ico"
             "Tag" = "8:"
             "Folder" = "8:_12FF615587324FEC93CE6F4D94F5F2CB"
@@ -163,7 +179,7 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_E984C97EBCC14D969D7B80AC2047958E"
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_5CA816EC674047C186FDD18F1CB90B8F"
             {
             "SourcePath" = "8:..\\Custom-QBSI\\bin\\x64\\Release\\CustomQBSIDatabase.accdb"
             "TargetName" = "8:CustomQBSIDatabase.accdb"
@@ -248,16 +264,16 @@
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
         "ProductVersion" = "8:1.0.0"
-        "Manufacturer" = "8:Default Company Name"
+        "Manufacturer" = "8:RAC Experts"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
         "Title" = "8:QBSIINSTALLER"
         "Subject" = "8:"
-        "ARPCONTACT" = "8:Rac Experts"
+        "ARPCONTACT" = "8:Kerr Micko Lanante"
         "Keywords" = "8:"
         "ARPCOMMENTS" = "8:"
         "ARPURLINFOABOUT" = "8:"
-        "ARPPRODUCTICON" = "8:_9F743D4911D64F679EC293A258F323E0"
+        "ARPPRODUCTICON" = "8:_14AF27B6208244CF9CC839FBBDE0CA97"
         "ARPIconIndex" = "3:0"
         "SearchPath" = "8:"
         "UseSystemSearchPath" = "11:TRUE"
@@ -360,32 +376,32 @@
         }
         "Shortcut"
         {
-            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_0E73CEB75FA44935A3C0A3D620D44804"
+            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_47B1ACB55D4D4B56AED6E467208F04A7"
             {
-            "Name" = "8:Quickbooks Sales Invoice"
+            "Name" = "8:QuickBooks Sales Invoice"
             "Arguments" = "8:"
             "Description" = "8:"
             "ShowCmd" = "3:1"
             "IconIndex" = "3:0"
             "Transitive" = "11:FALSE"
-            "Target" = "8:_E8478529AF2940DA808A1955F0BF6EE9"
+            "Target" = "8:_B5AFB94499674C6980F1AA277B951629"
             "Folder" = "8:_A1022835632E4D8D8CF14F6E4AE24EB7"
             "WorkingFolder" = "8:_12FF615587324FEC93CE6F4D94F5F2CB"
-            "Icon" = "8:_9F743D4911D64F679EC293A258F323E0"
+            "Icon" = "8:_14AF27B6208244CF9CC839FBBDE0CA97"
             "Feature" = "8:"
             }
-            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_8A255C3431A9426681615745F6EDF2AA"
+            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_A450FA52E94D4DB99CC7C121BC15736C"
             {
-            "Name" = "8:Quickbooks Sales Invoice"
+            "Name" = "8:QuickBooks Sales Invoice"
             "Arguments" = "8:"
             "Description" = "8:"
             "ShowCmd" = "3:1"
             "IconIndex" = "3:0"
             "Transitive" = "11:FALSE"
-            "Target" = "8:_E8478529AF2940DA808A1955F0BF6EE9"
+            "Target" = "8:_B5AFB94499674C6980F1AA277B951629"
             "Folder" = "8:_9093A0FDC21C41A58C857100B82B258F"
             "WorkingFolder" = "8:_12FF615587324FEC93CE6F4D94F5F2CB"
-            "Icon" = "8:_9F743D4911D64F679EC293A258F323E0"
+            "Icon" = "8:_14AF27B6208244CF9CC839FBBDE0CA97"
             "Feature" = "8:"
             }
         }
@@ -787,7 +803,7 @@
         }
         "ProjectOutput"
         {
-            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_E8478529AF2940DA808A1955F0BF6EE9"
+            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_B5AFB94499674C6980F1AA277B951629"
             {
             "SourcePath" = "8:..\\Custom-QBSI\\obj\\x64\\Release\\Custom-QBSI.exe"
             "TargetName" = "8:"
