@@ -174,7 +174,6 @@ namespace Custom_QBSI.Clients.Enclosure
                     {
                         var item = invoice.LineItems[i];
 
-                        // Skip "Subtotal" lines
                         if (item.Description == "Subtotal") continue;
 
                         bool isTaxable = item.SalesTaxTotal != 0 && item.Tax != "Non" && item.TaxesName != "Out of State";
@@ -184,37 +183,33 @@ namespace Custom_QBSI.Clients.Enclosure
                         decimal rateAdjustment = isTaxable ? item.Rate * 0.12m : 0m;
                         decimal unitRateToDraw = item.TaxesName != "Out of State" ? item.Rate + rateAdjustment : item.Rate;
 
-                        // Case: Discount follows item with Rate > 0
-                        if (item.Rate != 0 && hasNext && nextItem.Rate == 0 && nextItem.Description != "Subtotal")
+                        // ✅ Case 1: Discount line (separate always)
+                        if (item.Description.ToLower().Contains("discount") || item.Rate.ToString().Contains("%") || item.Amount < 0)
                         {
-                            decimal combinedAmount = item.Amount + nextItem.Amount;
-                            if (isTaxable) combinedAmount *= 1.12m;
+                            decimal discountAmount = isTaxable ? item.Amount * 1.12m : item.Amount;
 
-                            string desc = $"{item.Description} ({nextItem.Description})";
+                            e.Graphics.DrawString(item.Description, font_Data, Brushes.Black,new Rectangle(rectItemDescription.X, rectItemDescription.Y + yPos, rectItemDescription.Width, tableDataHeight), sfAlignLeftCenter);
+                            e.Graphics.DrawString(item.Quantity.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemQuantity.X, rectItemQuantity.Y + yPos, rectItemQuantity.Width, tableDataHeight), sfAlignCenter);
+                            e.Graphics.DrawString(item.Rate.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemUnitPrice.X, rectItemUnitPrice.Y + yPos, rectItemUnitPrice.Width, tableDataHeight), sfAlignCenterRight);
+                            e.Graphics.DrawString(discountAmount.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemAmount.X, rectItemAmount.Y + yPos, rectItemAmount.Width, tableDataHeight), sfAlignCenterRight);
 
-                            e.Graphics.DrawString(desc, font_Data, Brushes.Black, new Rectangle(rectItemDescription.X, rectItemDescription.Y + yPos, rectItemDescription.Width, tableDataHeight), sfAlignLeftCenter);
-                            e.Graphics.DrawString(item.Quantity.ToString("N2"), font_Data, Brushes.Black, new Rectangle(rectItemQuantity.X, rectItemQuantity.Y + yPos, rectItemQuantity.Width, tableDataHeight), sfAlignCenter);
-                            e.Graphics.DrawString(unitRateToDraw.ToString("N2"), font_Data, Brushes.Black, new Rectangle(rectItemUnitPrice.X, rectItemUnitPrice.Y + yPos, rectItemUnitPrice.Width, tableDataHeight), sfAlignCenterRight);
-                            e.Graphics.DrawString(combinedAmount.ToString("N2"), font_Data, Brushes.Black, new Rectangle(rectItemAmount.X, rectItemAmount.Y + yPos, rectItemAmount.Width, tableDataHeight), sfAlignCenterRight);
-
-                            totalAmount += combinedAmount;
+                            totalAmount += discountAmount;
                             yPos += tableDataHeight;
-                            i++; // Skip next (discount) line
                             continue;
                         }
 
-                        // Case: Description-only line after a Subtotal
+                        // ✅ Case 2: Description-only line after a Subtotal
                         if (item.Rate == 0 && i > 0 && invoice.LineItems[i - 1].Description == "Subtotal")
                         {
-                            e.Graphics.DrawString(item.Description, font_Data, Brushes.Black, new Rectangle(rectItemDescription.X, rectItemDescription.Y + yPos, rectItemDescription.Width, tableDataHeight), sfAlignLeftCenter);
-                            e.Graphics.DrawString(item.Amount.ToString("N2"), font_Data, Brushes.Black, new Rectangle(rectItemAmount.X, rectItemAmount.Y + yPos, rectItemAmount.Width, tableDataHeight), sfAlignCenterRight);
+                            e.Graphics.DrawString(item.Description, font_Data, Brushes.Black,new Rectangle(rectItemDescription.X, rectItemDescription.Y + yPos, rectItemDescription.Width, tableDataHeight), sfAlignLeftCenter);
+                            e.Graphics.DrawString(item.Amount.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemAmount.X, rectItemAmount.Y + yPos, rectItemAmount.Width, tableDataHeight), sfAlignCenterRight);
 
                             totalAmount += item.Amount;
                             yPos += tableDataHeight;
                             continue;
                         }
 
-                        // Case: Discount follows item with Rate == 0
+                        // ✅ Case 3: Discount follows item with Rate == 0
                         if (item.Rate == 0 && hasNext && nextItem.Rate == 0 && nextItem.Description != "Subtotal")
                         {
                             decimal combinedAmount = item.Amount + nextItem.Amount;
@@ -222,24 +217,24 @@ namespace Custom_QBSI.Clients.Enclosure
 
                             string desc = $"{item.Description} ({nextItem.Description})";
 
-                            e.Graphics.DrawString(desc, font_Data, Brushes.Black, new Rectangle(rectItemDescription.X, rectItemDescription.Y + yPos, rectItemDescription.Width, tableDataHeight), sfAlignLeftCenter);
-                            e.Graphics.DrawString(item.Quantity.ToString("N2"), font_Data, Brushes.Black, new Rectangle(rectItemQuantity.X, rectItemQuantity.Y + yPos, rectItemQuantity.Width, tableDataHeight), sfAlignCenter);
-                            e.Graphics.DrawString(item.Rate.ToString("N2"), font_Data, Brushes.Black, new Rectangle(rectItemUnitPrice.X, rectItemUnitPrice.Y + yPos, rectItemUnitPrice.Width, tableDataHeight), sfAlignCenterRight);
-                            e.Graphics.DrawString(combinedAmount.ToString("N2"), font_Data, Brushes.Black, new Rectangle(rectItemAmount.X, rectItemAmount.Y + yPos, rectItemAmount.Width, tableDataHeight), sfAlignCenterRight);
+                            e.Graphics.DrawString(desc, font_Data, Brushes.Black,new Rectangle(rectItemDescription.X, rectItemDescription.Y + yPos, rectItemDescription.Width, tableDataHeight), sfAlignLeftCenter);
+                            e.Graphics.DrawString(item.Quantity.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemQuantity.X, rectItemQuantity.Y + yPos, rectItemQuantity.Width, tableDataHeight), sfAlignCenter);
+                            e.Graphics.DrawString(item.Rate.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemUnitPrice.X, rectItemUnitPrice.Y + yPos, rectItemUnitPrice.Width, tableDataHeight), sfAlignCenterRight);
+                            e.Graphics.DrawString(combinedAmount.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemAmount.X, rectItemAmount.Y + yPos, rectItemAmount.Width, tableDataHeight), sfAlignCenterRight);
 
                             totalAmount += combinedAmount;
                             yPos += tableDataHeight;
-                            i++; // Skip next (discount) line
+                            i++; // Skip discount line
                             continue;
                         }
 
-                        // Regular line item
+                        // ✅ Case 4: Regular line item
                         decimal adjustedAmount = isTaxable ? item.Amount * 1.12m : item.Amount;
 
-                        e.Graphics.DrawString(item.Description, font_Data, Brushes.Black, new Rectangle(rectItemDescription.X, rectItemDescription.Y + yPos, rectItemDescription.Width, tableDataHeight), sfAlignLeftCenter);
-                        e.Graphics.DrawString(item.Quantity.ToString("N2"), font_Data, Brushes.Black, new Rectangle(rectItemQuantity.X, rectItemQuantity.Y + yPos, rectItemQuantity.Width, tableDataHeight), sfAlignCenter);
-                        e.Graphics.DrawString(unitRateToDraw.ToString("N2"), font_Data, Brushes.Black, new Rectangle(rectItemUnitPrice.X, rectItemUnitPrice.Y + yPos, rectItemUnitPrice.Width, tableDataHeight), sfAlignCenterRight);
-                        e.Graphics.DrawString(adjustedAmount.ToString("N2"), font_Data, Brushes.Black, new Rectangle(rectItemAmount.X, rectItemAmount.Y + yPos, rectItemAmount.Width, tableDataHeight), sfAlignCenterRight);
+                        e.Graphics.DrawString(item.Description, font_Data, Brushes.Black,new Rectangle(rectItemDescription.X, rectItemDescription.Y + yPos, rectItemDescription.Width, tableDataHeight), sfAlignLeftCenter);
+                        e.Graphics.DrawString(item.Quantity.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemQuantity.X, rectItemQuantity.Y + yPos, rectItemQuantity.Width, tableDataHeight), sfAlignCenter);
+                        e.Graphics.DrawString(unitRateToDraw.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemUnitPrice.X, rectItemUnitPrice.Y + yPos, rectItemUnitPrice.Width, tableDataHeight), sfAlignCenterRight);
+                        e.Graphics.DrawString(adjustedAmount.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemAmount.X, rectItemAmount.Y + yPos, rectItemAmount.Width, tableDataHeight), sfAlignCenterRight);
 
                         totalAmount += adjustedAmount;
                         yPos += tableDataHeight;
@@ -253,70 +248,64 @@ namespace Custom_QBSI.Clients.Enclosure
 
                         if (item.Description == "Subtotal") continue;
 
-                        bool isTaxable = item.SalesTaxTotal != 0 && item.Tax != "Non" && item.TaxesName != "Out of State";
                         bool hasNext = i + 1 < invoice.LineItems.Count;
                         var nextItem = hasNext ? invoice.LineItems[i + 1] : null;
+                        decimal unitRateToDraw = item.Rate; // no adjustment in Exclusive
 
-                        decimal unitRateToDraw = item.Rate; // No VAT adjustment
-
-                        // Case: Discount follows item with Rate > 0
-                        if (item.Rate != 0 && hasNext && nextItem.Rate == 0 && nextItem.Description != "Subtotal")
+                        // ✅ Case 1: Discount line (separate always)
+                        if (item.Description.ToLower().Contains("discount") || item.Rate.ToString().Contains("%") || item.Amount < 0)
                         {
-                            decimal combinedAmount = item.Amount + nextItem.Amount;
-
-                            string desc = $"{item.Description} ({nextItem.Description})";
-
-                            e.Graphics.DrawString(desc, font_Data, Brushes.Black, new Rectangle(rectItemDescription.X, rectItemDescription.Y + yPos, rectItemDescription.Width, tableDataHeight), sfAlignLeftCenter);
-                            e.Graphics.DrawString(item.Quantity.ToString("N2"), font_Data, Brushes.Black, new Rectangle(rectItemQuantity.X, rectItemQuantity.Y + yPos, rectItemQuantity.Width, tableDataHeight), sfAlignCenter);
-                            e.Graphics.DrawString(unitRateToDraw.ToString("N2"), font_Data, Brushes.Black, new Rectangle(rectItemUnitPrice.X, rectItemUnitPrice.Y + yPos, rectItemUnitPrice.Width, tableDataHeight), sfAlignCenterRight);
-                            e.Graphics.DrawString(combinedAmount.ToString("N2"), font_Data, Brushes.Black, new Rectangle(rectItemAmount.X, rectItemAmount.Y + yPos, rectItemAmount.Width, tableDataHeight), sfAlignCenterRight);
-
-                            totalAmount += combinedAmount;
-                            yPos += tableDataHeight;
-                            i++; // Skip next (discount) line
-                            continue;
-                        }
-
-                        // Case: Description-only line after a Subtotal
-                        if (item.Rate == 0 && i > 0 && invoice.LineItems[i - 1].Description == "Subtotal")
-                        {
-                            e.Graphics.DrawString(item.Description, font_Data, Brushes.Black, new Rectangle(rectItemDescription.X, rectItemDescription.Y + yPos, rectItemDescription.Width, tableDataHeight), sfAlignLeftCenter);
-                            e.Graphics.DrawString(item.Amount.ToString("N2"), font_Data, Brushes.Black, new Rectangle(rectItemAmount.X, rectItemAmount.Y + yPos, rectItemAmount.Width, tableDataHeight), sfAlignCenterRight);
+                            e.Graphics.DrawString(item.Description, font_Data, Brushes.Black,new Rectangle(rectItemDescription.X, rectItemDescription.Y + yPos, rectItemDescription.Width, tableDataHeight), sfAlignLeftCenter);
+                            e.Graphics.DrawString(item.Quantity.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemQuantity.X, rectItemQuantity.Y + yPos, rectItemQuantity.Width, tableDataHeight), sfAlignCenter);
+                            e.Graphics.DrawString(item.Rate.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemUnitPrice.X, rectItemUnitPrice.Y + yPos, rectItemUnitPrice.Width, tableDataHeight), sfAlignCenterRight);
+                            e.Graphics.DrawString(item.Amount.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemAmount.X, rectItemAmount.Y + yPos, rectItemAmount.Width, tableDataHeight), sfAlignCenterRight);
 
                             totalAmount += item.Amount;
                             yPos += tableDataHeight;
                             continue;
                         }
 
-                        // Case: Discount follows item with Rate == 0
+                        // ✅ Case 2: Description-only line after a Subtotal
+                        if (item.Rate == 0 && i > 0 && invoice.LineItems[i - 1].Description == "Subtotal")
+                        {
+                            e.Graphics.DrawString(item.Description, font_Data, Brushes.Black,new Rectangle(rectItemDescription.X, rectItemDescription.Y + yPos, rectItemDescription.Width, tableDataHeight), sfAlignLeftCenter);
+                            e.Graphics.DrawString(item.Amount.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemAmount.X, rectItemAmount.Y + yPos, rectItemAmount.Width, tableDataHeight), sfAlignCenterRight);
+
+                            totalAmount += item.Amount;
+                            yPos += tableDataHeight;
+                            continue;
+                        }
+
+                        // ✅ Case 3: Discount follows item with Rate == 0
                         if (item.Rate == 0 && hasNext && nextItem.Rate == 0 && nextItem.Description != "Subtotal")
                         {
                             decimal combinedAmount = item.Amount + nextItem.Amount;
 
                             string desc = $"{item.Description} ({nextItem.Description})";
 
-                            e.Graphics.DrawString(desc, font_Data, Brushes.Black, new Rectangle(rectItemDescription.X, rectItemDescription.Y + yPos, rectItemDescription.Width, tableDataHeight), sfAlignLeftCenter);
-                            e.Graphics.DrawString(item.Quantity.ToString("N2"), font_Data, Brushes.Black, new Rectangle(rectItemQuantity.X, rectItemQuantity.Y + yPos, rectItemQuantity.Width, tableDataHeight), sfAlignCenter);
-                            e.Graphics.DrawString(item.Rate.ToString("N2"), font_Data, Brushes.Black, new Rectangle(rectItemUnitPrice.X, rectItemUnitPrice.Y + yPos, rectItemUnitPrice.Width, tableDataHeight), sfAlignCenterRight);
-                            e.Graphics.DrawString(combinedAmount.ToString("N2"), font_Data, Brushes.Black, new Rectangle(rectItemAmount.X, rectItemAmount.Y + yPos, rectItemAmount.Width, tableDataHeight), sfAlignCenterRight);
+                            e.Graphics.DrawString(desc, font_Data, Brushes.Black,new Rectangle(rectItemDescription.X, rectItemDescription.Y + yPos, rectItemDescription.Width, tableDataHeight), sfAlignLeftCenter);
+                            e.Graphics.DrawString(item.Quantity.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemQuantity.X, rectItemQuantity.Y + yPos, rectItemQuantity.Width, tableDataHeight), sfAlignCenter);
+                            e.Graphics.DrawString(item.Rate.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemUnitPrice.X, rectItemUnitPrice.Y + yPos, rectItemUnitPrice.Width, tableDataHeight), sfAlignCenterRight);
+                            e.Graphics.DrawString(combinedAmount.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemAmount.X, rectItemAmount.Y + yPos, rectItemAmount.Width, tableDataHeight), sfAlignCenterRight);
 
                             totalAmount += combinedAmount;
                             yPos += tableDataHeight;
-                            i++; // Skip next (discount) line
+                            i++;
                             continue;
                         }
 
-                        // Regular line item (no VAT adjustment)
-                        e.Graphics.DrawString(item.Description, font_Data, Brushes.Black, new Rectangle(rectItemDescription.X, rectItemDescription.Y + yPos, rectItemDescription.Width, tableDataHeight), sfAlignLeftCenter);
-                        e.Graphics.DrawString(item.Quantity.ToString("N2"), font_Data, Brushes.Black, new Rectangle(rectItemQuantity.X, rectItemQuantity.Y + yPos, rectItemQuantity.Width, tableDataHeight), sfAlignCenter);
-                        e.Graphics.DrawString(unitRateToDraw.ToString("N2"), font_Data, Brushes.Black, new Rectangle(rectItemUnitPrice.X, rectItemUnitPrice.Y + yPos, rectItemUnitPrice.Width, tableDataHeight), sfAlignCenterRight);
-                        e.Graphics.DrawString(item.Amount.ToString("N2"), font_Data, Brushes.Black, new Rectangle(rectItemAmount.X, rectItemAmount.Y + yPos, rectItemAmount.Width, tableDataHeight), sfAlignCenterRight);
+                        // ✅ Case 4: Regular line item
+                        e.Graphics.DrawString(item.Description, font_Data, Brushes.Black,new Rectangle(rectItemDescription.X, rectItemDescription.Y + yPos, rectItemDescription.Width, tableDataHeight), sfAlignLeftCenter);
+                        e.Graphics.DrawString(item.Quantity.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemQuantity.X, rectItemQuantity.Y + yPos, rectItemQuantity.Width, tableDataHeight), sfAlignCenter);
+                        e.Graphics.DrawString(unitRateToDraw.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemUnitPrice.X, rectItemUnitPrice.Y + yPos, rectItemUnitPrice.Width, tableDataHeight), sfAlignCenterRight);
+                        e.Graphics.DrawString(item.Amount.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemAmount.X, rectItemAmount.Y + yPos, rectItemAmount.Width, tableDataHeight), sfAlignCenterRight);
 
                         totalAmount += item.Amount;
                         yPos += tableDataHeight;
                     }
                 }
             }
+
 
             // VAT PART
             int widthVATHeader = 100;
