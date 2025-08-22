@@ -17,16 +17,24 @@ namespace Custom_QBSI.Clients.Enclosure
             "Invoice", "InvoiceLine", "InvoiceLinkedTxn",
             "Item" };
 
+        readonly string tableName = "Enclosure";
+
         private PrintDocument printDocument;
         private PrintPreviewControl printPreviewControl;
 
         private ComboBox comboBox_Forms;
+
+        // Series Number
+        int seriesNumber = 1;
+        private TextBox textBox_SeriesNumber;
 
         // Details
         private CheckBox checkBox_EnableExpDate;
         private CheckBox checkBox_LessEWT;
         private TextBox textBox_Note;
         private TextBox textBox_BusinessStyle;
+        private TextBox textBox_ACNo;
+        private DateTimePicker dateTimePicker_DateIssued;
         private TextBox textBox_PWDSignature;
         private RadioButton radioButton_VATInclusive;
         private RadioButton radioButton_VATExclusive;
@@ -118,6 +126,40 @@ namespace Custom_QBSI.Clients.Enclosure
                 Font = font_Label,
             };
 
+            Label label_ACNo = new Label
+            {
+                Parent = panel_Details,
+                Width = componentWidth / 2 ,
+                Text = "AC NO:",
+                TextAlign = ContentAlignment.MiddleLeft,
+                Font = font_Label,
+            };
+
+            Label label_DateIssue = new Label
+            {
+                Parent = panel_Details,
+                Width = componentWidth / 2 - 5,
+                Text = "Date Issued:",
+                TextAlign = ContentAlignment.MiddleLeft,
+                Font = font_Label,
+            };
+
+            textBox_ACNo = new TextBox
+            {
+                Parent = panel_Details,
+                Width = componentWidth / 2,
+                Font = font_Label,
+            };
+
+            dateTimePicker_DateIssued = new DateTimePicker
+            {
+                Parent = panel_Details,
+                Width = componentWidth / 2 - 5,
+                Font = font_Label,
+                Format = DateTimePickerFormat.Short,
+                Value = DateTime.Now,
+            };
+
             Label label_PWDSignature = new Label
             {
                 Parent = panel_Details,
@@ -171,7 +213,6 @@ namespace Custom_QBSI.Clients.Enclosure
                 Width = componentWidth / 2 - 10,
                 Font = font_Label,
             };
-
 
             return panel_Details;
         }
@@ -289,15 +330,17 @@ namespace Custom_QBSI.Clients.Enclosure
 
             // ------------------------------------------
             FlowLayoutPanel panel_Forms = Panel_Forms();
+            FlowLayoutPanel panel_SeriesNumber = Panel_SeriesNumber();
             FlowLayoutPanel panel_RefNumber = Panel_RefNumber();
             FlowLayoutPanel panel_Signatory = Panel_Signatory();
-            FlowLayoutPanel panel_Prionting = Panel_Printing();
+            FlowLayoutPanel panel_Printing = Panel_Printing();
 
             // ------------------------------------------
             panel_SideBar.Controls.Add(panel_Forms);
+            panel_SideBar.Controls.Add(panel_SeriesNumber);
             panel_SideBar.Controls.Add(panel_RefNumber);
             panel_SideBar.Controls.Add(panel_Signatory);
-            panel_SideBar.Controls.Add(panel_Prionting);
+            panel_SideBar.Controls.Add(panel_Printing);
 
             return panel_SideBar;
         }
@@ -342,6 +385,79 @@ namespace Custom_QBSI.Clients.Enclosure
             comboBox_Forms.SelectedIndexChanged += ComboBox_Forms_SelectedIndexChanged;
 
             return panel_Forms;
+        }
+
+        private FlowLayoutPanel Panel_SeriesNumber()
+        {
+            AccessDatabase accessDatabase = new AccessDatabase();
+            seriesNumber = accessDatabase.GetSeriesNumberFromDatabase(tableName);
+
+            FlowLayoutPanel panel_SeriesNumber = new FlowLayoutPanel
+            {
+                Dock = DockStyle.Top,
+                Height = 64,
+                Width = sideBarWidth - 10,
+                BackColor = Color.LightGray,
+                Padding = new Padding(5),
+                BorderStyle = BorderStyle.FixedSingle,
+            };
+
+            Label label_SeriesNumberText = new Label
+            {
+                Parent = panel_SeriesNumber,
+                Width = sideBarWidth - 30,
+                Text = "Current Series Number:",
+                TextAlign = ContentAlignment.MiddleLeft,
+                Font = font_Label,
+            };
+
+            textBox_SeriesNumber = new TextBox
+            {
+                Parent = panel_SeriesNumber,
+                Width = 156,
+                Font = new Font("Microsoft Sans Serif", 10),
+            };
+            textBox_SeriesNumber.Text = FormatSeriesNumber(seriesNumber);
+            textBox_SeriesNumber.Leave += TextBox_SeriesNumber_Leave;
+
+            Button button_Decrement = new Button
+            {
+                Parent = panel_SeriesNumber,
+                Height = 28,
+                Width = 28,
+                Text = "-",
+                TextAlign = ContentAlignment.MiddleCenter,
+                Margin = new Padding(0, 1, 0, 0),
+                BackColor = Color.Transparent,
+            };
+            button_Decrement.Click += (sender, e) =>
+            {
+                if (seriesNumber != 0)
+                {
+                    seriesNumber--;
+                    textBox_SeriesNumber.Text = FormatSeriesNumber(seriesNumber);
+                    accessDatabase.UpdateManualSeriesNumber(tableName, seriesNumber);
+                }
+            };
+
+            Button button_Increment = new Button
+            {
+                Parent = panel_SeriesNumber,
+                Height = 28,
+                Width = 28,
+                Text = "+",
+                TextAlign = ContentAlignment.MiddleCenter,
+                Margin = new Padding(3, 1, 3, 0),
+                BackColor = Color.Transparent,
+            };
+            button_Increment.Click += (sender, e) =>
+            {
+                seriesNumber++;
+                textBox_SeriesNumber.Text = FormatSeriesNumber(seriesNumber);
+                accessDatabase.UpdateManualSeriesNumber(tableName, seriesNumber);
+            };
+
+            return panel_SeriesNumber;
         }
 
         private FlowLayoutPanel Panel_RefNumber()
@@ -398,15 +514,19 @@ namespace Custom_QBSI.Clients.Enclosure
                         string note = textBox_Note.Text;
                         string businessStyle = textBox_BusinessStyle.Text;
                         string pwdSignature = textBox_PWDSignature.Text;
+                        string acNo = textBox_ACNo.Text;
+                        DateTime dateIssued = dateTimePicker_DateIssued.Value;
                         bool isEnableExpDateChecked = checkBox_EnableExpDate.Checked;
                         bool isLessEWTChecked = checkBox_LessEWT.Checked;
+
+                        string seriesNumberRef = textBox_SeriesNumber.Text;
 
                         //string signatoryPreparedBy = textBox_SignatoryPreparedBy.Text;
                         //string signatoryCheckedBy = textBox_SignatoryCheckedBy.Text;
                         //string signatoryApprovedBy = textBox_SignatoryApprovedBy.Text;
 
                         Queries_Enclosure accessQueries = new Queries_Enclosure();
-                        List<Dataclass_Enclosure.InvoiceData> invoice = accessQueries.GetInvoiceData(refNumber);
+                        List<InvoiceData> invoice = accessQueries.GetInvoiceData(refNumber);
 
                         if (invoice.Count == 0)
                         {
@@ -424,7 +544,7 @@ namespace Custom_QBSI.Clients.Enclosure
                         {
                             //layout_NHC.PrintPage_NHC(s, ev, invoice, comboBox_Forms.SelectedIndex, note, businessStyle, pwdSignature, isEnableExpDateChecked);
                             //if (comboBox_Forms.SelectedIndex == 1)
-                            layout_Enclosure.Layout_SalesInvoice(ev, invoice, vatType, businessStyle, isLessEWTChecked);
+                            layout_Enclosure.Layout_SalesInvoice(ev, invoice, vatType, businessStyle, isLessEWTChecked, acNo, dateIssued, seriesNumberRef);
                             /*else if (comboBox_Forms.SelectedIndex == 2)
                                 layout_Enclosure.Layout_DeliveryReceipt(ev, invoice, note, businessStyle, pwdSignature, isEnableExpDateChecked, signatoryName);*/
                         };
@@ -594,6 +714,7 @@ namespace Custom_QBSI.Clients.Enclosure
             };
             button_Print.Click += (sender, e) =>
             {
+                AccessDatabase accessDatabase = new AccessDatabase();
                 try
                 {
                     PrintDialog printDialog = new PrintDialog
@@ -607,6 +728,10 @@ namespace Custom_QBSI.Clients.Enclosure
                         printPreviewControl.Visible = false;
                         printPreviewControl.Zoom = 1;
                         panel_Printing.Visible = false;
+
+                        seriesNumber++;
+                        textBox_SeriesNumber.Text = FormatSeriesNumber(seriesNumber);
+                        accessDatabase.UpdateManualSeriesNumber(tableName, seriesNumber);
                     }
                 }
                 catch (Exception ex)
@@ -617,7 +742,6 @@ namespace Custom_QBSI.Clients.Enclosure
 
             return panel_Printing;
         }
-
 
         private void ComboBox_Forms_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -639,6 +763,18 @@ namespace Custom_QBSI.Clients.Enclosure
             {
 
             }
+        }
+
+        private void TextBox_SeriesNumber_Leave(object sender, EventArgs e)
+        {
+            string tableName = "Enclosure";
+            AccessDatabase accessDatabase = new AccessDatabase();
+            accessDatabase.UpdateManualSeriesNumber(tableName, seriesNumber);
+        }
+
+        private string FormatSeriesNumber(int seriesNumber)
+        {
+            return $"0000-{seriesNumber:00000000000}";
         }
     }
 }

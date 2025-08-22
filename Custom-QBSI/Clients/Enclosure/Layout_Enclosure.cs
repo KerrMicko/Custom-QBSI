@@ -34,8 +34,11 @@ namespace Custom_QBSI.Clients.Enclosure
         StringFormat sfAlignCenterRight = new StringFormat { Alignment = StringAlignment.Far, LineAlignment = StringAlignment.Center };
         StringFormat sfAlignLeftCenter = new StringFormat { Alignment = StringAlignment.Near, LineAlignment = StringAlignment.Center };
         StringFormat sfAlignLeftBottom = new StringFormat { Alignment = StringAlignment.Near, LineAlignment = StringAlignment.Far };
-        public void Layout_SalesInvoice(PrintPageEventArgs e, List<InvoiceData> invoiceData, string vatType, string businessStyle, bool isLessEWTChecked)
+        public void Layout_SalesInvoice(PrintPageEventArgs e, List<InvoiceData> invoiceData, string vatType, string businessStyle, bool isLessEWTChecked, string acNo, DateTime dateIssued, string seriesNumber)
         {
+            Image logo = Properties.Resources.logo_enclosure;
+            e.Graphics.DrawImage(logo, new Rectangle(45, 50, 150, 80));
+
             Font font_Details = font_Eight;
             Font font_Number = font_Nine;
             Font font_Data = font_Eight;
@@ -60,25 +63,26 @@ namespace Custom_QBSI.Clients.Enclosure
 
             e.Graphics.DrawString("INVOICE", font_ThirteenBold, Brushes.Black, new PointF(xStart, yStart + 100));
 
+            int yStartDetails = 180;
             int rectHeight = 28;
             int rightWidth = 180;
             int leftWidth = maxWidth - rightWidth;
 
             // LEFT
-            Rectangle rectCustomerName = new Rectangle(xStart, 180, leftWidth, rectHeight);
-            Rectangle rectBusinessAddress = new Rectangle(xStart, 180 + rectHeight, leftWidth, rectHeight);
-            Rectangle rectBusinessAddress2 = new Rectangle(xStart, 180 + rectHeight * 2, leftWidth, rectHeight);
+            Rectangle rectCustomerName = new Rectangle(xStart, yStartDetails, leftWidth, rectHeight);
+            Rectangle rectBusinessAddress = new Rectangle(xStart, yStartDetails + rectHeight, leftWidth, rectHeight);
+            Rectangle rectBusinessAddress2 = new Rectangle(xStart, yStartDetails + rectHeight * 2, leftWidth, rectHeight);
 
-            Rectangle rectCustomerNameData = new Rectangle(xStart + 140, 180, leftWidth - 140, rectHeight);
-            Rectangle rectBusinessAddressData = new Rectangle(xStart, 180 + rectHeight + 5, leftWidth, rectHeight * 2);
+            Rectangle rectCustomerNameData = new Rectangle(xStart + 140, yStartDetails, leftWidth - 140, rectHeight);
+            Rectangle rectBusinessAddressData = new Rectangle(xStart, yStartDetails + rectHeight + 5, leftWidth, rectHeight * 2);
             // RIGHT
-            Rectangle rectDate = new Rectangle(xStart + leftWidth, 180, rightWidth, rectHeight);
-            Rectangle rectTIN = new Rectangle(xStart + leftWidth, 180 + rectHeight, rightWidth, rectHeight);
-            Rectangle rectTerms = new Rectangle(xStart + leftWidth, 180 + rectHeight * 2, rightWidth, rectHeight);
+            Rectangle rectDate = new Rectangle(xStart + leftWidth, yStartDetails, rightWidth, rectHeight);
+            Rectangle rectTIN = new Rectangle(xStart + leftWidth, yStartDetails + rectHeight, rightWidth, rectHeight);
+            Rectangle rectTerms = new Rectangle(xStart + leftWidth, yStartDetails + rectHeight * 2, rightWidth, rectHeight);
 
-            Rectangle rectDateData = new Rectangle(xStart + leftWidth + 38, 180, rightWidth - 38, rectHeight);
-            Rectangle rectTINData = new Rectangle(xStart + leftWidth + 30, 180 + rectHeight, rightWidth - 30, rectHeight);
-            Rectangle rectTermsData = new Rectangle(xStart + leftWidth + 52, 180 + rectHeight * 2, rightWidth - 52, rectHeight);
+            Rectangle rectDateData = new Rectangle(xStart + leftWidth + 38, yStartDetails, rightWidth - 38, rectHeight);
+            Rectangle rectTINData = new Rectangle(xStart + leftWidth + 30, yStartDetails + rectHeight, rightWidth - 30, rectHeight);
+            Rectangle rectTermsData = new Rectangle(xStart + leftWidth + 52, yStartDetails + rectHeight * 2, rightWidth - 52, rectHeight);
 
             /*e.Graphics.DrawRectangle(Pens.Black, rectCustomerName);
             e.Graphics.DrawRectangle(Pens.Black, rectBusinessAddress);
@@ -129,8 +133,37 @@ namespace Custom_QBSI.Clients.Enclosure
             e.Graphics.DrawString("Terms :  _______________", font_Ten, Brushes.Black, rectTerms, sfAlignLeftCenter);
             e.Graphics.DrawString(terms, font_Ten, Brushes.Black, rectTermsData, sfAlignLeftCenter);
 
+            // EXTRA FIELDS
+            int yStartExtraFields = yStartDetails + rectHeight * 3;
+            int widthExtraFields = 250;
+            int xAdd = 51;
+
+            Rectangle rectSO = new Rectangle(xStart, yStartExtraFields, widthExtraFields, rectHeight);
+            Rectangle rectDR = new Rectangle(xStart + widthExtraFields, yStartExtraFields, widthExtraFields, rectHeight);
+            Rectangle rectPO = new Rectangle(xStart + widthExtraFields * 2, yStartExtraFields, widthExtraFields, rectHeight);
+
+            Rectangle rectSOData = new Rectangle(xStart + xAdd, yStartExtraFields, widthExtraFields - xAdd, rectHeight);
+            Rectangle rectDRData = new Rectangle(xStart + widthExtraFields + xAdd - 5, yStartExtraFields, widthExtraFields - xAdd, rectHeight);
+            Rectangle rectPOData = new Rectangle(xStart + widthExtraFields * 2 + xAdd + 5, yStartExtraFields, widthExtraFields - xAdd, rectHeight);
+
+            /*e.Graphics.DrawRectangle(Pens.Red, rectSO);
+            e.Graphics.DrawRectangle(Pens.Red, rectDR);
+            e.Graphics.DrawRectangle(Pens.Red, rectPO);*/
+
+            e.Graphics.DrawString("S.O # : _______________________", font_Ten, Brushes.Black, rectSO, sfAlignLeftCenter);
+            e.Graphics.DrawString("DR # : ________________________", font_Ten, Brushes.Black, rectDR, sfAlignLeftCenter);
+            e.Graphics.DrawString("PO # :  _________________________", font_Ten, Brushes.Black, rectPO, sfAlignLeftCenter);
+
+            string soNumber = "0000000000";
+            string drNumber = invoiceData[0].DrNo;
+            string poNumber = invoiceData[0].PONumber;
+
+            e.Graphics.DrawString(soNumber, font_Ten, Brushes.Black, rectSOData, sfAlignLeftCenter);
+            e.Graphics.DrawString(drNumber, font_Ten, Brushes.Black, rectDRData, sfAlignLeftCenter);
+            e.Graphics.DrawString(poNumber, font_Ten, Brushes.Black, rectPOData, sfAlignLeftCenter);
+
             // TABLE
-            int yStartTable = 268;
+            int yStartTable = yStartExtraFields + rectHeight + 5; // 268
             int tableDataHeight = 26;
 
             int widthItemDescription = 350;
@@ -550,6 +583,33 @@ namespace Custom_QBSI.Clients.Enclosure
             e.Graphics.DrawString("Signature over Printed Name", font_Nine, Brushes.Black, new Rectangle(xStartPreparedByHeader, yStartSignatoryText, widthPreparedByHeader, tableDataHeight), sfAlignLeftCenter);
             e.Graphics.DrawString("Signature over Printed Name", font_Nine, Brushes.Black, new Rectangle(xStartCheckedByHeader, yStartSignatoryText, widthCheckedByHeader, tableDataHeight), sfAlignLeftCenter);
             e.Graphics.DrawString("Signature over Printed Name", font_Nine, Brushes.Black, new Rectangle(xStartApprovedByHeader, yStartSignatoryText, widthApprovedByHeader, tableDataHeight), sfAlignLeftCenter);
+
+            // EXTRA FIELDS FOOTER
+            int yStartFooterExtraFields = yStartSignatory + rectHeight * 4 + 8;
+
+            Rectangle rectACNo = new Rectangle(xStart, yStartFooterExtraFields, 250, rectHeight);
+            Rectangle rectDateIssued = new Rectangle(xStart, yStartFooterExtraFields + rectHeight, 300, rectHeight);
+            Rectangle rectSeriesRange = new Rectangle(xStart, yStartFooterExtraFields + rectHeight * 2, 350, rectHeight);
+
+            Rectangle rectACNoData = new Rectangle(xStart + 58, yStartFooterExtraFields, 250 - 58, rectHeight);
+            Rectangle rectDateIssuedData = new Rectangle(xStart + 92, yStartFooterExtraFields + rectHeight, 300 - 92, rectHeight);
+            Rectangle rectSeriesRangeData = new Rectangle(xStart + 94, yStartFooterExtraFields + rectHeight * 2, 350 - 94, rectHeight);
+
+            /*e.Graphics.DrawRectangle(Pens.Red, rectACNo);
+            e.Graphics.DrawRectangle(Pens.Red, rectDateIssued);
+            e.Graphics.DrawRectangle(Pens.Red, rectSeriesRange);*/
+
+            //string acNo = "12345678901234567890";
+            //DateTime dateIssued = DateTime.Now;
+            //string seriesRange = "00001-0000000100";
+
+            e.Graphics.DrawString("AC NO : _______________________", font_Ten, Brushes.Black, rectACNo, sfAlignLeftCenter);
+            e.Graphics.DrawString("Date Issued : _______________________", font_Ten, Brushes.Black, rectDateIssued, sfAlignLeftCenter);
+            e.Graphics.DrawString("Series Range :", font_Ten, Brushes.Black, rectSeriesRange, sfAlignLeftCenter);
+
+            e.Graphics.DrawString(acNo, font_Ten, Brushes.Black, rectACNoData, sfAlignLeftCenter);
+            e.Graphics.DrawString(dateIssued.ToString("dd/MM/yyyy"), font_Ten, Brushes.Black, rectDateIssuedData, sfAlignLeftCenter);
+            e.Graphics.DrawString(seriesNumber, font_Ten, Brushes.Black, rectSeriesRangeData, sfAlignLeftCenter);
         }
     }
 }

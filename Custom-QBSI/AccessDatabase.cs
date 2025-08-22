@@ -240,5 +240,63 @@ namespace Custom_QBSI
 
             Console.WriteLine("All data from specified tables has been deleted.");
         }
+
+        // -------------------------------
+        public void UpdateManualSeriesNumber(string tableName, int seriesNumber)
+        {
+            string query = $"UPDATE SeriesNumber_{tableName} SET Series = @SeriesNumber";
+
+            using (OleDbConnection connection = new OleDbConnection(GetAccessConnectionString()))
+            {
+                try
+                {
+                    connection.Open();
+                    using (OleDbCommand command = new OleDbCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@SeriesNumber", seriesNumber);
+                        command.ExecuteNonQuery();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error updating {tableName} series number: {ex.Message}");
+                }
+            }
+        }
+
+        public int GetSeriesNumberFromDatabase(string tableName)
+        {
+            string accessConnectionString = GetAccessConnectionString();
+
+            int currentSeries = 1; // Default to 1 if no value is found
+            string query = $"SELECT Series FROM SeriesNumber_{tableName}"; // Replace 'SeriesTable' with your actual table name
+
+            using (OleDbConnection connection = new OleDbConnection(accessConnectionString))
+            {
+                try
+                {
+                    connection.Open();
+                    using (OleDbCommand command = new OleDbCommand(query, connection))
+                    {
+                        object result = command.ExecuteScalar();
+                        if (result != null && int.TryParse(result.ToString(), out int series))
+                        {
+                            currentSeries = series;
+                        }
+
+                        /*if (result != null)
+                        {
+                            currentSeries = (int)result;
+                        }*/
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error fetching {tableName} series number: {ex.Message}");
+                }
+            }
+
+            return currentSeries;
+        }
     }
 }
