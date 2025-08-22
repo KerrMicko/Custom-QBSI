@@ -165,6 +165,10 @@ namespace Custom_QBSI.Clients.Enclosure
                 yPosLayout += tableDataHeight;
             }
 
+            decimal vatableSalesTotal = 0;
+            decimal zeroRatedSalesTotal = 0;
+            decimal vatExemptSalesTotal = 0;
+
             int yPos = 26;
             foreach (var invoice in invoiceData)
             {
@@ -183,15 +187,23 @@ namespace Custom_QBSI.Clients.Enclosure
                         decimal rateAdjustment = isTaxable ? item.Rate * 0.12m : 0m;
                         decimal unitRateToDraw = item.TaxesName != "Out of State" ? item.Rate + rateAdjustment : item.Rate;
 
+                        // ✅ Classification
+                        if (item.TaxesName == "Zero Rated Sales")
+                            zeroRatedSalesTotal += item.Amount;
+                        else if (item.TaxesName == "VAT Exempt")
+                            vatExemptSalesTotal += item.Amount;
+                        else if (isTaxable)
+                            vatableSalesTotal += item.Amount;
+
                         // ✅ Case 1: Discount line (separate always)
                         if (item.Description.ToLower().Contains("discount") || item.Rate.ToString().Contains("%") || item.Amount < 0)
                         {
                             decimal discountAmount = isTaxable ? item.Amount * 1.12m : item.Amount;
 
-                            e.Graphics.DrawString(item.Description, font_Data, Brushes.Black,new Rectangle(rectItemDescription.X, rectItemDescription.Y + yPos, rectItemDescription.Width, tableDataHeight), sfAlignLeftCenter);
-                            e.Graphics.DrawString(item.Quantity.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemQuantity.X, rectItemQuantity.Y + yPos, rectItemQuantity.Width, tableDataHeight), sfAlignCenter);
-                            e.Graphics.DrawString(item.Rate.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemUnitPrice.X, rectItemUnitPrice.Y + yPos, rectItemUnitPrice.Width, tableDataHeight), sfAlignCenterRight);
-                            e.Graphics.DrawString(discountAmount.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemAmount.X, rectItemAmount.Y + yPos, rectItemAmount.Width, tableDataHeight), sfAlignCenterRight);
+                            e.Graphics.DrawString(item.Description, font_Data, Brushes.Black, new Rectangle(rectItemDescription.X, rectItemDescription.Y + yPos, rectItemDescription.Width, tableDataHeight), sfAlignLeftCenter);
+                            e.Graphics.DrawString(item.Quantity.ToString("N2"), font_Data, Brushes.Black, new Rectangle(rectItemQuantity.X, rectItemQuantity.Y + yPos, rectItemQuantity.Width, tableDataHeight), sfAlignCenter);
+                            e.Graphics.DrawString(item.Rate.ToString("N2"), font_Data, Brushes.Black, new Rectangle(rectItemUnitPrice.X, rectItemUnitPrice.Y + yPos, rectItemUnitPrice.Width, tableDataHeight), sfAlignCenterRight);
+                            e.Graphics.DrawString(discountAmount.ToString("N2"), font_Data, Brushes.Black, new Rectangle(rectItemAmount.X, rectItemAmount.Y + yPos, rectItemAmount.Width, tableDataHeight), sfAlignCenterRight);
 
                             totalAmount += discountAmount;
                             yPos += tableDataHeight;
@@ -201,8 +213,8 @@ namespace Custom_QBSI.Clients.Enclosure
                         // ✅ Case 2: Description-only line after a Subtotal
                         if (item.Rate == 0 && i > 0 && invoice.LineItems[i - 1].Description == "Subtotal")
                         {
-                            e.Graphics.DrawString(item.Description, font_Data, Brushes.Black,new Rectangle(rectItemDescription.X, rectItemDescription.Y + yPos, rectItemDescription.Width, tableDataHeight), sfAlignLeftCenter);
-                            e.Graphics.DrawString(item.Amount.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemAmount.X, rectItemAmount.Y + yPos, rectItemAmount.Width, tableDataHeight), sfAlignCenterRight);
+                            e.Graphics.DrawString(item.Description, font_Data, Brushes.Black, new Rectangle(rectItemDescription.X, rectItemDescription.Y + yPos, rectItemDescription.Width, tableDataHeight), sfAlignLeftCenter);
+                            e.Graphics.DrawString(item.Amount.ToString("N2"), font_Data, Brushes.Black, new Rectangle(rectItemAmount.X, rectItemAmount.Y + yPos, rectItemAmount.Width, tableDataHeight), sfAlignCenterRight);
 
                             totalAmount += item.Amount;
                             yPos += tableDataHeight;
@@ -217,10 +229,10 @@ namespace Custom_QBSI.Clients.Enclosure
 
                             string desc = $"{item.Description} ({nextItem.Description})";
 
-                            e.Graphics.DrawString(desc, font_Data, Brushes.Black,new Rectangle(rectItemDescription.X, rectItemDescription.Y + yPos, rectItemDescription.Width, tableDataHeight), sfAlignLeftCenter);
-                            e.Graphics.DrawString(item.Quantity.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemQuantity.X, rectItemQuantity.Y + yPos, rectItemQuantity.Width, tableDataHeight), sfAlignCenter);
-                            e.Graphics.DrawString(item.Rate.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemUnitPrice.X, rectItemUnitPrice.Y + yPos, rectItemUnitPrice.Width, tableDataHeight), sfAlignCenterRight);
-                            e.Graphics.DrawString(combinedAmount.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemAmount.X, rectItemAmount.Y + yPos, rectItemAmount.Width, tableDataHeight), sfAlignCenterRight);
+                            e.Graphics.DrawString(desc, font_Data, Brushes.Black, new Rectangle(rectItemDescription.X, rectItemDescription.Y + yPos, rectItemDescription.Width, tableDataHeight), sfAlignLeftCenter);
+                            e.Graphics.DrawString(item.Quantity.ToString("N2"), font_Data, Brushes.Black, new Rectangle(rectItemQuantity.X, rectItemQuantity.Y + yPos, rectItemQuantity.Width, tableDataHeight), sfAlignCenter);
+                            e.Graphics.DrawString(item.Rate.ToString("N2"), font_Data, Brushes.Black, new Rectangle(rectItemUnitPrice.X, rectItemUnitPrice.Y + yPos, rectItemUnitPrice.Width, tableDataHeight), sfAlignCenterRight);
+                            e.Graphics.DrawString(combinedAmount.ToString("N2"), font_Data, Brushes.Black, new Rectangle(rectItemAmount.X, rectItemAmount.Y + yPos, rectItemAmount.Width, tableDataHeight), sfAlignCenterRight);
 
                             totalAmount += combinedAmount;
                             yPos += tableDataHeight;
@@ -231,10 +243,10 @@ namespace Custom_QBSI.Clients.Enclosure
                         // ✅ Case 4: Regular line item
                         decimal adjustedAmount = isTaxable ? item.Amount * 1.12m : item.Amount;
 
-                        e.Graphics.DrawString(item.Description, font_Data, Brushes.Black,new Rectangle(rectItemDescription.X, rectItemDescription.Y + yPos, rectItemDescription.Width, tableDataHeight), sfAlignLeftCenter);
-                        e.Graphics.DrawString(item.Quantity.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemQuantity.X, rectItemQuantity.Y + yPos, rectItemQuantity.Width, tableDataHeight), sfAlignCenter);
-                        e.Graphics.DrawString(unitRateToDraw.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemUnitPrice.X, rectItemUnitPrice.Y + yPos, rectItemUnitPrice.Width, tableDataHeight), sfAlignCenterRight);
-                        e.Graphics.DrawString(adjustedAmount.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemAmount.X, rectItemAmount.Y + yPos, rectItemAmount.Width, tableDataHeight), sfAlignCenterRight);
+                        e.Graphics.DrawString(item.Description, font_Data, Brushes.Black, new Rectangle(rectItemDescription.X, rectItemDescription.Y + yPos, rectItemDescription.Width, tableDataHeight), sfAlignLeftCenter);
+                        e.Graphics.DrawString(item.Quantity.ToString("N2"), font_Data, Brushes.Black, new Rectangle(rectItemQuantity.X, rectItemQuantity.Y + yPos, rectItemQuantity.Width, tableDataHeight), sfAlignCenter);
+                        e.Graphics.DrawString(unitRateToDraw.ToString("N2"), font_Data, Brushes.Black, new Rectangle(rectItemUnitPrice.X, rectItemUnitPrice.Y + yPos, rectItemUnitPrice.Width, tableDataHeight), sfAlignCenterRight);
+                        e.Graphics.DrawString(adjustedAmount.ToString("N2"), font_Data, Brushes.Black, new Rectangle(rectItemAmount.X, rectItemAmount.Y + yPos, rectItemAmount.Width, tableDataHeight), sfAlignCenterRight);
 
                         totalAmount += adjustedAmount;
                         yPos += tableDataHeight;
@@ -252,13 +264,21 @@ namespace Custom_QBSI.Clients.Enclosure
                         var nextItem = hasNext ? invoice.LineItems[i + 1] : null;
                         decimal unitRateToDraw = item.Rate; // no adjustment in Exclusive
 
+                        // ✅ Classification
+                        if (item.TaxesName == "Zero Rated Sales")
+                            zeroRatedSalesTotal += item.Amount;
+                        else if (item.TaxesName == "VAT Exempt")
+                            vatExemptSalesTotal += item.Amount;
+                        else if (item.Tax != "Non")
+                            vatableSalesTotal += item.Amount;
+
                         // ✅ Case 1: Discount line (separate always)
                         if (item.Description.ToLower().Contains("discount") || item.Rate.ToString().Contains("%") || item.Amount < 0)
                         {
-                            e.Graphics.DrawString(item.Description, font_Data, Brushes.Black,new Rectangle(rectItemDescription.X, rectItemDescription.Y + yPos, rectItemDescription.Width, tableDataHeight), sfAlignLeftCenter);
-                            e.Graphics.DrawString(item.Quantity.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemQuantity.X, rectItemQuantity.Y + yPos, rectItemQuantity.Width, tableDataHeight), sfAlignCenter);
-                            e.Graphics.DrawString(item.Rate.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemUnitPrice.X, rectItemUnitPrice.Y + yPos, rectItemUnitPrice.Width, tableDataHeight), sfAlignCenterRight);
-                            e.Graphics.DrawString(item.Amount.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemAmount.X, rectItemAmount.Y + yPos, rectItemAmount.Width, tableDataHeight), sfAlignCenterRight);
+                            e.Graphics.DrawString(item.Description, font_Data, Brushes.Black, new Rectangle(rectItemDescription.X, rectItemDescription.Y + yPos, rectItemDescription.Width, tableDataHeight), sfAlignLeftCenter);
+                            e.Graphics.DrawString(item.Quantity.ToString("N2"), font_Data, Brushes.Black, new Rectangle(rectItemQuantity.X, rectItemQuantity.Y + yPos, rectItemQuantity.Width, tableDataHeight), sfAlignCenter);
+                            e.Graphics.DrawString(item.Rate.ToString("N2"), font_Data, Brushes.Black, new Rectangle(rectItemUnitPrice.X, rectItemUnitPrice.Y + yPos, rectItemUnitPrice.Width, tableDataHeight), sfAlignCenterRight);
+                            e.Graphics.DrawString(item.Amount.ToString("N2"), font_Data, Brushes.Black, new Rectangle(rectItemAmount.X, rectItemAmount.Y + yPos, rectItemAmount.Width, tableDataHeight), sfAlignCenterRight);
 
                             totalAmount += item.Amount;
                             yPos += tableDataHeight;
@@ -268,8 +288,8 @@ namespace Custom_QBSI.Clients.Enclosure
                         // ✅ Case 2: Description-only line after a Subtotal
                         if (item.Rate == 0 && i > 0 && invoice.LineItems[i - 1].Description == "Subtotal")
                         {
-                            e.Graphics.DrawString(item.Description, font_Data, Brushes.Black,new Rectangle(rectItemDescription.X, rectItemDescription.Y + yPos, rectItemDescription.Width, tableDataHeight), sfAlignLeftCenter);
-                            e.Graphics.DrawString(item.Amount.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemAmount.X, rectItemAmount.Y + yPos, rectItemAmount.Width, tableDataHeight), sfAlignCenterRight);
+                            e.Graphics.DrawString(item.Description, font_Data, Brushes.Black, new Rectangle(rectItemDescription.X, rectItemDescription.Y + yPos, rectItemDescription.Width, tableDataHeight), sfAlignLeftCenter);
+                            e.Graphics.DrawString(item.Amount.ToString("N2"), font_Data, Brushes.Black, new Rectangle(rectItemAmount.X, rectItemAmount.Y + yPos, rectItemAmount.Width, tableDataHeight), sfAlignCenterRight);
 
                             totalAmount += item.Amount;
                             yPos += tableDataHeight;
@@ -283,10 +303,10 @@ namespace Custom_QBSI.Clients.Enclosure
 
                             string desc = $"{item.Description} ({nextItem.Description})";
 
-                            e.Graphics.DrawString(desc, font_Data, Brushes.Black,new Rectangle(rectItemDescription.X, rectItemDescription.Y + yPos, rectItemDescription.Width, tableDataHeight), sfAlignLeftCenter);
-                            e.Graphics.DrawString(item.Quantity.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemQuantity.X, rectItemQuantity.Y + yPos, rectItemQuantity.Width, tableDataHeight), sfAlignCenter);
-                            e.Graphics.DrawString(item.Rate.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemUnitPrice.X, rectItemUnitPrice.Y + yPos, rectItemUnitPrice.Width, tableDataHeight), sfAlignCenterRight);
-                            e.Graphics.DrawString(combinedAmount.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemAmount.X, rectItemAmount.Y + yPos, rectItemAmount.Width, tableDataHeight), sfAlignCenterRight);
+                            e.Graphics.DrawString(desc, font_Data, Brushes.Black, new Rectangle(rectItemDescription.X, rectItemDescription.Y + yPos, rectItemDescription.Width, tableDataHeight), sfAlignLeftCenter);
+                            e.Graphics.DrawString(item.Quantity.ToString("N2"), font_Data, Brushes.Black, new Rectangle(rectItemQuantity.X, rectItemQuantity.Y + yPos, rectItemQuantity.Width, tableDataHeight), sfAlignCenter);
+                            e.Graphics.DrawString(item.Rate.ToString("N2"), font_Data, Brushes.Black, new Rectangle(rectItemUnitPrice.X, rectItemUnitPrice.Y + yPos, rectItemUnitPrice.Width, tableDataHeight), sfAlignCenterRight);
+                            e.Graphics.DrawString(combinedAmount.ToString("N2"), font_Data, Brushes.Black, new Rectangle(rectItemAmount.X, rectItemAmount.Y + yPos, rectItemAmount.Width, tableDataHeight), sfAlignCenterRight);
 
                             totalAmount += combinedAmount;
                             yPos += tableDataHeight;
@@ -295,10 +315,10 @@ namespace Custom_QBSI.Clients.Enclosure
                         }
 
                         // ✅ Case 4: Regular line item
-                        e.Graphics.DrawString(item.Description, font_Data, Brushes.Black,new Rectangle(rectItemDescription.X, rectItemDescription.Y + yPos, rectItemDescription.Width, tableDataHeight), sfAlignLeftCenter);
-                        e.Graphics.DrawString(item.Quantity.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemQuantity.X, rectItemQuantity.Y + yPos, rectItemQuantity.Width, tableDataHeight), sfAlignCenter);
-                        e.Graphics.DrawString(unitRateToDraw.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemUnitPrice.X, rectItemUnitPrice.Y + yPos, rectItemUnitPrice.Width, tableDataHeight), sfAlignCenterRight);
-                        e.Graphics.DrawString(item.Amount.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemAmount.X, rectItemAmount.Y + yPos, rectItemAmount.Width, tableDataHeight), sfAlignCenterRight);
+                        e.Graphics.DrawString(item.Description, font_Data, Brushes.Black, new Rectangle(rectItemDescription.X, rectItemDescription.Y + yPos, rectItemDescription.Width, tableDataHeight), sfAlignLeftCenter);
+                        e.Graphics.DrawString(item.Quantity.ToString("N2"), font_Data, Brushes.Black, new Rectangle(rectItemQuantity.X, rectItemQuantity.Y + yPos, rectItemQuantity.Width, tableDataHeight), sfAlignCenter);
+                        e.Graphics.DrawString(unitRateToDraw.ToString("N2"), font_Data, Brushes.Black, new Rectangle(rectItemUnitPrice.X, rectItemUnitPrice.Y + yPos, rectItemUnitPrice.Width, tableDataHeight), sfAlignCenterRight);
+                        e.Graphics.DrawString(item.Amount.ToString("N2"), font_Data, Brushes.Black, new Rectangle(rectItemAmount.X, rectItemAmount.Y + yPos, rectItemAmount.Width, tableDataHeight), sfAlignCenterRight);
 
                         totalAmount += item.Amount;
                         yPos += tableDataHeight;
@@ -372,8 +392,14 @@ namespace Custom_QBSI.Clients.Enclosure
             }
             else
             {
-                e.Graphics.DrawString(amountNetVat.ToString("N2"), font_Data, Brushes.Black, rectVATExemptSales, sfAlignCenterRight);
-                e.Graphics.DrawString(amountNetVat.ToString("N2"), font_Data, Brushes.Black, rectZeroRatedSales, sfAlignCenterRight);
+                if (zeroRatedSalesTotal > 0)
+                {
+                    e.Graphics.DrawString(zeroRatedSalesTotal.ToString("N2"), font_Data, Brushes.Black, rectZeroRatedSales, sfAlignCenterRight);
+                }
+                else if (vatExemptSalesTotal > 0)
+                {
+                    e.Graphics.DrawString(vatExemptSalesTotal.ToString("N2"), font_Data, Brushes.Black, rectVATExemptSales, sfAlignCenterRight);
+                }
             }
 
             // RIGHT
