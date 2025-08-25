@@ -154,7 +154,7 @@ namespace Custom_QBSI.Clients.Enclosure
             e.Graphics.DrawString("DR # : ________________________", font_Ten, Brushes.Black, rectDR, sfAlignLeftCenter);
             e.Graphics.DrawString("PO # :  _________________________", font_Ten, Brushes.Black, rectPO, sfAlignLeftCenter);
 
-            string soNumber = "0000000000";
+            string soNumber = invoiceData[0].SONumber;
             string drNumber = invoiceData[0].DrNo;
             string poNumber = invoiceData[0].PONumber;
 

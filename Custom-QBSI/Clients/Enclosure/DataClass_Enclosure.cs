@@ -15,6 +15,7 @@ namespace Custom_QBSI.Clients.Enclosure
             public string PONumber { get; set; }
             public string DrNo { get; set; }
             public string PwdNo { get; set; }
+            public string SONumber { get; set; }
             public string BusinessStyle { get; set; }
             public string StoreCode { get; set; }
             public string JobOrderNo { get; set; }
