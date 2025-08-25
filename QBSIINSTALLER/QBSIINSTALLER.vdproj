@@ -21,13 +21,13 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_5CA816EC674047C186FDD18F1CB90B8F"
+        "MsmKey" = "8:_A86980AD379647DDB08751226FDB9152"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_A86980AD379647DDB08751226FDB9152"
+        "MsmKey" = "8:_D43B353DF61C4D4EA144512FBEC757E8"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -40,13 +40,13 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_1315A280485AE3CAA2409165B07D3E85"
+        "OwnerKey" = "8:_A86980AD379647DDB08751226FDB9152"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_A86980AD379647DDB08751226FDB9152"
+        "OwnerKey" = "8:_1315A280485AE3CAA2409165B07D3E85"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -175,7 +175,7 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_5CA816EC674047C186FDD18F1CB90B8F"
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_D43B353DF61C4D4EA144512FBEC757E8"
             {
             "SourcePath" = "8:..\\Custom-QBSI\\bin\\x64\\Release\\CustomQBSIDatabase.accdb"
             "TargetName" = "8:CustomQBSIDatabase.accdb"
@@ -272,7 +272,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:QBSIINSTALLER"
         "ProductCode" = "8:{EE9D41BF-74E9-48C6-883F-06CD32597888}"
-        "PackageCode" = "8:{C8A04DCC-CCB1-49E6-8AC6-08D09B023AE3}"
+        "PackageCode" = "8:{34CCC70A-9B44-43D8-84EE-7256E44A02E0}"
         "UpgradeCode" = "8:{97A6F377-A2BE-467E-8046-ED0307F20637}"
         "AspNetVersion" = "8:2.0.50727.0"
         "RestartWWWService" = "11:FALSE"
