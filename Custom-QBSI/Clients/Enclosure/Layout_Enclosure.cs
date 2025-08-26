@@ -609,7 +609,7 @@ namespace Custom_QBSI.Clients.Enclosure
 
             e.Graphics.DrawString(acNo, font_Ten, Brushes.Black, rectACNoData, sfAlignLeftCenter);
             e.Graphics.DrawString(dateIssued.ToString("dd/MM/yyyy"), font_Ten, Brushes.Black, rectDateIssuedData, sfAlignLeftCenter);
-            e.Graphics.DrawString(seriesNumber, font_Ten, Brushes.Black, rectSeriesRangeData, sfAlignLeftCenter);
+            e.Graphics.DrawString("000001-9999999999", font_Ten, Brushes.Black, rectSeriesRangeData, sfAlignLeftCenter);
         }
     }
 }

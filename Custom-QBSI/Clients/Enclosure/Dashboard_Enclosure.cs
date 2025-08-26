@@ -337,7 +337,7 @@ namespace Custom_QBSI.Clients.Enclosure
 
             // ------------------------------------------
             panel_SideBar.Controls.Add(panel_Forms);
-            panel_SideBar.Controls.Add(panel_SeriesNumber);
+            //panel_SideBar.Controls.Add(panel_SeriesNumber);
             panel_SideBar.Controls.Add(panel_RefNumber);
             panel_SideBar.Controls.Add(panel_Signatory);
             panel_SideBar.Controls.Add(panel_Printing);
@@ -772,9 +772,15 @@ namespace Custom_QBSI.Clients.Enclosure
             accessDatabase.UpdateManualSeriesNumber(tableName, seriesNumber);
         }
 
-        private string FormatSeriesNumber(int seriesNumber)
+        private string FormatSeriesNumber(long seriesNumber)
         {
-            return $"0000-{seriesNumber:00000000000}";
+            const long maxSuffix = 99999999999;
+
+            long prefix = (seriesNumber / (maxSuffix + 1)) + 1;
+            long suffix = seriesNumber % (maxSuffix + 1);
+
+            return $"{prefix:000000}-{suffix:0000000000}";
         }
+
     }
 }
