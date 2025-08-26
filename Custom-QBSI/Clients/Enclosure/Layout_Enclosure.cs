@@ -37,16 +37,16 @@ namespace Custom_QBSI.Clients.Enclosure
         StringFormat sfAlignLeftBottom = new StringFormat { Alignment = StringAlignment.Near, LineAlignment = StringAlignment.Far };
         public void Layout_SalesInvoice(PrintPageEventArgs e, List<InvoiceData> invoiceData, string vatType, string businessStyle, bool includeDateIssued, bool isLessEWTChecked, string acNo, DateTime dateIssued, string seriesNumber)
         {
+            int maxWidth = 750;
+            int xStart = 50 - 25;
+            int yStart = 40;
+
             Image logo = Properties.Resources.logo_enclosure;
-            e.Graphics.DrawImage(logo, new Rectangle(45, 50, 150, 80));
+            e.Graphics.DrawImage(logo, new Rectangle(xStart - 5, 50, 150, 80));
 
             Font font_Details = font_Eight;
             Font font_Number = font_Nine;
             Font font_Data = font_Eight;
-
-            int maxWidth = 750;
-            int xStart = 50;
-            int yStart = 40;
 
             Rectangle rectCompanyName = new Rectangle(xStart, yStart, maxWidth, 40);
             Rectangle rectCompanyAddress = new Rectangle(xStart, yStart + 40 - 10, maxWidth, 40);
@@ -64,7 +64,7 @@ namespace Custom_QBSI.Clients.Enclosure
 
             e.Graphics.DrawString("INVOICE", font_ThirteenBold, Brushes.Black, new PointF(xStart, yStart + 100));
 
-            e.Graphics.DrawString("NO. " + seriesNumber, font_Thirteen, Brushes.Red, new PointF(700, yStart + 100));
+            e.Graphics.DrawString("NO. " + seriesNumber, font_Thirteen, Brushes.Red, new PointF(xStart + 650, yStart + 100));
 
             int yStartDetails = 180;
             int rectHeight = 28;
@@ -118,7 +118,6 @@ namespace Custom_QBSI.Clients.Enclosure
             {
                 invoiceBusinessStyle = businessStyle;
             }
-
 
             e.Graphics.DrawString("Customer's Name: ________________________________________________________", font_Ten, Brushes.Black, rectCustomerName, sfAlignLeftCenter);
             e.Graphics.DrawString(customerName, font_Ten, Brushes.Black, rectCustomerNameData, sfAlignLeftCenter);
@@ -550,22 +549,22 @@ namespace Custom_QBSI.Clients.Enclosure
             e.Graphics.DrawRectangle(Pens.Black, rectSignatory);
 
             Rectangle rectPreparedByHeader = new Rectangle(xStartPreparedByHeader, yStartSignatoryHeader, widthPreparedByHeader - xStartMinus, tableDataHeight);
-            Rectangle rectPreparedByUnderline = new Rectangle(xStartPreparedByHeader, yStartSignatoryUnderline, widthPreparedByHeader - xStartMinus - 25, tableDataHeight);
+            Rectangle rectPreparedByUnderline = new Rectangle(xStartPreparedByHeader, yStartSignatoryUnderline, widthPreparedByHeader - xStartMinus - 25 - 22, tableDataHeight);
 
             Rectangle rectCheckedByHeader = new Rectangle(xStartCheckedByHeader, yStartSignatoryHeader, widthCheckedByHeader, tableDataHeight);
-            Rectangle rectCheckedByUnderline = new Rectangle(xStartCheckedByHeader, yStartSignatoryUnderline, widthCheckedByHeader - 10, tableDataHeight);
+            Rectangle rectCheckedByUnderline = new Rectangle(xStartCheckedByHeader, yStartSignatoryUnderline, widthCheckedByHeader - 10 - 28, tableDataHeight);
 
             Rectangle rectApprovedByHeader = new Rectangle(xStartApprovedByHeader, yStartSignatoryHeader, widthApprovedByHeader, tableDataHeight);
-            Rectangle rectApproveedByUnderline = new Rectangle(xStartApprovedByHeader, yStartSignatoryUnderline, widthApprovedByHeader, tableDataHeight);
+            Rectangle rectApproveedByUnderline = new Rectangle(xStartApprovedByHeader, yStartSignatoryUnderline, widthApprovedByHeader - 2, tableDataHeight);
 
             /*e.Graphics.DrawRectangle(Pens.Black, rectPreparedByHeader);
-            e.Graphics.DrawRectangle(Pens.Black, rectPreparedByUnderline);
+            e.Graphics.DrawRectangle(Pens.Red, rectPreparedByUnderline);
 
             e.Graphics.DrawRectangle(Pens.Black, rectCheckedByHeader);
-            e.Graphics.DrawRectangle(Pens.Black, rectCheckedByUnderline);
+            e.Graphics.DrawRectangle(Pens.Red, rectCheckedByUnderline);
 
             e.Graphics.DrawRectangle(Pens.Black, rectApprovedByHeader);
-            e.Graphics.DrawRectangle(Pens.Black, rectApproveedByUnderline);*/
+            e.Graphics.DrawRectangle(Pens.Red, rectApproveedByUnderline);*/
 
             e.Graphics.DrawString("PREPARED BY:", font_Nine, Brushes.Black, rectPreparedByHeader, sfAlignLeftCenter);
             e.Graphics.DrawString("CHECKED BY:", font_Nine, Brushes.Black, rectCheckedByHeader, sfAlignLeftCenter);
