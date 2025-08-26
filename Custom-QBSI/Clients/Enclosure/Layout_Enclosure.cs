@@ -591,12 +591,12 @@ namespace Custom_QBSI.Clients.Enclosure
             int yStartFooterExtraFields = yStartSignatory + rectHeight * 4 + 8;
 
             Rectangle rectACNo = new Rectangle(xStart, yStartFooterExtraFields, 250, rectHeight);
-            Rectangle rectDateIssued = new Rectangle(xStart, yStartFooterExtraFields + rectHeight, 300, rectHeight);
-            Rectangle rectSeriesRange = new Rectangle(xStart, yStartFooterExtraFields + rectHeight * 2, 350, rectHeight);
+            Rectangle rectDateIssued = new Rectangle(xStart, yStartFooterExtraFields - 10 + rectHeight, 300, rectHeight);
+            Rectangle rectSeriesRange = new Rectangle(xStart, yStartFooterExtraFields - 20 + rectHeight * 2, 350, rectHeight);
 
             Rectangle rectACNoData = new Rectangle(xStart + 58 - 20, yStartFooterExtraFields, 250 - 58, rectHeight);
-            Rectangle rectDateIssuedData = new Rectangle(xStart + 92 - 18, yStartFooterExtraFields + rectHeight, 300 - 92, rectHeight);
-            Rectangle rectSeriesRangeData = new Rectangle(xStart + 94 - 15, yStartFooterExtraFields + rectHeight * 2, 350 - 94, rectHeight);
+            Rectangle rectDateIssuedData = new Rectangle(xStart + 92 - 18, yStartFooterExtraFields - 10 + rectHeight, 300 - 92, rectHeight);
+            Rectangle rectSeriesRangeData = new Rectangle(xStart + 94 - 15, yStartFooterExtraFields - 20 + rectHeight * 2, 350 - 94, rectHeight);
 
             /*e.Graphics.DrawRectangle(Pens.Red, rectACNo);
             e.Graphics.DrawRectangle(Pens.Red, rectDateIssued);
@@ -606,7 +606,7 @@ namespace Custom_QBSI.Clients.Enclosure
             //DateTime dateIssued = DateTime.Now;
             //string seriesRange = "00001-0000000100";
 
-            Font fontExtraFieldsFooter = font_Eight;
+            Font fontExtraFieldsFooter = font_Seven;
 
             e.Graphics.DrawString("AC NO : _______________________", fontExtraFieldsFooter, Brushes.Black, rectACNo, sfAlignLeftCenter);
             e.Graphics.DrawString("Date Issued : ___________________", fontExtraFieldsFooter, Brushes.Black, rectDateIssued, sfAlignLeftCenter);
