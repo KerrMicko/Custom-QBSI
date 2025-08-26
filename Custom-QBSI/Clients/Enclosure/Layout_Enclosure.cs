@@ -25,6 +25,7 @@ namespace Custom_QBSI.Clients.Enclosure
         Font font_Eleven = new Font("Microsoft Sans Serif", 11, System.Drawing.FontStyle.Regular);
         Font font_ElevenBold = new Font("Microsoft Sans Serif", 11, System.Drawing.FontStyle.Bold);
         Font font_TwelveBold = new Font("Microsoft Sans Serif", 12, System.Drawing.FontStyle.Bold);
+        Font font_Thirteen = new Font("Microsoft Sans Serif", 13, System.Drawing.FontStyle.Regular);
         Font font_ThirteenBold = new Font("Microsoft Sans Serif", 13, System.Drawing.FontStyle.Bold);
         Font font_FourteenBold = new Font("Microsoft Sans Serif", 14, System.Drawing.FontStyle.Bold);
         Font font_SixteenBold = new Font("Microsoft Sans Serif", 16, System.Drawing.FontStyle.Bold);
@@ -34,7 +35,7 @@ namespace Custom_QBSI.Clients.Enclosure
         StringFormat sfAlignCenterRight = new StringFormat { Alignment = StringAlignment.Far, LineAlignment = StringAlignment.Center };
         StringFormat sfAlignLeftCenter = new StringFormat { Alignment = StringAlignment.Near, LineAlignment = StringAlignment.Center };
         StringFormat sfAlignLeftBottom = new StringFormat { Alignment = StringAlignment.Near, LineAlignment = StringAlignment.Far };
-        public void Layout_SalesInvoice(PrintPageEventArgs e, List<InvoiceData> invoiceData, string vatType, string businessStyle, bool isLessEWTChecked, string acNo, DateTime dateIssued, string seriesNumber)
+        public void Layout_SalesInvoice(PrintPageEventArgs e, List<InvoiceData> invoiceData, string vatType, string businessStyle, bool includeDateIssued, bool isLessEWTChecked, string acNo, DateTime dateIssued, string seriesNumber)
         {
             Image logo = Properties.Resources.logo_enclosure;
             e.Graphics.DrawImage(logo, new Rectangle(45, 50, 150, 80));
@@ -62,6 +63,8 @@ namespace Custom_QBSI.Clients.Enclosure
             e.Graphics.DrawString(companyTIN, font_Ten, Brushes.Black, rectCompanyTIN, sfAlignCenter);
 
             e.Graphics.DrawString("INVOICE", font_ThirteenBold, Brushes.Black, new PointF(xStart, yStart + 100));
+
+            e.Graphics.DrawString("NO. " + seriesNumber, font_Thirteen, Brushes.Red, new PointF(700, yStart + 100));
 
             int yStartDetails = 180;
             int rectHeight = 28;
@@ -591,9 +594,9 @@ namespace Custom_QBSI.Clients.Enclosure
             Rectangle rectDateIssued = new Rectangle(xStart, yStartFooterExtraFields + rectHeight, 300, rectHeight);
             Rectangle rectSeriesRange = new Rectangle(xStart, yStartFooterExtraFields + rectHeight * 2, 350, rectHeight);
 
-            Rectangle rectACNoData = new Rectangle(xStart + 58, yStartFooterExtraFields, 250 - 58, rectHeight);
-            Rectangle rectDateIssuedData = new Rectangle(xStart + 92, yStartFooterExtraFields + rectHeight, 300 - 92, rectHeight);
-            Rectangle rectSeriesRangeData = new Rectangle(xStart + 94, yStartFooterExtraFields + rectHeight * 2, 350 - 94, rectHeight);
+            Rectangle rectACNoData = new Rectangle(xStart + 58 - 20, yStartFooterExtraFields, 250 - 58, rectHeight);
+            Rectangle rectDateIssuedData = new Rectangle(xStart + 92 - 18, yStartFooterExtraFields + rectHeight, 300 - 92, rectHeight);
+            Rectangle rectSeriesRangeData = new Rectangle(xStart + 94 - 15, yStartFooterExtraFields + rectHeight * 2, 350 - 94, rectHeight);
 
             /*e.Graphics.DrawRectangle(Pens.Red, rectACNo);
             e.Graphics.DrawRectangle(Pens.Red, rectDateIssued);
@@ -603,13 +606,18 @@ namespace Custom_QBSI.Clients.Enclosure
             //DateTime dateIssued = DateTime.Now;
             //string seriesRange = "00001-0000000100";
 
-            e.Graphics.DrawString("AC NO : _______________________", font_Ten, Brushes.Black, rectACNo, sfAlignLeftCenter);
-            e.Graphics.DrawString("Date Issued : _______________________", font_Ten, Brushes.Black, rectDateIssued, sfAlignLeftCenter);
-            e.Graphics.DrawString("Series Range :", font_Ten, Brushes.Black, rectSeriesRange, sfAlignLeftCenter);
+            Font fontExtraFieldsFooter = font_Eight;
 
-            e.Graphics.DrawString(acNo, font_Ten, Brushes.Black, rectACNoData, sfAlignLeftCenter);
-            e.Graphics.DrawString(dateIssued.ToString("dd/MM/yyyy"), font_Ten, Brushes.Black, rectDateIssuedData, sfAlignLeftCenter);
-            e.Graphics.DrawString("000001-9999999999", font_Ten, Brushes.Black, rectSeriesRangeData, sfAlignLeftCenter);
+            e.Graphics.DrawString("AC NO : _______________________", fontExtraFieldsFooter, Brushes.Black, rectACNo, sfAlignLeftCenter);
+            e.Graphics.DrawString("Date Issued : ___________________", fontExtraFieldsFooter, Brushes.Black, rectDateIssued, sfAlignLeftCenter);
+            e.Graphics.DrawString("Series Range :", fontExtraFieldsFooter, Brushes.Black, rectSeriesRange, sfAlignLeftCenter);
+
+            e.Graphics.DrawString(acNo, fontExtraFieldsFooter, Brushes.Black, rectACNoData, sfAlignLeftCenter);
+            if (includeDateIssued)
+            {
+                e.Graphics.DrawString(dateIssued.ToString("dd/MM/yyyy"), fontExtraFieldsFooter, Brushes.Black, rectDateIssuedData, sfAlignLeftCenter);
+            }
+            e.Graphics.DrawString("000001-9999999999", fontExtraFieldsFooter, Brushes.Black, rectSeriesRangeData, sfAlignLeftCenter);
         }
     }
 }

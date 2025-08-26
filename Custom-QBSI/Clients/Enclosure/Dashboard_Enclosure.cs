@@ -35,6 +35,7 @@ namespace Custom_QBSI.Clients.Enclosure
         private TextBox textBox_BusinessStyle;
         private TextBox textBox_ACNo;
         private DateTimePicker dateTimePicker_DateIssued;
+        private CheckBox checkBox_IncludeDateIssued;
         private TextBox textBox_PWDSignature;
         private RadioButton radioButton_VATInclusive;
         private RadioButton radioButton_VATExclusive;
@@ -188,6 +189,16 @@ namespace Custom_QBSI.Clients.Enclosure
                 Visible = false,
             };
 
+            checkBox_IncludeDateIssued = new CheckBox
+            {
+                Parent = panel_Details,
+                Text = "Include Date Issued",
+                Width = componentWidth,
+                Font = font_Label,
+                Checked = false,
+                Visible = true,
+            };
+
             checkBox_LessEWT = new CheckBox
             {
                 Parent = panel_Details,
@@ -337,7 +348,7 @@ namespace Custom_QBSI.Clients.Enclosure
 
             // ------------------------------------------
             panel_SideBar.Controls.Add(panel_Forms);
-            //panel_SideBar.Controls.Add(panel_SeriesNumber);
+            panel_SideBar.Controls.Add(panel_SeriesNumber);
             panel_SideBar.Controls.Add(panel_RefNumber);
             panel_SideBar.Controls.Add(panel_Signatory);
             panel_SideBar.Controls.Add(panel_Printing);
@@ -516,6 +527,7 @@ namespace Custom_QBSI.Clients.Enclosure
                         string pwdSignature = textBox_PWDSignature.Text;
                         string acNo = textBox_ACNo.Text;
                         DateTime dateIssued = dateTimePicker_DateIssued.Value;
+                        bool includeDateIssued = checkBox_IncludeDateIssued.Checked;
                         bool isEnableExpDateChecked = checkBox_EnableExpDate.Checked;
                         bool isLessEWTChecked = checkBox_LessEWT.Checked;
 
@@ -544,7 +556,7 @@ namespace Custom_QBSI.Clients.Enclosure
                         {
                             //layout_NHC.PrintPage_NHC(s, ev, invoice, comboBox_Forms.SelectedIndex, note, businessStyle, pwdSignature, isEnableExpDateChecked);
                             //if (comboBox_Forms.SelectedIndex == 1)
-                            layout_Enclosure.Layout_SalesInvoice(ev, invoice, vatType, businessStyle, isLessEWTChecked, acNo, dateIssued, seriesNumberRef);
+                            layout_Enclosure.Layout_SalesInvoice(ev, invoice, vatType, businessStyle, includeDateIssued, isLessEWTChecked, acNo, dateIssued, seriesNumberRef);
                             /*else if (comboBox_Forms.SelectedIndex == 2)
                                 layout_Enclosure.Layout_DeliveryReceipt(ev, invoice, note, businessStyle, pwdSignature, isEnableExpDateChecked, signatoryName);*/
                         };
@@ -774,12 +786,16 @@ namespace Custom_QBSI.Clients.Enclosure
 
         private string FormatSeriesNumber(long seriesNumber)
         {
-            const long maxSuffix = 99999999999;
+            /*const long maxSuffix = 99999999999;
 
             long prefix = (seriesNumber / (maxSuffix + 1)) + 1;
             long suffix = seriesNumber % (maxSuffix + 1);
 
-            return $"{prefix:000000}-{suffix:0000000000}";
+            return $"{prefix:000000}-{suffix:0000000000}";*/
+
+            //return $"{seriesNumber:00000}-000000000";
+
+            return $"{seriesNumber:000000}";
         }
 
     }
