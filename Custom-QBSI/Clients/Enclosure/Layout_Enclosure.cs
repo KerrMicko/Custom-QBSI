@@ -582,9 +582,9 @@ namespace Custom_QBSI.Clients.Enclosure
             e.Graphics.DrawString("___________________________", font_Nine, Brushes.Black, rectApproveedByUnderline, sfAlignLeftBottom);
 
             //e.Graphics.DrawRectangle(Pens.Black, new Rectangle(xStartPreparedByHeader, yStartSignatoryText, widthPreparedByHeader, tableDataHeight));
-            e.Graphics.DrawString("Signature over Printed Name", font_Nine, Brushes.Black, new Rectangle(xStartPreparedByHeader, yStartSignatoryText, widthPreparedByHeader, tableDataHeight), sfAlignLeftCenter);
-            e.Graphics.DrawString("Signature over Printed Name", font_Nine, Brushes.Black, new Rectangle(xStartCheckedByHeader, yStartSignatoryText, widthCheckedByHeader, tableDataHeight), sfAlignLeftCenter);
-            e.Graphics.DrawString("Signature over Printed Name", font_Nine, Brushes.Black, new Rectangle(xStartApprovedByHeader, yStartSignatoryText, widthApprovedByHeader, tableDataHeight), sfAlignLeftCenter);
+            e.Graphics.DrawString("Signature over Printed Name", font_Nine, Brushes.Black, new Rectangle(xStartPreparedByHeader, yStartSignatoryText, rectPreparedByUnderline.Width, tableDataHeight), sfAlignCenter);
+            e.Graphics.DrawString("Signature over Printed Name", font_Nine, Brushes.Black, new Rectangle(xStartCheckedByHeader, yStartSignatoryText, rectCheckedByUnderline.Width, tableDataHeight), sfAlignCenter);
+            e.Graphics.DrawString("Signature over Printed Name", font_Nine, Brushes.Black, new Rectangle(xStartApprovedByHeader, yStartSignatoryText, rectApproveedByUnderline.Width, tableDataHeight), sfAlignCenter);
 
             // EXTRA FIELDS FOOTER
             int yStartFooterExtraFields = yStartSignatory + rectHeight * 4 + 8;
