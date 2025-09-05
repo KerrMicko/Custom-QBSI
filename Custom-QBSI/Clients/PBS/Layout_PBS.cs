@@ -1,16 +1,16 @@
-﻿using System;
+﻿using Custom_QBSI.Clients.Enclosure;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Printing;
 using System.Linq;
-using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
-using static Custom_QBSI.Clients.Enclosure.Dataclass_Enclosure;
+using static Custom_QBSI.Clients.PBS.DataClass_PBS;
 
-namespace Custom_QBSI.Clients.Enclosure
+namespace Custom_QBSI.Clients.PBS
 {
-    public class Layout_Enclosure
+    public class Layout_PBS
     {
         Font font_Six = new Font("Microsoft Sans Serif", 6, System.Drawing.FontStyle.Regular);
         Font font_Seven = new Font("Microsoft Sans Serif", 7, System.Drawing.FontStyle.Regular);
@@ -37,10 +37,10 @@ namespace Custom_QBSI.Clients.Enclosure
         public void Layout_SalesInvoice(PrintPageEventArgs e, List<InvoiceData> invoiceData, string vatType, string businessStyle, bool includeDateIssued, bool isLessEWTChecked, string acNo, DateTime dateIssued, string seriesNumber)
         {
             int maxWidth = 750;
-            int xStart = 50 - 25;
+            int xStart = 50;
             int yStart = 40;
 
-            Image logo = Properties.Resources.logo_enclosure;
+            Image logo = Properties.Resources.logo_plan_b;
             e.Graphics.DrawImage(logo, new Rectangle(xStart - 5, 50, 150, 80));
 
             Font font_Details = font_Eight;
@@ -51,10 +51,10 @@ namespace Custom_QBSI.Clients.Enclosure
             Rectangle rectCompanyAddress = new Rectangle(xStart, yStart + 40 - 10, maxWidth, 40);
             Rectangle rectCompanyTIN = new Rectangle(xStart, yStart + 65 - 10, maxWidth, 40);
 
-            string companyName = "ENCLOSURE SYSTEMS SPECIALISTS, INC.";
-            string companyAddress = "Warehouse 1-B Narra Bldg., 2276 Chino Roces Ave. Ext.,\n" +
-                "Magallanes 1232, City of Makati, NCR, Fourth District, Philippines";
-            string companyTIN = "VAT REG. TIN: " + "004-661-469-00000";
+            string companyName = "PLAN B SOLUTIONS INC.";
+            string companyAddress = "Rm. 217-A Narra Bldg., 2276 Chino Roces Ave. Extn., Magallanes 1232\n" +
+                "City of Makati, NCR, Fourth District, Philippines";
+            string companyTIN = "VAT REG. TIN: " + "010-044-372-00000";
 
             //e.Graphics.DrawRectangle(Pens.Black, rectCompanyAddress);
             e.Graphics.DrawString(companyName, font_SixteenBold, Brushes.Black, rectCompanyName, sfAlignCenter);
@@ -139,28 +139,28 @@ namespace Custom_QBSI.Clients.Enclosure
             int widthExtraFields = 250;
             int xAdd = 51;
 
-            Rectangle rectSO = new Rectangle(xStart, yStartExtraFields, widthExtraFields, rectHeight);
-            Rectangle rectDR = new Rectangle(xStart + widthExtraFields, yStartExtraFields, widthExtraFields, rectHeight);
+            //Rectangle rectSO = new Rectangle(xStart, yStartExtraFields, widthExtraFields, rectHeight);
+            //Rectangle rectDR = new Rectangle(xStart + widthExtraFields, yStartExtraFields, widthExtraFields, rectHeight);
             Rectangle rectPO = new Rectangle(xStart + widthExtraFields * 2, yStartExtraFields, widthExtraFields, rectHeight);
 
-            Rectangle rectSOData = new Rectangle(xStart + xAdd, yStartExtraFields, widthExtraFields - xAdd, rectHeight);
-            Rectangle rectDRData = new Rectangle(xStart + widthExtraFields + xAdd - 5, yStartExtraFields, widthExtraFields - xAdd, rectHeight);
+            //Rectangle rectSOData = new Rectangle(xStart + xAdd, yStartExtraFields, widthExtraFields - xAdd, rectHeight);
+            //Rectangle rectDRData = new Rectangle(xStart + widthExtraFields + xAdd - 5, yStartExtraFields, widthExtraFields - xAdd, rectHeight);
             Rectangle rectPOData = new Rectangle(xStart + widthExtraFields * 2 + xAdd + 5, yStartExtraFields, widthExtraFields - xAdd, rectHeight);
 
             /*e.Graphics.DrawRectangle(Pens.Red, rectSO);
             e.Graphics.DrawRectangle(Pens.Red, rectDR);
             e.Graphics.DrawRectangle(Pens.Red, rectPO);*/
 
-            e.Graphics.DrawString("S.O # : _______________________", font_Ten, Brushes.Black, rectSO, sfAlignLeftCenter);
-            e.Graphics.DrawString("DR # : ________________________", font_Ten, Brushes.Black, rectDR, sfAlignLeftCenter);
+            //e.Graphics.DrawString("S.O # : _______________________", font_Ten, Brushes.Black, rectSO, sfAlignLeftCenter);
+            //e.Graphics.DrawString("DR # : ________________________", font_Ten, Brushes.Black, rectDR, sfAlignLeftCenter);
             e.Graphics.DrawString("PO # :  _________________________", font_Ten, Brushes.Black, rectPO, sfAlignLeftCenter);
 
-            string soNumber = invoiceData[0].SONumber;
-            string drNumber = invoiceData[0].DrNo;
+            //string soNumber = invoiceData[0].SONumber;
+            //string drNumber = invoiceData[0].DrNo;
             string poNumber = invoiceData[0].PONumber;
 
-            e.Graphics.DrawString(soNumber, font_Ten, Brushes.Black, rectSOData, sfAlignLeftCenter);
-            e.Graphics.DrawString(drNumber, font_Ten, Brushes.Black, rectDRData, sfAlignLeftCenter);
+            //e.Graphics.DrawString(soNumber, font_Ten, Brushes.Black, rectSOData, sfAlignLeftCenter);
+            //e.Graphics.DrawString(drNumber, font_Ten, Brushes.Black, rectDRData, sfAlignLeftCenter);
             e.Graphics.DrawString(poNumber, font_Ten, Brushes.Black, rectPOData, sfAlignLeftCenter);
 
             // TABLE
@@ -569,8 +569,8 @@ namespace Custom_QBSI.Clients.Enclosure
             e.Graphics.DrawString("CHECKED BY:", font_Nine, Brushes.Black, rectCheckedByHeader, sfAlignLeftCenter);
             e.Graphics.DrawString("APPROVED BY:", font_Nine, Brushes.Black, rectApprovedByHeader, sfAlignLeftCenter);
 
-            Queries_Enclosure queries_Enclosure = new Queries_Enclosure();
-            var signatories = queries_Enclosure.RetrieveSignatory();
+            Queries_PBS queries_PBS = new Queries_PBS();
+            var signatories = queries_PBS.RetrieveSignatory();
 
             e.Graphics.DrawString(signatories.preparedBy, font_Nine, Brushes.Black, rectPreparedByUnderline, sfAlignCenter);
             e.Graphics.DrawString(signatories.checkedBy, font_Nine, Brushes.Black, rectCheckedByUnderline, sfAlignCenter);

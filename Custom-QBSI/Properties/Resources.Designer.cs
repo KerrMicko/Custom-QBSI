@@ -73,6 +73,16 @@ namespace Custom_QBSI.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap logo_plan_b {
+            get {
+                object obj = ResourceManager.GetObject("logo-plan-b", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap NATURE_DR {
             get {
                 object obj = ResourceManager.GetObject("NATURE DR", resourceCulture);

@@ -63,6 +63,10 @@
     <Compile Include="Clients\NHC\Dataclass_NHC.cs" />
     <Compile Include="Clients\NHC\Layout_NHC.cs" />
     <Compile Include="Clients\NHC\Queries_NHC.cs" />
+    <Compile Include="Clients\PBS\Dashboard_PBS.cs" />
+    <Compile Include="Clients\PBS\DataClass_PBS.cs" />
+    <Compile Include="Clients\PBS\Layout_PBS.cs" />
+    <Compile Include="Clients\PBS\Queries_PBS.cs" />
     <Compile Include="Dashboard.cs" />
     <Compile Include="Dashboard.Designer.cs">
       <DependentUpon>Dashboard.cs</DependentUpon>
@@ -110,6 +114,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\logo-enclosure.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\logo-plan-b.jpg" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

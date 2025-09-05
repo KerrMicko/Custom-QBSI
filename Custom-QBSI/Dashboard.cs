@@ -1,5 +1,6 @@
 ﻿using Custom_QBSI.Clients.Enclosure;
 using Custom_QBSI.Clients.NHC;
+using Custom_QBSI.Clients.PBS;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -18,8 +19,9 @@ namespace Custom_QBSI
          * Current clients:
          * NHC
          * Enclosure 
+         * PBS
          */
-        public static string client = "Enclosure";
+        public static string client = "PBS";
     }
     public partial class Dashboard : Form
     {
@@ -59,6 +61,17 @@ namespace Custom_QBSI
                 Panel panel_Main = dashboard_Enclosure.MainPanel();
                 Panel panel_Sidebar = dashboard_Enclosure.SidebarPanel();
                 Panel panel_Title = dashboard_Enclosure.TitlePanel();
+
+                panel.Controls.Add(panel_Sidebar);
+                panel.Controls.Add(panel_Title);
+                panel.Controls.Add(panel_Main);
+            }
+            else if (GlobalVariables.client == "PBS")
+            {
+                Dashboard_PBS dashboard_PBS = new Dashboard_PBS();
+                Panel panel_Main = dashboard_PBS.MainPanel();
+                Panel panel_Sidebar = dashboard_PBS.SidebarPanel();
+                Panel panel_Title = dashboard_PBS.TitlePanel();
 
                 panel.Controls.Add(panel_Sidebar);
                 panel.Controls.Add(panel_Title);
