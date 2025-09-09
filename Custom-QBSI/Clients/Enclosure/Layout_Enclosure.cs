@@ -152,7 +152,7 @@ namespace Custom_QBSI.Clients.Enclosure
             e.Graphics.DrawRectangle(Pens.Red, rectPO);*/
 
             e.Graphics.DrawString("S.O # : ________________", font_Ten, Brushes.Black, rectPO, sfAlignLeftCenter);//RECTSO
-            e.Graphics.DrawString("DR # : ______________________", font_Ten, Brushes.Black, rectDR, sfAlignLeftCenter);
+            e.Graphics.DrawString("DR # :  _____________________", font_Ten, Brushes.Black, rectDR, sfAlignLeftCenter);
             e.Graphics.DrawString("PO # :  _______________________", font_Ten, Brushes.Black, rectSO, sfAlignLeftCenter);//RECTPO
 
             string soNumber = invoiceData[0].SONumber;
