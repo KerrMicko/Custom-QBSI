@@ -141,11 +141,11 @@ namespace Custom_QBSI.Clients.Enclosure
 
             Rectangle rectSO = new Rectangle(xStart, yStartExtraFields, widthExtraFields, rectHeight);
             Rectangle rectDR = new Rectangle(xStart + widthExtraFields, yStartExtraFields, widthExtraFields, rectHeight);
-            Rectangle rectPO = new Rectangle(xStart + widthExtraFields * 2, yStartExtraFields, widthExtraFields, rectHeight);
+            Rectangle rectPO = new Rectangle(xStart + widthExtraFields * 2 + 70, yStartExtraFields, widthExtraFields, rectHeight);
 
             Rectangle rectSOData = new Rectangle(xStart + xAdd, yStartExtraFields, widthExtraFields - xAdd, rectHeight);
             Rectangle rectDRData = new Rectangle(xStart + widthExtraFields + xAdd - 5, yStartExtraFields, widthExtraFields - xAdd, rectHeight);
-            Rectangle rectPOData = new Rectangle(xStart + widthExtraFields * 2 + xAdd + 5, yStartExtraFields, widthExtraFields - xAdd, rectHeight);
+            Rectangle rectPOData = new Rectangle(xStart + widthExtraFields * 2 + xAdd + 70, yStartExtraFields, widthExtraFields - xAdd, rectHeight);
 
             /*e.Graphics.DrawRectangle(Pens.Red, rectSO);
             e.Graphics.DrawRectangle(Pens.Red, rectDR);
@@ -153,7 +153,7 @@ namespace Custom_QBSI.Clients.Enclosure
 
             e.Graphics.DrawString("S.O # : _______________________", font_Ten, Brushes.Black, rectSO, sfAlignLeftCenter);
             e.Graphics.DrawString("DR # : ________________________", font_Ten, Brushes.Black, rectDR, sfAlignLeftCenter);
-            e.Graphics.DrawString("PO # :  _________________________", font_Ten, Brushes.Black, rectPO, sfAlignLeftCenter);
+            e.Graphics.DrawString("PO # :  ________________", font_Ten, Brushes.Black, rectPO, sfAlignLeftCenter);
 
             string soNumber = invoiceData[0].SONumber;
             string drNumber = invoiceData[0].DrNo;
