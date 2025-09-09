@@ -41,7 +41,7 @@ namespace Custom_QBSI.Clients.PBS
             int yStart = 40;
 
             Image logo = Properties.Resources.logo_plan_b;
-            e.Graphics.DrawImage(logo, new Rectangle(xStart - 5, 50, 150, 80));
+            e.Graphics.DrawImage(logo, new Rectangle(xStart - 5, 45, 150, 80));
 
             Font font_Details = font_Eight;
             Font font_Number = font_Nine;
@@ -141,11 +141,11 @@ namespace Custom_QBSI.Clients.PBS
 
             //Rectangle rectSO = new Rectangle(xStart, yStartExtraFields, widthExtraFields, rectHeight);
             //Rectangle rectDR = new Rectangle(xStart + widthExtraFields, yStartExtraFields, widthExtraFields, rectHeight);
-            Rectangle rectPO = new Rectangle(xStart + widthExtraFields * 2, yStartExtraFields, widthExtraFields, rectHeight);
+            Rectangle rectPO = new Rectangle(xStart + widthExtraFields * 2 + 72, yStartExtraFields, widthExtraFields, rectHeight);
 
             //Rectangle rectSOData = new Rectangle(xStart + xAdd, yStartExtraFields, widthExtraFields - xAdd, rectHeight);
             //Rectangle rectDRData = new Rectangle(xStart + widthExtraFields + xAdd - 5, yStartExtraFields, widthExtraFields - xAdd, rectHeight);
-            Rectangle rectPOData = new Rectangle(xStart + widthExtraFields * 2 + xAdd + 5, yStartExtraFields, widthExtraFields - xAdd, rectHeight);
+            Rectangle rectPOData = new Rectangle(xStart + widthExtraFields * 2 + xAdd + 72, yStartExtraFields, widthExtraFields - xAdd, rectHeight);
 
             /*e.Graphics.DrawRectangle(Pens.Red, rectSO);
             e.Graphics.DrawRectangle(Pens.Red, rectDR);
@@ -153,7 +153,7 @@ namespace Custom_QBSI.Clients.PBS
 
             //e.Graphics.DrawString("S.O # : _______________________", font_Ten, Brushes.Black, rectSO, sfAlignLeftCenter);
             //e.Graphics.DrawString("DR # : ________________________", font_Ten, Brushes.Black, rectDR, sfAlignLeftCenter);
-            e.Graphics.DrawString("PO # :  _________________________", font_Ten, Brushes.Black, rectPO, sfAlignLeftCenter);
+            e.Graphics.DrawString("PO # :  _________________", font_Ten, Brushes.Black, rectPO, sfAlignLeftCenter);
 
             //string soNumber = invoiceData[0].SONumber;
             //string drNumber = invoiceData[0].DrNo;
@@ -162,6 +162,7 @@ namespace Custom_QBSI.Clients.PBS
             //e.Graphics.DrawString(soNumber, font_Ten, Brushes.Black, rectSOData, sfAlignLeftCenter);
             //e.Graphics.DrawString(drNumber, font_Ten, Brushes.Black, rectDRData, sfAlignLeftCenter);
             e.Graphics.DrawString(poNumber, font_Ten, Brushes.Black, rectPOData, sfAlignLeftCenter);
+
 
             // TABLE
             int yStartTable = yStartExtraFields + rectHeight + 5; // 268
@@ -547,13 +548,13 @@ namespace Custom_QBSI.Clients.PBS
             Rectangle rectSignatory = new Rectangle(xStart, yStartSignatory, maxWidth, tableDataHeight * 4 + 10);
             e.Graphics.DrawRectangle(Pens.Black, rectSignatory);
 
-            Rectangle rectPreparedByHeader = new Rectangle(xStartPreparedByHeader, yStartSignatoryHeader, widthPreparedByHeader - xStartMinus, tableDataHeight);
+            Rectangle rectPreparedByHeader = new Rectangle(xStartPreparedByHeader + 75 , yStartSignatoryHeader, widthPreparedByHeader - xStartMinus, tableDataHeight);
             Rectangle rectPreparedByUnderline = new Rectangle(xStartPreparedByHeader, yStartSignatoryUnderline, widthPreparedByHeader - xStartMinus - 25 - 22, tableDataHeight);
 
-            Rectangle rectCheckedByHeader = new Rectangle(xStartCheckedByHeader, yStartSignatoryHeader, widthCheckedByHeader, tableDataHeight);
+            Rectangle rectCheckedByHeader = new Rectangle(xStartCheckedByHeader + 55, yStartSignatoryHeader, widthCheckedByHeader, tableDataHeight);
             Rectangle rectCheckedByUnderline = new Rectangle(xStartCheckedByHeader, yStartSignatoryUnderline, widthCheckedByHeader - 10 - 28, tableDataHeight);
 
-            Rectangle rectApprovedByHeader = new Rectangle(xStartApprovedByHeader, yStartSignatoryHeader, widthApprovedByHeader, tableDataHeight);
+            Rectangle rectApprovedByHeader = new Rectangle(xStartApprovedByHeader + 45, yStartSignatoryHeader, widthApprovedByHeader, tableDataHeight);
             Rectangle rectApproveedByUnderline = new Rectangle(xStartApprovedByHeader, yStartSignatoryUnderline, widthApprovedByHeader - 2, tableDataHeight);
 
             /*e.Graphics.DrawRectangle(Pens.Black, rectPreparedByHeader);
@@ -566,8 +567,8 @@ namespace Custom_QBSI.Clients.PBS
             e.Graphics.DrawRectangle(Pens.Red, rectApproveedByUnderline);*/
 
             e.Graphics.DrawString("PREPARED BY:", font_Nine, Brushes.Black, rectPreparedByHeader, sfAlignLeftCenter);
-            e.Graphics.DrawString("CHECKED BY:", font_Nine, Brushes.Black, rectCheckedByHeader, sfAlignLeftCenter);
-            e.Graphics.DrawString("APPROVED BY:", font_Nine, Brushes.Black, rectApprovedByHeader, sfAlignLeftCenter);
+            e.Graphics.DrawString("APPROVED BY:", font_Nine, Brushes.Black, rectCheckedByHeader, sfAlignLeftCenter); //CHECKED BY
+            e.Graphics.DrawString("RECEIVED BY:", font_Nine, Brushes.Black, rectApprovedByHeader, sfAlignLeftCenter); //APPROVED BY
 
             Queries_PBS queries_PBS = new Queries_PBS();
             var signatories = queries_PBS.RetrieveSignatory();
