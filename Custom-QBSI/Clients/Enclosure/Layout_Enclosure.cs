@@ -41,7 +41,7 @@ namespace Custom_QBSI.Clients.Enclosure
             int yStart = 40;
 
             Image logo = Properties.Resources.logo_enclosure;
-            e.Graphics.DrawImage(logo, new Rectangle(xStart - 5, 50, 150, 80));
+            e.Graphics.DrawImage(logo, new Rectangle(xStart - 5, 45, 150, 80));
 
             Font font_Details = font_Eight;
             Font font_Number = font_Nine;
@@ -140,28 +140,28 @@ namespace Custom_QBSI.Clients.Enclosure
             int xAdd = 51;
 
             Rectangle rectSO = new Rectangle(xStart, yStartExtraFields, widthExtraFields, rectHeight);
-            Rectangle rectDR = new Rectangle(xStart + widthExtraFields, yStartExtraFields, widthExtraFields, rectHeight);
+            Rectangle rectDR = new Rectangle(xStart + 100 + widthExtraFields, yStartExtraFields, widthExtraFields, rectHeight);
             Rectangle rectPO = new Rectangle(xStart + widthExtraFields * 2 + 70, yStartExtraFields, widthExtraFields, rectHeight);
 
             Rectangle rectSOData = new Rectangle(xStart + xAdd, yStartExtraFields, widthExtraFields - xAdd, rectHeight);
-            Rectangle rectDRData = new Rectangle(xStart + widthExtraFields + xAdd - 5, yStartExtraFields, widthExtraFields - xAdd, rectHeight);
+            Rectangle rectDRData = new Rectangle(xStart + widthExtraFields + xAdd - 5 + 100, yStartExtraFields, widthExtraFields - xAdd, rectHeight);
             Rectangle rectPOData = new Rectangle(xStart + widthExtraFields * 2 + xAdd + 70, yStartExtraFields, widthExtraFields - xAdd, rectHeight);
 
             /*e.Graphics.DrawRectangle(Pens.Red, rectSO);
             e.Graphics.DrawRectangle(Pens.Red, rectDR);
             e.Graphics.DrawRectangle(Pens.Red, rectPO);*/
 
-            e.Graphics.DrawString("S.O # : _______________________", font_Ten, Brushes.Black, rectSO, sfAlignLeftCenter);
-            e.Graphics.DrawString("DR # : ________________________", font_Ten, Brushes.Black, rectDR, sfAlignLeftCenter);
-            e.Graphics.DrawString("PO # :  ________________", font_Ten, Brushes.Black, rectPO, sfAlignLeftCenter);
+            e.Graphics.DrawString("S.O # : ________________", font_Ten, Brushes.Black, rectPO, sfAlignLeftCenter);//RECTSO
+            e.Graphics.DrawString("DR # : ______________________", font_Ten, Brushes.Black, rectDR, sfAlignLeftCenter);
+            e.Graphics.DrawString("PO # :  _______________________", font_Ten, Brushes.Black, rectSO, sfAlignLeftCenter);//RECTPO
 
             string soNumber = invoiceData[0].SONumber;
             string drNumber = invoiceData[0].DrNo;
             string poNumber = invoiceData[0].PONumber;
 
-            e.Graphics.DrawString(soNumber, font_Ten, Brushes.Black, rectSOData, sfAlignLeftCenter);
+            e.Graphics.DrawString(soNumber, font_Ten, Brushes.Black, rectPOData, sfAlignLeftCenter);//RECTSODATA
             e.Graphics.DrawString(drNumber, font_Ten, Brushes.Black, rectDRData, sfAlignLeftCenter);
-            e.Graphics.DrawString(poNumber, font_Ten, Brushes.Black, rectPOData, sfAlignLeftCenter);
+            e.Graphics.DrawString(poNumber, font_Ten, Brushes.Black, rectSOData, sfAlignLeftCenter);//RECTPODATA
 
             // TABLE
             int yStartTable = yStartExtraFields + rectHeight + 5; // 268
