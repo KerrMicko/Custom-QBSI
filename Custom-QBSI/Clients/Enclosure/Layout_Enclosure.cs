@@ -547,13 +547,13 @@ namespace Custom_QBSI.Clients.Enclosure
             Rectangle rectSignatory = new Rectangle(xStart, yStartSignatory, maxWidth, tableDataHeight * 4 + 10);
             e.Graphics.DrawRectangle(Pens.Black, rectSignatory);
 
-            Rectangle rectPreparedByHeader = new Rectangle(xStartPreparedByHeader, yStartSignatoryHeader, widthPreparedByHeader - xStartMinus, tableDataHeight);
+            Rectangle rectPreparedByHeader = new Rectangle(xStartPreparedByHeader + 75, yStartSignatoryHeader, widthPreparedByHeader - xStartMinus, tableDataHeight);
             Rectangle rectPreparedByUnderline = new Rectangle(xStartPreparedByHeader, yStartSignatoryUnderline, widthPreparedByHeader - xStartMinus - 25 - 22, tableDataHeight);
 
-            Rectangle rectCheckedByHeader = new Rectangle(xStartCheckedByHeader, yStartSignatoryHeader, widthCheckedByHeader, tableDataHeight);
+            Rectangle rectCheckedByHeader = new Rectangle(xStartCheckedByHeader + 50, yStartSignatoryHeader, widthCheckedByHeader, tableDataHeight);
             Rectangle rectCheckedByUnderline = new Rectangle(xStartCheckedByHeader, yStartSignatoryUnderline, widthCheckedByHeader - 10 - 28, tableDataHeight);
 
-            Rectangle rectApprovedByHeader = new Rectangle(xStartApprovedByHeader, yStartSignatoryHeader, widthApprovedByHeader, tableDataHeight);
+            Rectangle rectApprovedByHeader = new Rectangle(xStartApprovedByHeader + 50, yStartSignatoryHeader, widthApprovedByHeader, tableDataHeight);
             Rectangle rectApproveedByUnderline = new Rectangle(xStartApprovedByHeader, yStartSignatoryUnderline, widthApprovedByHeader - 2, tableDataHeight);
 
             /*e.Graphics.DrawRectangle(Pens.Black, rectPreparedByHeader);
@@ -566,8 +566,8 @@ namespace Custom_QBSI.Clients.Enclosure
             e.Graphics.DrawRectangle(Pens.Red, rectApproveedByUnderline);*/
 
             e.Graphics.DrawString("PREPARED BY:", font_Nine, Brushes.Black, rectPreparedByHeader, sfAlignLeftCenter);
-            e.Graphics.DrawString("CHECKED BY:", font_Nine, Brushes.Black, rectCheckedByHeader, sfAlignLeftCenter);
-            e.Graphics.DrawString("APPROVED BY:", font_Nine, Brushes.Black, rectApprovedByHeader, sfAlignLeftCenter);
+            e.Graphics.DrawString("APPROVED BY:", font_Nine, Brushes.Black, rectCheckedByHeader, sfAlignLeftCenter);//checked by
+            e.Graphics.DrawString("RECEIVED BY:", font_Nine, Brushes.Black, rectApprovedByHeader, sfAlignLeftCenter);//approved by
 
             Queries_Enclosure queries_Enclosure = new Queries_Enclosure();
             var signatories = queries_Enclosure.RetrieveSignatory();

@@ -624,7 +624,7 @@ namespace Custom_QBSI.Clients.Enclosure
             {
                 Parent = panel,
                 Width = sideBarWidth - 30,
-                Text = "Checked By:",
+                Text = "Approved By:", //Checked By:
                 TextAlign = ContentAlignment.MiddleLeft,
                 Font = font_Label,
             };
@@ -641,7 +641,7 @@ namespace Custom_QBSI.Clients.Enclosure
             {
                 Parent = panel,
                 Width = sideBarWidth - 30,
-                Text = "Approved By:",
+                Text = "Received By:",//Approved By:
                 TextAlign = ContentAlignment.MiddleLeft,
                 Font = font_Label,
             };

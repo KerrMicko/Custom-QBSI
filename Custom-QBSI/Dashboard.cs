@@ -21,7 +21,7 @@ namespace Custom_QBSI
          * Enclosure 
          * PBS
          */
-        public static string client = "PBS";
+        public static string client = "Enclosure";
     }
     public partial class Dashboard : Form
     {
