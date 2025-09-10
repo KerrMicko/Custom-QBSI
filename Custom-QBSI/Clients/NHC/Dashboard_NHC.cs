@@ -13,7 +13,7 @@ namespace Custom_QBSI.Clients.NHC
     public class Dashboard_NHC
     {
         private static readonly List<string> tableNames = new List<string> { "Account",
-            "Company", "Customer",
+            "Customer",
             "Invoice", "InvoiceLine", "InvoiceLinkedTxn",
             "Item" };
 
@@ -203,19 +203,40 @@ namespace Custom_QBSI.Clients.NHC
                 Height = 32,
                 BackColor = Color.White,
             };
+
+            ComboBox comboBox_Year = new ComboBox
+            {
+                Parent = panel_Left,
+                Width = 70,
+                Margin = new Padding(3, 7, 0, 0),
+                DropDownStyle = ComboBoxStyle.DropDownList,
+                Font = new Font("Microsoft Sans Serif", 10),
+            };
+            comboBox_Year.Items.AddRange(new string[]
+            {
+                "2025",
+                "2024",
+                "2023",
+                "2022",
+                "2021",
+                "2020",
+            });
+            comboBox_Year.SelectedIndex = 0;
+
+
             button_SyncData.Click += async (sender, e) =>
             {
-                //ExportToJSON();
+                string selectedYear = comboBox_Year.SelectedItem.ToString();
                 try
                 {
-                    DialogResult result = MessageBox.Show("Do you want to sync data from QuickBooks?",
+                    DialogResult result = MessageBox.Show($"Do you want to sync data for Year {selectedYear} from QuickBooks?",
                                          "Sync Confirmation",
                                          MessageBoxButtons.YesNo,
                                          MessageBoxIcon.Question);
 
                     if (result == DialogResult.Yes)
                     {
-                        AccessDatabase accessDatabase = new AccessDatabase();
+                        QBDataSync_NHC qbDataSync_NHC = new QBDataSync_NHC();
 
                         using (var progressForm = new Form())
                         {
@@ -238,7 +259,7 @@ namespace Custom_QBSI.Clients.NHC
                             progressForm.Show();
                             progressForm.BringToFront();
 
-                            await accessDatabase.FetchCreateAndSaveData(tableNames);
+                            await qbDataSync_NHC.FetchCreateAndSaveData(tableNames, selectedYear);
 
                             progressForm.Close();
                         }

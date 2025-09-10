@@ -61,6 +61,7 @@
     <Compile Include="Clients\Enclosure\Queries_Enclosure.cs" />
     <Compile Include="Clients\NHC\Dashboard_NHC.cs" />
     <Compile Include="Clients\NHC\Dataclass_NHC.cs" />
+    <Compile Include="Clients\NHC\QBDataSync_NHC.cs" />
     <Compile Include="Clients\NHC\Layout_NHC.cs" />
     <Compile Include="Clients\NHC\Queries_NHC.cs" />
     <Compile Include="Clients\PBS\Dashboard_PBS.cs" />
