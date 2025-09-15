@@ -189,7 +189,7 @@ namespace Custom_QBSI.Clients.Enclosure
             e.Graphics.DrawString("Amount", font_Nine, Brushes.Black, rectItemAmount, sfAlignCenter);
 
             int yPosLayout = 0;
-            decimal totalAmount = 0;
+            
             for (int i = 0; i < 12; i++)
             {
                 e.Graphics.DrawRectangle(Pens.Black, new Rectangle(xStartItemDescription, yStartTable + yPosLayout, widthItemDescription, tableDataHeight));
@@ -198,7 +198,7 @@ namespace Custom_QBSI.Clients.Enclosure
                 e.Graphics.DrawRectangle(Pens.Black, new Rectangle(xStartItemUnitAmount, yStartTable + yPosLayout, widthItemAmount, tableDataHeight));
                 yPosLayout += tableDataHeight;
             }
-
+            decimal totalAmount = 0;
             decimal vatableSalesTotal = 0;
             decimal zeroRatedSalesTotal = 0;
             decimal vatExemptSalesTotal = 0;

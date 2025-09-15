@@ -54,7 +54,7 @@ namespace Custom_QBSI.Clients.NHC
                             TotalAmount = (qbInvoice.Subtotal?.GetValue() ?? 0) + (qbInvoice.SalesTaxTotal?.GetValue() ?? 0),
                             Terms = qbInvoice.TermsRef?.FullName?.GetValue(),
                             DueDate = qbInvoice.DueDate?.GetValue(),
-                            PONumber = qbInvoice.PONumber?.GetValue(),
+                            PONumber = qbInvoice.PONumber?.GetValue() ?? string.Empty,
                             TaxesName = qbInvoice.ItemSalesTaxRef?.FullName?.GetValue(),
 
                             BillAddress1 = qbInvoice.BillAddressBlock.Addr1.GetValue(),

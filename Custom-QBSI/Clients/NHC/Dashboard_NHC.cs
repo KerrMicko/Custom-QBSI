@@ -434,7 +434,7 @@ namespace Custom_QBSI.Clients.NHC
                         }
 
                         AltLayout_NHC altLayout_NHC = new AltLayout_NHC();
-                        Layout_NHC layout_NHC = new Layout_NHC();
+                        //Layout_NHC layout_NHC = new Layout_NHC();
                         PaperSize paperSize = new PaperSize("Custom", 850, 1100);
 
                         printDocument = new PrintDocument();
