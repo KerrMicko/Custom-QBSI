@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using static Custom_QBSI.Clients.NHC.Dataclass_NHC;
+//using static Custom_QBSI.Clients.NHC.Dataclass_NHC;
 
 namespace Custom_QBSI.Clients.NHC
 {
@@ -433,6 +433,7 @@ namespace Custom_QBSI.Clients.NHC
                             return;
                         }
 
+                        AltLayout_NHC altLayout_NHC = new AltLayout_NHC();
                         Layout_NHC layout_NHC = new Layout_NHC();
                         PaperSize paperSize = new PaperSize("Custom", 850, 1100);
 
@@ -443,9 +444,9 @@ namespace Custom_QBSI.Clients.NHC
                         {
                             //layout_NHC.PrintPage_NHC(s, ev, invoice, comboBox_Forms.SelectedIndex, note, businessStyle, pwdSignature, isEnableExpDateChecked);
                             if (comboBox_Forms.SelectedIndex == 1)
-                                layout_NHC.Layout_SalesInvoice(ev, invoice, vatType, businessStyle, signatoryName, isLessEWTChecked);
+                                altLayout_NHC.Layout_SalesInvoice(ev, invoice, vatType, businessStyle, signatoryName, isLessEWTChecked);
                             else if (comboBox_Forms.SelectedIndex == 2)
-                                layout_NHC.Layout_DeliveryReceipt(ev, invoice, note, businessStyle, pwdSignature, isEnableExpDateChecked, signatoryName);
+                                altLayout_NHC.Layout_DeliveryReceipt(ev, invoice, note, businessStyle, pwdSignature, isEnableExpDateChecked, signatoryName);
                         };
                         printPreviewControl.Document = printDocument;
                         printPreviewControl.Visible = true;

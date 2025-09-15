@@ -19,6 +19,7 @@ namespace Custom_QBSI.Clients.NHC
             public string Terms { get; set; }
             public DateTime? DueDate { get; set; }
             public string PONumber { get; set; }
+            public string TaxesName { get; set; }
             public string BillAddress1 { get; set; }
             public string BillAddress2 { get; set; }
             public string BillAddress3 { get; set; }
@@ -44,10 +45,13 @@ namespace Custom_QBSI.Clients.NHC
             public string ItemName { get; set; }
             public string Description { get; set; }
             public double Quantity { get; set; }
-            public double Rate { get; set; }
-            public double Amount { get; set; }
+            public string UnitOfMeasure { get; set; }
+            public decimal Rate { get; set; }
+            public decimal Amount { get; set; }
+            public decimal TotalAmount { get; set; }
+            public string ExpirationDate { get; set; }
             public string Tax { get; set; }
-            public double SalesTaxTotal { get; set; }
+            public decimal SalesTaxTotal { get; set; }
             public string ServiceDate { get; set; }
 
         }

@@ -55,12 +55,13 @@ namespace Custom_QBSI.Clients.NHC
                             Terms = qbInvoice.TermsRef?.FullName?.GetValue(),
                             DueDate = qbInvoice.DueDate?.GetValue(),
                             PONumber = qbInvoice.PONumber?.GetValue(),
+                            TaxesName = qbInvoice.ItemSalesTaxRef?.FullName?.GetValue(),
 
-                            BillAddress1 = qbInvoice.BillAddress?.Addr1?.GetValue(),
-                            BillAddress2 = qbInvoice.BillAddress?.Addr2?.GetValue(),
-                            BillAddress3 = qbInvoice.BillAddress?.Addr3?.GetValue(),
-                            BillAddress4 = qbInvoice.BillAddress?.Addr4?.GetValue(),
-                            BillAddress5 = qbInvoice.BillAddress?.Addr5?.GetValue(),
+                            BillAddress1 = qbInvoice.BillAddressBlock.Addr1.GetValue(),
+                            BillAddress2 = qbInvoice.BillAddressBlock?.Addr2?.GetValue(),
+                            BillAddress3 = qbInvoice.BillAddressBlock?.Addr3?.GetValue(),
+                            BillAddress4 = qbInvoice.BillAddressBlock?.Addr4?.GetValue(),
+                            BillAddress5 = qbInvoice.BillAddressBlock?.Addr5?.GetValue(),
                         };
 
                         var customerListID = qbInvoice.CustomerRef?.ListID?.GetValue();
@@ -83,11 +84,13 @@ namespace Custom_QBSI.Clients.NHC
                                         ItemName = line.ItemRef?.FullName?.GetValue(),
                                         Description = line.Desc?.GetValue(),
                                         Quantity = line.Quantity?.GetValue() ?? 0,
-                                        Rate = line.ORRate?.Rate?.GetValue() ?? 0,
-                                        Amount = line.Amount?.GetValue() ?? 0,
+                                        UnitOfMeasure = line.UnitOfMeasure?.GetValue(),
+                                        Rate = (decimal)(line.ORRate?.Rate?.GetValue() ?? 0),
+                                        Amount = (decimal)(line.Amount?.GetValue() ?? 0),
+                                        TotalAmount = (decimal)(line.Amount?.GetValue() ?? 0),
+                                        ExpirationDate = line.ExpirationDateForSerialLotNumber?.GetValue(),
                                         Tax = line.SalesTaxCodeRef?.FullName?.GetValue(),
-                                        TaxesName = line.SalesTaxCodeRef?.FullName?.GetValue(),
-                                        SalesTaxTotal = line.TaxAmount?.GetValue() ?? 0,
+                                        SalesTaxTotal = (decimal)(line.TaxAmount?.GetValue() ?? 0),
                                         ServiceDate = line.ServiceDate?.GetValue().ToShortDateString()
                                     };
 
