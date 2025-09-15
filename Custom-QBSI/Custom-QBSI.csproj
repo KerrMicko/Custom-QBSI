@@ -59,6 +59,9 @@
     <Compile Include="Clients\Enclosure\DataClass_Enclosure.cs" />
     <Compile Include="Clients\Enclosure\Layout_Enclosure.cs" />
     <Compile Include="Clients\Enclosure\Queries_Enclosure.cs" />
+    <Compile Include="Clients\NHC\AltDataClass_NHC.cs" />
+    <Compile Include="Clients\NHC\AltLayout_NHC.cs" />
+    <Compile Include="Clients\NHC\AltQBDataSync_NHC.cs" />
     <Compile Include="Clients\NHC\Dashboard_NHC.cs" />
     <Compile Include="Clients\NHC\Dataclass_NHC.cs" />
     <Compile Include="Clients\NHC\QBDataSync_NHC.cs" />
@@ -118,6 +121,17 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\logo-plan-b.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <COMReference Include="QBFC16Lib">
+      <Guid>{1D05360B-2536-4277-83FD-BDF639E20F9E}</Guid>
+      <VersionMajor>1</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>tlbimp</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </COMReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

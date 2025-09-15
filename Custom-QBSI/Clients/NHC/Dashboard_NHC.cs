@@ -289,7 +289,7 @@ namespace Custom_QBSI.Clients.NHC
                 ForeColor = Color.White,
             };
 
-            panel_Left.Parent = panel_Title;
+            //panel_Left.Parent = panel_Title;
             panel_Right.Parent = panel_Title;
 
             return panel_Title;
@@ -422,8 +422,10 @@ namespace Custom_QBSI.Clients.NHC
 
                         string signatoryName = textBox_SignatoryName.Text;
 
-                        Queries_NHC accessQueries = new Queries_NHC();
-                        List<Dataclass_NHC.InvoiceData> invoice = accessQueries.GetInvoiceData(refNumber);
+                        //Queries_NHC accessQueries = new Queries_NHC();
+                        //List<Dataclass_NHC.InvoiceData> invoice = accessQueries.GetInvoiceData(refNumber);
+
+                        List<AltDataClass_NHC.InvoiceData> invoice = AltQBDataSync_NHC.GetInvoiceByRefNumber(refNumber);
 
                         if (invoice.Count == 0)
                         {
@@ -431,7 +433,16 @@ namespace Custom_QBSI.Clients.NHC
                             return;
                         }
 
-                        Layout_NHC layout_NHC = new Layout_NHC();
+                        foreach (var inv in invoice)
+                        {
+                            Console.WriteLine($"Invoice {inv.RefNumber}, Customer: {inv.CustomerName}, Amount: {inv.TotalAmount}");
+
+                            foreach (var field in inv.CustomerCustomFields)
+                            {
+                                Console.WriteLine($"   Custom Field: {field.Key} = {field.Value}");
+                            }
+                        }
+                        /*Layout_NHC layout_NHC = new Layout_NHC();
                         PaperSize paperSize = new PaperSize("Custom", 850, 1100);
 
                         printDocument = new PrintDocument();
@@ -447,7 +458,7 @@ namespace Custom_QBSI.Clients.NHC
                         };
                         printPreviewControl.Document = printDocument;
                         printPreviewControl.Visible = true;
-                        panel_Printing.Visible = true;
+                        panel_Printing.Visible = true;*/
                     }
                     else
                     {

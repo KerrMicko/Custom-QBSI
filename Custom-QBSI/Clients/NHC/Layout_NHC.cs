@@ -33,21 +33,6 @@ namespace Custom_QBSI.Clients.NHC
         StringFormat sfAlignLeftCenter = new StringFormat { Alignment = StringAlignment.Near, LineAlignment = StringAlignment.Center };
         StringFormat sfAlignLeftBottom = new StringFormat { Alignment = StringAlignment.Near, LineAlignment = StringAlignment.Far };
 
-        /*public void PrintPage_NHC(object sender, PrintPageEventArgs e, List<InvoiceData> invoiceData, int layoutIndex, string note, string businessStyle, string pwdSignature, bool isEnableExpDateChecked)
-        {
-            switch (layoutIndex)
-            {
-                case 1:
-                    Layout_SalesInvoice(e, invoiceData);
-                    break;
-                case 2:
-                    Layout_DeliveryReceipt(e, invoiceData, note, businessStyle, pwdSignature, isEnableExpDateChecked);
-                    break;
-                default:
-                    throw new NotImplementedException();
-            }
-        }*/
-
         public void Layout_SalesInvoice(PrintPageEventArgs e, List<InvoiceData> invoiceData, string vatType, string businessStyle, string signatoryName, bool isLessEWTChecked)
         {
 
