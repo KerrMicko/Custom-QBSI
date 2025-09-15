@@ -54,7 +54,13 @@ namespace Custom_QBSI.Clients.NHC
                             TotalAmount = (qbInvoice.Subtotal?.GetValue() ?? 0) + (qbInvoice.SalesTaxTotal?.GetValue() ?? 0),
                             Terms = qbInvoice.TermsRef?.FullName?.GetValue(),
                             DueDate = qbInvoice.DueDate?.GetValue(),
-                            PONumber = qbInvoice.PONumber?.GetValue()
+                            PONumber = qbInvoice.PONumber?.GetValue(),
+
+                            BillAddress1 = qbInvoice.BillAddress?.Addr1?.GetValue(),
+                            BillAddress2 = qbInvoice.BillAddress?.Addr2?.GetValue(),
+                            BillAddress3 = qbInvoice.BillAddress?.Addr3?.GetValue(),
+                            BillAddress4 = qbInvoice.BillAddress?.Addr4?.GetValue(),
+                            BillAddress5 = qbInvoice.BillAddress?.Addr5?.GetValue(),
                         };
 
                         var customerListID = qbInvoice.CustomerRef?.ListID?.GetValue();
@@ -75,10 +81,13 @@ namespace Custom_QBSI.Clients.NHC
                                     var lineData = new InvoiceLineData
                                     {
                                         ItemName = line.ItemRef?.FullName?.GetValue(),
-                                        Desc = line.Desc?.GetValue(),
+                                        Description = line.Desc?.GetValue(),
                                         Quantity = line.Quantity?.GetValue() ?? 0,
                                         Rate = line.ORRate?.Rate?.GetValue() ?? 0,
                                         Amount = line.Amount?.GetValue() ?? 0,
+                                        Tax = line.SalesTaxCodeRef?.FullName?.GetValue(),
+                                        TaxesName = line.SalesTaxCodeRef?.FullName?.GetValue(),
+                                        SalesTaxTotal = line.TaxAmount?.GetValue() ?? 0,
                                         ServiceDate = line.ServiceDate?.GetValue().ToShortDateString()
                                     };
 
@@ -113,6 +122,7 @@ namespace Custom_QBSI.Clients.NHC
 
             ICustomerQuery custQuery = custRequest.AppendCustomerQueryRq();
             custQuery.ORCustomerListQuery.ListIDList.Add(customerListID);
+            custQuery.OwnerIDList.Add("0"); // To include custom fields
 
             IMsgSetResponse custResponse = sessionManager.DoRequests(custRequest);
             IResponse custResp = custResponse.ResponseList.GetAt(0);

@@ -433,16 +433,7 @@ namespace Custom_QBSI.Clients.NHC
                             return;
                         }
 
-                        foreach (var inv in invoice)
-                        {
-                            Console.WriteLine($"Invoice {inv.RefNumber}, Customer: {inv.CustomerName}, Amount: {inv.TotalAmount}");
-
-                            foreach (var field in inv.CustomerCustomFields)
-                            {
-                                Console.WriteLine($"   Custom Field: {field.Key} = {field.Value}");
-                            }
-                        }
-                        /*Layout_NHC layout_NHC = new Layout_NHC();
+                        Layout_NHC layout_NHC = new Layout_NHC();
                         PaperSize paperSize = new PaperSize("Custom", 850, 1100);
 
                         printDocument = new PrintDocument();
@@ -458,7 +449,7 @@ namespace Custom_QBSI.Clients.NHC
                         };
                         printPreviewControl.Document = printDocument;
                         printPreviewControl.Visible = true;
-                        panel_Printing.Visible = true;*/
+                        panel_Printing.Visible = true;
                     }
                     else
                     {

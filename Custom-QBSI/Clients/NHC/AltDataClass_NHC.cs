@@ -19,19 +19,35 @@ namespace Custom_QBSI.Clients.NHC
             public string Terms { get; set; }
             public DateTime? DueDate { get; set; }
             public string PONumber { get; set; }
+            public string BillAddress1 { get; set; }
+            public string BillAddress2 { get; set; }
+            public string BillAddress3 { get; set; }
+            public string BillAddress4 { get; set; }
+            public string BillAddress5 { get; set; }
 
             public List<InvoiceLineData> Lines { get; set; } = new List<InvoiceLineData>();
             public Dictionary<string, string> CustomerCustomFields { get; set; } = new Dictionary<string, string>();
-            public Dictionary<string, string> InvoiceCustomFields { get; set; } = new Dictionary<string, string>();
+
+            // 🔹 Helper method
+            public string GetCustomField(string fieldName)
+            {
+                if (CustomerCustomFields != null && CustomerCustomFields.TryGetValue(fieldName, out var value))
+                {
+                    return value;
+                }
+                return null;
+            }
         }
 
         public class InvoiceLineData
         {
             public string ItemName { get; set; }
-            public string Desc { get; set; }
+            public string Description { get; set; }
             public double Quantity { get; set; }
             public double Rate { get; set; }
             public double Amount { get; set; }
+            public string Tax { get; set; }
+            public double SalesTaxTotal { get; set; }
             public string ServiceDate { get; set; }
 
         }
