@@ -69,24 +69,24 @@ namespace Custom_QBSI.Clients.NHC
                     invoiceStoreCode = inv.GetCustomField("STORE CODE");
                 }
 
-                //string invoiceBusinessAdd = invoiceData[0].BillAddress1.ToString() + invoiceData[0].BillAddress2.ToString() + invoiceData[0].BillAddress3.ToString() + invoiceData[0].BillAddress4.ToString() + invoiceData[0].BillAddress5.ToString();
+                string invoiceBusinessAdd = invoiceData[0].BillAddress1.ToString() + invoiceData[0].BillAddress2.ToString() + invoiceData[0].BillAddress3.ToString() + invoiceData[0].BillAddress4.ToString() + invoiceData[0].BillAddress5.ToString();
 
 
                 e.Graphics.DrawString(date, font_Data, Brushes.Black, rectDate, sfAlignCenter);
                 e.Graphics.DrawString(invoiceSoldTo, font_Data, Brushes.Black, rectSoldTo);
                 e.Graphics.DrawString(invoiceBusinessStyle, font_Data, Brushes.Black, rectBusinessStyle);
                 e.Graphics.DrawString(invoiceTin, font_Data, Brushes.Black, rectTIN);
-                //e.Graphics.DrawString(invoiceBusinessAdd, font_Data, Brushes.Black, rectBusinessAdd);
+                e.Graphics.DrawString(invoiceBusinessAdd, font_Data, Brushes.Black, rectBusinessAdd);
 
 
                 Rectangle rectPoNo = new Rectangle(145, 205, 285, 15);
                 Rectangle rectStoreCode = new Rectangle(145, 220, 285, 15);
                 Rectangle rectTerms = new Rectangle(145, 235, 285, 15);
 
-                //string invoicePoNo = invoiceData[0].PONumber.ToString();
+                string invoicePoNo = invoiceData[0].PONumber.ToString();
                 string invoiceTerms = invoiceData[0].Terms.ToString();
 
-                //e.Graphics.DrawString(invoicePoNo, font_Data, Brushes.Black, rectPoNo);
+                e.Graphics.DrawString(invoicePoNo, font_Data, Brushes.Black, rectPoNo);
                 e.Graphics.DrawString(invoiceStoreCode, font_Data, Brushes.Black, rectStoreCode);
                 e.Graphics.DrawString(invoiceTerms, font_Data, Brushes.Black, rectTerms);
 
@@ -459,23 +459,29 @@ namespace Custom_QBSI.Clients.NHC
                 string Date = invoiceData[0].TxnDate.ToString("MM/dd/yyyy");
                 string invoiceSoldTo = invoiceData[0].CustomerName.ToString();
                 string invoiceBusinessStyle = "";
-                if (businessStyle == "")
-                {
-                    //invoiceBusinessStyle = invoiceData[0].BusinessStyle.ToString();
-                }
-                else
-                {
-                    invoiceBusinessStyle = businessStyle;
-                }
-                //string invoiceTin = invoiceData[0].TINNO.ToString();
-                //string invoiceBusinessAdd = invoiceData[0].BillAddress1.ToString() + invoiceData[0].BillAddress2.ToString() + invoiceData[0].BillAddress3.ToString() + invoiceData[0].BillAddress4.ToString() + invoiceData[0].BillAddress5.ToString();
+                string invoiceTin = "";
+                string invoiceStoreCode = "";
+                foreach (var inv in invoiceData)
+                    {
+                        invoiceTin = inv.GetCustomField("TIN");
+                        if (businessStyle == "")
+                        {
+                            invoiceBusinessStyle = inv.GetCustomField("BUSINESS STYLE");
+                        }
+                        else
+                        {
+                            invoiceBusinessStyle = businessStyle;
+                        }
+                        invoiceStoreCode = inv.GetCustomField("STORE CODE");
+                    }
+                string invoiceBusinessAdd = invoiceData[0].BillAddress1.ToString() + invoiceData[0].BillAddress2.ToString() + invoiceData[0].BillAddress3.ToString() + invoiceData[0].BillAddress4.ToString() + invoiceData[0].BillAddress5.ToString();
 
 
                 e.Graphics.DrawString(Date, font_Data, Brushes.Black, rectDate, sfAlignCenter);
                 e.Graphics.DrawString(invoiceSoldTo, font_Data, Brushes.Black, rectSoldTo);
                 e.Graphics.DrawString(invoiceBusinessStyle, font_Data, Brushes.Black, rectBusinessStyle);
-                //e.Graphics.DrawString(invoiceTin, font_Data, Brushes.Black, rectTIN);
-                //e.Graphics.DrawString(invoiceBusinessAdd, font_Data, Brushes.Black, rectBusinessAdd);
+                e.Graphics.DrawString(invoiceTin, font_Data, Brushes.Black, rectTIN);
+                e.Graphics.DrawString(invoiceBusinessAdd, font_Data, Brushes.Black, rectBusinessAdd);
 
                 Rectangle rectPoNo = new Rectangle(125, 205, 285, 15);
                 Rectangle rectStoreCode = new Rectangle(125, 220, 285, 15);
@@ -486,11 +492,10 @@ namespace Custom_QBSI.Clients.NHC
                 e.Graphics.DrawRectangle(Pens.Pink, rectTerms);*/
 
                 string invoicePoNo = invoiceData[0].PONumber.ToString();
-                //string invoiceStoreCode = invoiceData[0].StoreCode.ToString(); // CUSTOM STORE CODE
                 string invoiceTerms = invoiceData[0].Terms.ToString();
 
                 e.Graphics.DrawString(invoicePoNo, font_Data, Brushes.Black, rectPoNo);
-                //e.Graphics.DrawString(invoiceStoreCode, font_Data, Brushes.Black, rectStoreCode);
+                e.Graphics.DrawString(invoiceStoreCode, font_Data, Brushes.Black, rectStoreCode);
                 e.Graphics.DrawString(invoiceTerms, font_Data, Brushes.Black, rectTerms);
 
                 // TABLE MIDDLE CALCULATION

@@ -46,23 +46,24 @@ namespace Custom_QBSI.Clients.NHC
 
                         InvoiceData invoiceData = new InvoiceData
                         {
-                            RefNumber = qbInvoice.RefNumber?.GetValue(),
-                            TxnDate = qbInvoice.TxnDate?.GetValue() ?? DateTime.MinValue,
-                            CustomerName = qbInvoice.CustomerRef?.FullName?.GetValue(),
-                            BalanceRemaining = qbInvoice.BalanceRemaining?.GetValue() ?? 0,
-                            Subtotal = qbInvoice.Subtotal?.GetValue() ?? 0,
-                            TotalAmount = (qbInvoice.Subtotal?.GetValue() ?? 0) + (qbInvoice.SalesTaxTotal?.GetValue() ?? 0),
-                            Terms = qbInvoice.TermsRef?.FullName?.GetValue(),
-                            DueDate = qbInvoice.DueDate?.GetValue(),
-                            PONumber = qbInvoice.PONumber?.GetValue() ?? string.Empty,
-                            TaxesName = qbInvoice.ItemSalesTaxRef?.FullName?.GetValue(),
+                            RefNumber = qbInvoice?.RefNumber?.GetValue() ?? string.Empty,
+                            TxnDate = qbInvoice?.TxnDate?.GetValue() ?? DateTime.MinValue,
+                            CustomerName = qbInvoice?.CustomerRef?.FullName?.GetValue() ?? string.Empty,
+                            BalanceRemaining = qbInvoice?.BalanceRemaining?.GetValue() ?? 0,
+                            Subtotal = qbInvoice?.Subtotal?.GetValue() ?? 0,
+                            TotalAmount = (qbInvoice?.Subtotal?.GetValue() ?? 0) + (qbInvoice?.SalesTaxTotal?.GetValue() ?? 0),
+                            Terms = qbInvoice?.TermsRef?.FullName?.GetValue() ?? string.Empty,
+                            DueDate = qbInvoice?.DueDate?.GetValue() ?? DateTime.MinValue,
+                            PONumber = qbInvoice?.PONumber?.GetValue() ?? string.Empty,
+                            TaxesName = qbInvoice?.ItemSalesTaxRef?.FullName?.GetValue() ?? string.Empty,
 
-                            BillAddress1 = qbInvoice.BillAddressBlock.Addr1.GetValue(),
-                            BillAddress2 = qbInvoice.BillAddressBlock?.Addr2?.GetValue(),
-                            BillAddress3 = qbInvoice.BillAddressBlock?.Addr3?.GetValue(),
-                            BillAddress4 = qbInvoice.BillAddressBlock?.Addr4?.GetValue(),
-                            BillAddress5 = qbInvoice.BillAddressBlock?.Addr5?.GetValue(),
+                            BillAddress1 = qbInvoice?.BillAddressBlock?.Addr1?.GetValue() ?? string.Empty,
+                            BillAddress2 = qbInvoice?.BillAddressBlock?.Addr2?.GetValue() ?? string.Empty,
+                            BillAddress3 = qbInvoice?.BillAddressBlock?.Addr3?.GetValue() ?? string.Empty,
+                            BillAddress4 = qbInvoice?.BillAddressBlock?.Addr4?.GetValue() ?? string.Empty,
+                            BillAddress5 = qbInvoice?.BillAddressBlock?.Addr5?.GetValue() ?? string.Empty,
                         };
+
 
                         var customerListID = qbInvoice.CustomerRef?.ListID?.GetValue();
                         if (!string.IsNullOrEmpty(customerListID))
