@@ -272,7 +272,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:QBSIINSTALLER"
         "ProductCode" = "8:{EE9D41BF-74E9-48C6-883F-06CD32597888}"
-        "PackageCode" = "8:{7C182611-6AF9-49FD-A63B-3F6819706F4F}"
+        "PackageCode" = "8:{C94B0DB7-26D2-46A3-A62C-5A7360D7C296}"
         "UpgradeCode" = "8:{97A6F377-A2BE-467E-8046-ED0307F20637}"
         "AspNetVersion" = "8:2.0.50727.0"
         "RestartWWWService" = "11:FALSE"

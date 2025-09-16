@@ -66,7 +66,7 @@ namespace Custom_QBSI.Clients.NHC
                     {
                         invoiceBusinessStyle = businessStyle;
                     }
-                    invoiceStoreCode = inv.GetCustomField("STORE CODE");
+                    invoiceStoreCode = inv.GetCustomField("Store Code");
                 }
 
                 string invoiceBusinessAdd = invoiceData[0].BillAddress1.ToString() + invoiceData[0].BillAddress2.ToString() + invoiceData[0].BillAddress3.ToString() + invoiceData[0].BillAddress4.ToString() + invoiceData[0].BillAddress5.ToString();
@@ -472,7 +472,7 @@ namespace Custom_QBSI.Clients.NHC
                         {
                             invoiceBusinessStyle = businessStyle;
                         }
-                        invoiceStoreCode = inv.GetCustomField("STORE CODE");
+                        invoiceStoreCode = inv.GetCustomField("Store Code");
                     }
                 string invoiceBusinessAdd = invoiceData[0].BillAddress1.ToString() + invoiceData[0].BillAddress2.ToString() + invoiceData[0].BillAddress3.ToString() + invoiceData[0].BillAddress4.ToString() + invoiceData[0].BillAddress5.ToString();
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,6 +19,8 @@ namespace Custom_QBSI.Clients.NHC
             try
             {
                 string AppName = "QBSI";
+                LogDataSync($"Opening QuickBooks session for RefNumber: {refNumber}");
+
                 // Start QuickBooks session
                 sessionManager.OpenConnection("", AppName);
                 sessionManager.BeginSession("", ENOpenMode.omDontCare);
@@ -34,12 +37,14 @@ namespace Custom_QBSI.Clients.NHC
                 invoiceQuery.ORInvoiceQuery.InvoiceFilter.ORRefNumberFilter.RefNumberFilter.MatchCriterion.SetValue(ENMatchCriterion.mcStartsWith);
                 invoiceQuery.ORInvoiceQuery.InvoiceFilter.ORRefNumberFilter.RefNumberFilter.RefNumber.SetValue(refNumber);
 
+                LogDataSync("Sending InvoiceQuery request...");
                 IMsgSetResponse responseMsgSet = sessionManager.DoRequests(requestMsgSet);
                 IResponse response = responseMsgSet.ResponseList.GetAt(0);
                 IInvoiceRetList invoiceList = response.Detail as IInvoiceRetList;
 
                 if (invoiceList != null && invoiceList.Count > 0)
                 {
+                    LogDataSync($"Found {invoiceList.Count} invoice(s) for RefNumber: {refNumber}");
                     for (int i = 0; i < invoiceList.Count; i++)
                     {
                         IInvoiceRet qbInvoice = invoiceList.GetAt(i);
@@ -64,11 +69,11 @@ namespace Custom_QBSI.Clients.NHC
                             BillAddress5 = qbInvoice?.BillAddressBlock?.Addr5?.GetValue() ?? string.Empty,
                         };
 
-
                         var customerListID = qbInvoice.CustomerRef?.ListID?.GetValue();
                         if (!string.IsNullOrEmpty(customerListID))
                         {
                             invoiceData.CustomerCustomFields = GetCustomerCustomFields(sessionManager, customerListID);
+                            LogDataSync($"Fetched custom fields for customer {customerListID}");
                         }
 
                         // --- Line Items ---
@@ -103,15 +108,23 @@ namespace Custom_QBSI.Clients.NHC
                         invoices.Add(invoiceData);
                     }
                 }
+                else
+                {
+                    LogDataSync($"No invoices found for RefNumber: {refNumber}");
+                }
 
                 sessionManager.EndSession();
                 sessionManager.CloseConnection();
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error: " + ex.Message);
-                sessionManager.EndSession();
-                sessionManager.CloseConnection();
+                LogDataSync($"ERROR while getting invoice {refNumber}: {ex}");
+                try
+                {
+                    sessionManager.EndSession();
+                    sessionManager.CloseConnection();
+                }
+                catch { }
             }
 
             return invoices;
@@ -121,41 +134,66 @@ namespace Custom_QBSI.Clients.NHC
         {
             var customFields = new Dictionary<string, string>();
 
-            IMsgSetRequest custRequest = sessionManager.CreateMsgSetRequest("US", 13, 0);
-            custRequest.Attributes.OnError = ENRqOnError.roeStop;
-
-            ICustomerQuery custQuery = custRequest.AppendCustomerQueryRq();
-            custQuery.ORCustomerListQuery.ListIDList.Add(customerListID);
-            custQuery.OwnerIDList.Add("0"); // To include custom fields
-
-            IMsgSetResponse custResponse = sessionManager.DoRequests(custRequest);
-            IResponse custResp = custResponse.ResponseList.GetAt(0);
-            ICustomerRetList custList = custResp.Detail as ICustomerRetList;
-
-            if (custList != null && custList.Count > 0)
+            try
             {
-                ICustomerRet customer = custList.GetAt(0);
+                IMsgSetRequest custRequest = sessionManager.CreateMsgSetRequest("US", 13, 0);
+                custRequest.Attributes.OnError = ENRqOnError.roeStop;
 
-                Console.WriteLine($"Customer {customerListID} has DataExtRetList count: {customer.DataExtRetList?.Count ?? 0}");
-                if (customer.DataExtRetList != null)
+                ICustomerQuery custQuery = custRequest.AppendCustomerQueryRq();
+                custQuery.ORCustomerListQuery.ListIDList.Add(customerListID);
+                custQuery.OwnerIDList.Add("0"); // To include custom fields
+
+                IMsgSetResponse custResponse = sessionManager.DoRequests(custRequest);
+                IResponse custResp = custResponse.ResponseList.GetAt(0);
+                ICustomerRetList custList = custResp.Detail as ICustomerRetList;
+
+                if (custList != null && custList.Count > 0)
                 {
-                    for (int i = 0; i < customer.DataExtRetList.Count; i++)
+                    ICustomerRet customer = custList.GetAt(0);
+
+                    LogDataSync($"Customer {customerListID} has DataExtRetList count: {customer.DataExtRetList?.Count ?? 0}");
+
+                    if (customer.DataExtRetList != null)
                     {
-
-                        IDataExtRet dataExt = customer.DataExtRetList.GetAt(i);
-                        string name = dataExt.DataExtName?.GetValue();
-                        string value = dataExt.DataExtValue?.GetValue();
-
-                        if (!string.IsNullOrEmpty(name))
+                        for (int i = 0; i < customer.DataExtRetList.Count; i++)
                         {
-                            customFields[name] = value;
+                            IDataExtRet dataExt = customer.DataExtRetList.GetAt(i);
+                            string name = dataExt.DataExtName?.GetValue();
+                            string value = dataExt.DataExtValue?.GetValue();
+
+                            if (!string.IsNullOrEmpty(name))
+                            {
+                                customFields[name] = value;
+                                LogDataSync($"Customer {customerListID} - CustomField: {name} = {value}");
+                            }
                         }
                     }
                 }
+                else
+                {
+                    LogDataSync($"No customer found for ListID: {customerListID}");
+                }
+            }
+            catch (Exception ex)
+            {
+                LogDataSync($"ERROR fetching custom fields for Customer {customerListID}: {ex}");
             }
 
             return customFields;
         }
+        private static void LogDataSync(string message)
+        {
+            string logFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "datasync_log.txt");
+            string logEntry = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} - {message}";
 
+            try
+            {
+                File.AppendAllText(logFilePath, logEntry + Environment.NewLine);
+            }
+            catch
+            {
+                // Fail silently if logging fails
+            }
+        }
     }
 }

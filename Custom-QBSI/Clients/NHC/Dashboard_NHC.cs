@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Printing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -406,35 +407,31 @@ namespace Custom_QBSI.Clients.NHC
                     if (comboBox_Forms.SelectedIndex == 0)
                     {
                         MessageBox.Show("Please select a form.", "Notice", MessageBoxButtons.OK);
+                        LogMessage("User did not select a form.");
                     }
                     else if (comboBox_Forms.SelectedIndex != 0 && textBox_ReferenceNumber.Text != "")
                     {
                         string refNumber = textBox_ReferenceNumber.Text;
+                        LogMessage($"Searching invoice for RefNumber: {refNumber}");
 
                         string vatType = radioButton_VATInclusive.Checked ? "Inclusive" : "Exclusive";
-                        //bool vatType = radioButton_VATInclusive.Checked ? true : false;
-
                         string note = textBox_Note.Text;
                         string businessStyle = textBox_BusinessStyle.Text;
                         string pwdSignature = textBox_PWDSignature.Text;
                         bool isEnableExpDateChecked = checkBox_EnableExpDate.Checked;
                         bool isLessEWTChecked = checkBox_LessEWT.Checked;
-
                         string signatoryName = textBox_SignatoryName.Text;
-
-                        //Queries_NHC accessQueries = new Queries_NHC();
-                        //List<Dataclass_NHC.InvoiceData> invoice = accessQueries.GetInvoiceData(refNumber);
 
                         List<AltDataClass_NHC.InvoiceData> invoice = AltQBDataSync_NHC.GetInvoiceByRefNumber(refNumber);
 
                         if (invoice.Count == 0)
                         {
                             MessageBox.Show("No invoice found for the given reference number.", "Notice", MessageBoxButtons.OK);
+                            LogMessage($"No invoice found for RefNumber: {refNumber}");
                             return;
                         }
 
                         AltLayout_NHC altLayout_NHC = new AltLayout_NHC();
-                        //Layout_NHC layout_NHC = new Layout_NHC();
                         PaperSize paperSize = new PaperSize("Custom", 850, 1100);
 
                         printDocument = new PrintDocument();
@@ -442,11 +439,16 @@ namespace Custom_QBSI.Clients.NHC
                         printDocument.PrinterSettings.DefaultPageSettings.PaperSize = paperSize;
                         printDocument.PrintPage += (s, ev) =>
                         {
-                            //layout_NHC.PrintPage_NHC(s, ev, invoice, comboBox_Forms.SelectedIndex, note, businessStyle, pwdSignature, isEnableExpDateChecked);
                             if (comboBox_Forms.SelectedIndex == 1)
+                            {
                                 altLayout_NHC.Layout_SalesInvoice(ev, invoice, vatType, businessStyle, signatoryName, isLessEWTChecked);
+                                LogMessage("Printing Sales Invoice layout.");
+                            }
                             else if (comboBox_Forms.SelectedIndex == 2)
+                            {
                                 altLayout_NHC.Layout_DeliveryReceipt(ev, invoice, note, businessStyle, pwdSignature, isEnableExpDateChecked, signatoryName);
+                                LogMessage("Printing Delivery Receipt layout.");
+                            }
                         };
                         printPreviewControl.Document = printDocument;
                         printPreviewControl.Visible = true;
@@ -455,15 +457,32 @@ namespace Custom_QBSI.Clients.NHC
                     else
                     {
                         MessageBox.Show("Please enter a reference number.", "Notice", MessageBoxButtons.OK);
+                        LogMessage("Reference number was empty.");
                     }
                 }
                 catch (Exception ex)
                 {
                     MessageBox.Show($"An error occurred: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    LogMessage($"ERROR: {ex.ToString()}");
                 }
             };
 
             return panel_RefNumber;
+        }
+
+        private void LogMessage(string message)
+        {
+            string logFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "app_log.txt");
+            string logEntry = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} - {message}";
+
+            try
+            {
+                File.AppendAllText(logFilePath, logEntry + Environment.NewLine);
+            }
+            catch
+            {
+                // Avoid crashing if logging fails
+            }
         }
 
         private FlowLayoutPanel Panel_Signatory()
