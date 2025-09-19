@@ -87,18 +87,19 @@ namespace Custom_QBSI.Clients.NHC
                                     var line = orLine.InvoiceLineRet;
                                     var lineData = new InvoiceLineData
                                     {
-                                        ItemName = line.ItemRef?.FullName?.GetValue(),
-                                        Description = line.Desc?.GetValue(),
+                                        ItemName = line.ItemRef?.FullName?.GetValue() ?? string.Empty,
+                                        Description = line.Desc?.GetValue() ?? string.Empty,
                                         Quantity = line.Quantity?.GetValue() ?? 0,
-                                        UnitOfMeasure = line.UnitOfMeasure?.GetValue(),
-                                        Rate = (decimal)(line.ORRate?.Rate?.GetValue() ?? 0),
-                                        Amount = (decimal)(line.Amount?.GetValue() ?? 0),
-                                        TotalAmount = (decimal)(line.Amount?.GetValue() ?? 0),
-                                        ExpirationDate = line.Other1?.GetValue(),
-                                        Tax = line.SalesTaxCodeRef?.FullName?.GetValue(),
-                                        SalesTaxTotal = (decimal)(line.TaxAmount?.GetValue() ?? 0),
-                                        ServiceDate = line.ServiceDate?.GetValue().ToShortDateString()
+                                        UnitOfMeasure = line.UnitOfMeasure?.GetValue() ?? string.Empty,
+                                        Rate = (decimal?)(line.ORRate?.Rate?.GetValue()) ?? 0m,
+                                        Amount = (decimal?)(line.Amount?.GetValue()) ?? 0m,
+                                        TotalAmount = (decimal?)(line.Amount?.GetValue()) ?? 0m,
+                                        ExpirationDate = line.Other1?.GetValue() ?? string.Empty,
+                                        Tax = line.SalesTaxCodeRef?.FullName?.GetValue() ?? string.Empty,
+                                        SalesTaxTotal = (decimal?)(line.TaxAmount?.GetValue()) ?? 0m,
+                                        ServiceDate = line.ServiceDate != null? line.ServiceDate.GetValue().ToShortDateString():string.Empty
                                     };
+
 
                                     invoiceData.Lines.Add(lineData);
                                 }
