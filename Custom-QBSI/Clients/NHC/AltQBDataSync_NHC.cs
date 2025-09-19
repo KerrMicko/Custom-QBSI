@@ -62,11 +62,11 @@ namespace Custom_QBSI.Clients.NHC
                             PONumber = qbInvoice?.PONumber?.GetValue() ?? string.Empty,
                             TaxesName = qbInvoice?.ItemSalesTaxRef?.FullName?.GetValue() ?? string.Empty,
 
-                            BillAddress1 = qbInvoice?.BillAddressBlock?.Addr1?.GetValue() ?? string.Empty,
-                            BillAddress2 = qbInvoice?.BillAddressBlock?.Addr2?.GetValue() ?? string.Empty,
-                            BillAddress3 = qbInvoice?.BillAddressBlock?.Addr3?.GetValue() ?? string.Empty,
-                            BillAddress4 = qbInvoice?.BillAddressBlock?.Addr4?.GetValue() ?? string.Empty,
-                            BillAddress5 = qbInvoice?.BillAddressBlock?.Addr5?.GetValue() ?? string.Empty,
+                            ShipAddress1 = qbInvoice?.ShipAddressBlock?.Addr1?.GetValue() ?? string.Empty,
+                            ShipAddress2 = qbInvoice?.ShipAddressBlock?.Addr2?.GetValue() ?? string.Empty,
+                            ShipAddress3 = qbInvoice?.ShipAddressBlock?.Addr3?.GetValue() ?? string.Empty,
+                            ShipAddress4 = qbInvoice?.ShipAddressBlock?.Addr4?.GetValue() ?? string.Empty,
+                            ShipAddress5 = qbInvoice?.ShipAddressBlock?.Addr5?.GetValue() ?? string.Empty,
                         };
 
                         var customerListID = qbInvoice.CustomerRef?.ListID?.GetValue();

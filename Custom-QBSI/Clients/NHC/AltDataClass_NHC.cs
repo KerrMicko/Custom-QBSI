@@ -20,11 +20,11 @@ namespace Custom_QBSI.Clients.NHC
             public DateTime? DueDate { get; set; }
             public string PONumber { get; set; }
             public string TaxesName { get; set; }
-            public string BillAddress1 { get; set; }
-            public string BillAddress2 { get; set; }
-            public string BillAddress3 { get; set; }
-            public string BillAddress4 { get; set; }
-            public string BillAddress5 { get; set; }
+            public string ShipAddress1 { get; set; }
+            public string ShipAddress2 { get; set; }
+            public string ShipAddress3 { get; set; }
+            public string ShipAddress4 { get; set; }
+            public string ShipAddress5 { get; set; }
 
             public List<InvoiceLineData> Lines { get; set; } = new List<InvoiceLineData>();
             public Dictionary<string, string> CustomerCustomFields { get; set; } = new Dictionary<string, string>();

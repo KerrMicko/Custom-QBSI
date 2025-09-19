@@ -69,7 +69,7 @@ namespace Custom_QBSI.Clients.NHC
                     invoiceStoreCode = inv.GetCustomField("Store Code");
                 }
 
-                string invoiceBusinessAdd = invoiceData[0].BillAddress1.ToString() + invoiceData[0].BillAddress2.ToString() + invoiceData[0].BillAddress3.ToString() + invoiceData[0].BillAddress4.ToString() + invoiceData[0].BillAddress5.ToString();
+                string invoiceBusinessAdd = invoiceData[0].ShipAddress1.ToString() + invoiceData[0].ShipAddress2.ToString() + invoiceData[0].ShipAddress3.ToString() + invoiceData[0].ShipAddress4.ToString() + invoiceData[0].ShipAddress5.ToString();
 
 
                 e.Graphics.DrawString(date, font_Data, Brushes.Black, rectDate, sfAlignCenter);
@@ -142,7 +142,7 @@ namespace Custom_QBSI.Clients.NHC
                         var nextItem = hasNext ? invoice.Lines[i + 1] : null;
 
                         bool isInclusive = vatType == "Inclusive";
-                        bool isTaxable = isInclusive && invoice.TaxesName == "VAT";
+                        bool isTaxable = isInclusive && invoice.TaxesName == "Vat";
                         Console.WriteLine($"isInclusive: {isInclusive}, isTaxable: {isTaxable}, Rate: {item.Rate}, SalesTaxTotal: {item.SalesTaxTotal}, Tax: {item.Tax}, TaxesName: {invoice.TaxesName}");
 
                         decimal rateAdjustment = isTaxable ? item.Rate * 0.12m : 0m;
@@ -151,7 +151,7 @@ namespace Custom_QBSI.Clients.NHC
 
                         // ✅ Classification
                         if (invoice.TaxesName == "Zero Rated Sales") zeroRatedSalesTotal += item.Amount;
-                        else if (invoice.TaxesName == "VAT Exempt") vatExemptSalesTotal += item.Amount;
+                        else if (invoice.TaxesName == "Vat Exempt") vatExemptSalesTotal += item.Amount;
                         else if (isInclusive ? isTaxable : item.Tax != "Non") vatableSalesTotal += item.Amount;
 
                         // ✅ Case 1: Discount line
@@ -226,7 +226,7 @@ namespace Custom_QBSI.Clients.NHC
                         // ✅ Classification
                         if (invoice.TaxesName == "Zero Rated Sales")
                             zeroRatedSalesTotal += item.Amount;
-                        else if (invoice.TaxesName == "VAT Exempt")
+                        else if (invoice.TaxesName == "Vat Exempt")
                             vatExemptSalesTotal += item.Amount;
                         else if (item.Tax != "Non")
                             vatableSalesTotal += item.Amount;
@@ -314,7 +314,7 @@ namespace Custom_QBSI.Clients.NHC
             {
                 foreach (var line in invoice.Lines)
                 {
-                    bool isLineVATable = line.Tax != "Non" || invoice.TaxesName == "VAT";
+                    bool isLineVATable = line.Tax != "Non" || invoice.TaxesName == "Vat";
                     if (isLineVATable)
                     {
                         decimal adjustedAmount = line.Tax != "Non" ? line.Amount * 1.12m : line.Amount;
@@ -328,7 +328,7 @@ namespace Custom_QBSI.Clients.NHC
             decimal totalVAT = totalVATableAmount - amountNetVat;
 
 
-            if (invoiceData[0].TaxesName == "VAT")
+            if (invoiceData[0].TaxesName == "Vat")
             {
                 if (amountNetVat > 0)
                     e.Graphics.DrawString(amountNetVat.ToString("N2"), font_Data, Brushes.Black, rectVATableSales, sfAlignCenterRight);
@@ -369,7 +369,7 @@ namespace Custom_QBSI.Clients.NHC
             {
                 foreach (var line in invoice.Lines)
                 {
-                    bool isLineVATable = line.Tax != "Non" || invoice.TaxesName == "VAT";
+                    bool isLineVATable = line.Tax != "Non" || invoice.TaxesName == "Vat";
                     if (isLineVATable)
                     {
                         decimal adjustedAmount = line.Tax != "Non" ? line.Amount * 1.12m : line.Amount;
@@ -474,7 +474,7 @@ namespace Custom_QBSI.Clients.NHC
                         }
                         invoiceStoreCode = inv.GetCustomField("Store Code");
                     }
-                string invoiceBusinessAdd = invoiceData[0].BillAddress1.ToString() + invoiceData[0].BillAddress2.ToString() + invoiceData[0].BillAddress3.ToString() + invoiceData[0].BillAddress4.ToString() + invoiceData[0].BillAddress5.ToString();
+                string invoiceBusinessAdd = invoiceData[0].ShipAddress1.ToString() + invoiceData[0].ShipAddress2.ToString() + invoiceData[0].ShipAddress3.ToString() + invoiceData[0].ShipAddress4.ToString() + invoiceData[0].ShipAddress5.ToString();
 
 
                 e.Graphics.DrawString(Date, font_Data, Brushes.Black, rectDate, sfAlignCenter);
