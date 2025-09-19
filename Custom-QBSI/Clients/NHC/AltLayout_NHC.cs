@@ -326,11 +326,10 @@ namespace Custom_QBSI.Clients.NHC
             Rectangle rectZeroRatedSales = new Rectangle(xStart, yStart - 3 + dataHeight * 2, width, dataHeight);
             Rectangle rectVatAmount = new Rectangle(xStart, yStart - 3 + dataHeight * 3, width, dataHeight);
 
-
-            e.Graphics.DrawRectangle(Pens.Red, rectVATableSales);
+            /*e.Graphics.DrawRectangle(Pens.Red, rectVATableSales);
             e.Graphics.DrawRectangle(Pens.Blue, rectVATExemptSales);
             e.Graphics.DrawRectangle(Pens.Yellow, rectZeroRatedSales);
-            e.Graphics.DrawRectangle(Pens.Orange, rectVatAmount);
+            e.Graphics.DrawRectangle(Pens.Orange, rectVatAmount);*/
 
 
             decimal totalVATableAmount = 0;
