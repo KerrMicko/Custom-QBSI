@@ -142,7 +142,7 @@ namespace Custom_QBSI.Clients.NHC
                 Width = componentWidth,
                 Font = font_Label,
                 Checked = true,
-                Visible = false,
+                Visible = true,
             };
 
             checkBox_LessEWT = new CheckBox
@@ -441,7 +441,7 @@ namespace Custom_QBSI.Clients.NHC
                         {
                             if (comboBox_Forms.SelectedIndex == 1)
                             {
-                                altLayout_NHC.Layout_SalesInvoice(ev, invoice, vatType, businessStyle, signatoryName, isLessEWTChecked);
+                                altLayout_NHC.Layout_SalesInvoice(ev, invoice, vatType, businessStyle, signatoryName, isEnableExpDateChecked, isLessEWTChecked);
                                 LogMessage("Printing Sales Invoice layout.");
                             }
                             else if (comboBox_Forms.SelectedIndex == 2)
@@ -625,7 +625,7 @@ namespace Custom_QBSI.Clients.NHC
             {
                 //panel_Details.Visible = false;
                 //panel_Details.Width = 0;
-                checkBox_EnableExpDate.Visible = false;
+                checkBox_EnableExpDate.Visible = true;
                 checkBox_LessEWT.Visible = true;
             }
             else if (comboBox_Forms.SelectedIndex == 2)

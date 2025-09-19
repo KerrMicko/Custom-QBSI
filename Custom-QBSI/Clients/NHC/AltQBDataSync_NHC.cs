@@ -94,7 +94,7 @@ namespace Custom_QBSI.Clients.NHC
                                         Rate = (decimal)(line.ORRate?.Rate?.GetValue() ?? 0),
                                         Amount = (decimal)(line.Amount?.GetValue() ?? 0),
                                         TotalAmount = (decimal)(line.Amount?.GetValue() ?? 0),
-                                        ExpirationDate = line.ExpirationDateForSerialLotNumber?.GetValue(),
+                                        ExpirationDate = line.Other1?.GetValue(),
                                         Tax = line.SalesTaxCodeRef?.FullName?.GetValue(),
                                         SalesTaxTotal = (decimal)(line.TaxAmount?.GetValue() ?? 0),
                                         ServiceDate = line.ServiceDate?.GetValue().ToShortDateString()
