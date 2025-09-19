@@ -157,7 +157,7 @@ namespace Custom_QBSI.Clients.NHC
                         }
 
                         // ✅ Classification
-                        if (invoice.TaxesName == "Zero Rated Sales") zeroRatedSalesTotal += item.Amount;
+                        if (invoice.TaxesName == "Zero rated sales") zeroRatedSalesTotal += item.Amount;
                         else if (invoice.TaxesName == "Vat Exempt") vatExemptSalesTotal += item.Amount;
                         else if (isInclusive ? isTaxable : item.Tax != "Non") vatableSalesTotal += item.Amount;
 
@@ -244,7 +244,7 @@ namespace Custom_QBSI.Clients.NHC
                         }
 
                         // ✅ Classification
-                        if (invoice.TaxesName == "Zero Rated Sales")
+                        if (invoice.TaxesName == "Zero rated sales")
                             zeroRatedSalesTotal += item.Amount;
                         else if (invoice.TaxesName == "Vat Exempt")
                             vatExemptSalesTotal += item.Amount;
