@@ -136,78 +136,76 @@ namespace Custom_QBSI.Clients.NHC
                     for (int i = 0; i < invoice.Lines.Count; i++)
                     {
                         var item = invoice.Lines[i];
-
-                        // Skip Subtotal lines
                         if (item.Description == "Subtotal") continue;
 
                         bool hasNext = i + 1 < invoice.Lines.Count;
                         var nextItem = hasNext ? invoice.Lines[i + 1] : null;
 
-                        bool isInclusive = vatType == "Inclusive";
-                        bool isTaxable = isInclusive && invoice.TaxesName == "Vat";
-                        Console.WriteLine($"isInclusive: {isInclusive}, isTaxable: {isTaxable}, Rate: {item.Rate}, SalesTaxTotal: {item.SalesTaxTotal}, Tax: {item.Tax}, TaxesName: {invoice.TaxesName}");
+                        bool isTaxable = invoice.TaxesName == "Vat";
+                        bool isDiscountLine = (item.Description != null && item.Description.ToLower().Contains("discount"))
+                                              || item.Amount < 0
+                                              || item.Rate.ToString().Contains("%");
 
+                        // Adjusted amount (VAT only if not discount)
+                        decimal adjustedAmount = isDiscountLine ? item.Amount : (isTaxable ? item.Amount * 1.12m : item.Amount);
                         decimal rateAdjustment = isTaxable ? item.Rate * 0.12m : 0m;
-                        decimal unitRateToDraw = isInclusive && invoice.TaxesName != "Out of State" ? item.Rate + rateAdjustment : item.Rate;
-                        decimal adjustedAmount = isInclusive && isTaxable ? item.Amount * 1.12m : item.Amount;
+                        decimal unitRateToDraw = isDiscountLine ? item.Rate : item.Rate + rateAdjustment;
 
-                        // ✅ Base description with expiry
+                        // Base description with expiry
                         string descText = item.Description;
                         if (isEnableExpDateChecked && !string.IsNullOrEmpty(item.ExpirationDate))
                         {
                             descText += " (Exp. " + item.ExpirationDate + ")";
                         }
 
-                        // ✅ Classification
-                        if (invoice.TaxesName == "Zero rated sales") zeroRatedSalesTotal += item.Amount;
-                        else if (invoice.TaxesName == "Vat Exempt") vatExemptSalesTotal += item.Amount;
-                        else if (isInclusive ? isTaxable : item.Tax != "Non") vatableSalesTotal += item.Amount;
+                        // Classification
+                        if (invoice.TaxesName == "Zero rated sales")
+                            zeroRatedSalesTotal += item.Amount;
+                        else if (invoice.TaxesName == "Vat Exempt")
+                            vatExemptSalesTotal += item.Amount;
+                        else if (!isDiscountLine && isTaxable)
+                            vatableSalesTotal += item.Amount;
 
-                        // ✅ Case 1: Discount line
-                        if ((item.Description != null && item.Description.ToLower().Contains("discount")) || item.Amount < 0 || item.Rate.ToString().Contains("%"))
+                        // ---------- Case 1: Discount line ----------
+                        if (isDiscountLine)
                         {
-                            decimal discountAmount = adjustedAmount;
-                            string unitRateDisplay = item.Rate.ToString().Contains("%") ? "-" + item.Rate.ToString() : item.Rate.ToString("N2");
-
-                            e.Graphics.DrawString(descText, font_Data, Brushes.Black, new Rectangle(xStartItemDesc, tab1YStart + itemHeight, widthItemDesc, tab1DataHeight), sfAlignLeftCenter);
-                            e.Graphics.DrawString(item.Quantity.ToString("N2"), font_Data, Brushes.Black, new Rectangle(xStartItemQty, tab1YStart + itemHeight, widthItemQuantity, tab1DataHeight), sfAlignCenter);
-                            e.Graphics.DrawString(item.UnitOfMeasure, font_Data, Brushes.Black, new Rectangle(xStartItemUOM, tab1YStart + itemHeight, widthItemUOM, tab1DataHeight), sfAlignCenter);
-                            e.Graphics.DrawString(unitRateDisplay, font_Data, Brushes.Black, new Rectangle(xStartItemUnitPrice, tab1YStart + itemHeight, widthItemUnitPrice, tab1DataHeight), sfAlignCenterRight);
-                            e.Graphics.DrawString(discountAmount.ToString("N2"), font_Data, Brushes.Black, new Rectangle(xStartItemAmount, tab1YStart + itemHeight, widthItemAmount, tab1DataHeight), sfAlignCenterRight);
-
-                            totalAmount += discountAmount;
-                            itemHeight += tab1DataHeight;
-                            continue;
-                        }
-
-                        // ✅ Case 2: Description-only after Subtotal
-                        if (item.Rate == 0 && i > 0 && invoice.Lines[i - 1].Description == "Subtotal")
-                        {
-                            e.Graphics.DrawString(descText, font_Data, Brushes.Black, new Rectangle(xStartItemDesc, tab1YStart + itemHeight, widthItemDesc, tab1DataHeight), sfAlignLeftCenter);
-                            e.Graphics.DrawString(adjustedAmount.ToString("N2"), font_Data, Brushes.Black, new Rectangle(xStartItemAmount, tab1YStart + itemHeight, widthItemAmount, tab1DataHeight), sfAlignCenterRight);
+                            e.Graphics.DrawString(descText, font_Data, Brushes.Black,new Rectangle(xStartItemDesc, tab1YStart + itemHeight, widthItemDesc, tab1DataHeight), sfAlignLeftCenter);
+                            e.Graphics.DrawString(item.Quantity.ToString("N2"), font_Data, Brushes.Black,new Rectangle(xStartItemQty, tab1YStart + itemHeight, widthItemQuantity, tab1DataHeight), sfAlignCenter);
+                            e.Graphics.DrawString(item.UnitOfMeasure, font_Data, Brushes.Black,new Rectangle(xStartItemUOM, tab1YStart + itemHeight, widthItemUOM, tab1DataHeight), sfAlignCenter);
+                            e.Graphics.DrawString(unitRateToDraw.ToString("N2"), font_Data, Brushes.Black,new Rectangle(xStartItemUnitPrice, tab1YStart + itemHeight, widthItemUnitPrice, tab1DataHeight), sfAlignCenterRight);
+                            e.Graphics.DrawString(adjustedAmount.ToString("N2"), font_Data, Brushes.Black,new Rectangle(xStartItemAmount, tab1YStart + itemHeight, widthItemAmount, tab1DataHeight), sfAlignCenterRight);
 
                             totalAmount += adjustedAmount;
                             itemHeight += tab1DataHeight;
                             continue;
                         }
 
-                        // ✅ Case 3: Discount follows item with Rate == 0 (combined)
+                        // ---------- Case 2: Description-only after Subtotal ----------
+                        if (item.Rate == 0 && i > 0 && invoice.Lines[i - 1].Description == "Subtotal")
+                        {
+                            e.Graphics.DrawString(descText, font_Data, Brushes.Black,new Rectangle(xStartItemDesc, tab1YStart + itemHeight, widthItemDesc, tab1DataHeight), sfAlignLeftCenter);
+                            e.Graphics.DrawString(adjustedAmount.ToString("N2"), font_Data, Brushes.Black,new Rectangle(xStartItemAmount, tab1YStart + itemHeight, widthItemAmount, tab1DataHeight), sfAlignCenterRight);
+
+                            totalAmount += adjustedAmount;
+                            itemHeight += tab1DataHeight;
+                            continue;
+                        }
+
+                        // ---------- Case 3: Combined line ----------
                         if (item.Rate == 0 && hasNext && nextItem.Rate == 0 && nextItem.Description != "Subtotal")
                         {
-                            decimal combinedAmount = adjustedAmount + (isInclusive && nextItem.SalesTaxTotal != 0 && nextItem.Tax != "Non" && invoice.TaxesName != "Out of State" ? nextItem.Amount * 1.12m : nextItem.Amount);
+                            decimal combinedAmount = adjustedAmount + (nextItem.Description.ToLower().Contains("discount") ? nextItem.Amount : (isTaxable ? nextItem.Amount * 1.12m : nextItem.Amount));
                             string desc = $"{item.Description} ({nextItem.Description})";
-
-                            // apply expiry
                             if (isEnableExpDateChecked && !string.IsNullOrEmpty(item.ExpirationDate))
                             {
                                 desc += " (Exp. " + item.ExpirationDate + ")";
                             }
 
-                            e.Graphics.DrawString(desc, font_Data, Brushes.Black, new Rectangle(xStartItemDesc, tab1YStart + itemHeight, widthItemDesc, tab1DataHeight), sfAlignLeftCenter);
-                            e.Graphics.DrawString(item.Quantity.ToString("N2"), font_Data, Brushes.Black, new Rectangle(xStartItemQty, tab1YStart + itemHeight, widthItemQuantity, tab1DataHeight), sfAlignCenter);
-                            e.Graphics.DrawString(item.UnitOfMeasure, font_Data, Brushes.Black, new Rectangle(xStartItemUOM, tab1YStart + itemHeight, widthItemUOM, tab1DataHeight), sfAlignCenter);
-                            e.Graphics.DrawString(item.Rate.ToString("N2"), font_Data, Brushes.Black, new Rectangle(xStartItemUnitPrice, tab1YStart + itemHeight, widthItemUnitPrice, tab1DataHeight), sfAlignCenterRight);
-                            e.Graphics.DrawString(combinedAmount.ToString("N2"), font_Data, Brushes.Black, new Rectangle(xStartItemAmount, tab1YStart + itemHeight, widthItemAmount, tab1DataHeight), sfAlignCenterRight);
+                            e.Graphics.DrawString(desc, font_Data, Brushes.Black,new Rectangle(xStartItemDesc, tab1YStart + itemHeight, widthItemDesc, tab1DataHeight), sfAlignLeftCenter);
+                            e.Graphics.DrawString(item.Quantity.ToString("N2"), font_Data, Brushes.Black,new Rectangle(xStartItemQty, tab1YStart + itemHeight, widthItemQuantity, tab1DataHeight), sfAlignCenter);
+                            e.Graphics.DrawString(item.UnitOfMeasure, font_Data, Brushes.Black,new Rectangle(xStartItemUOM, tab1YStart + itemHeight, widthItemUOM, tab1DataHeight), sfAlignCenter);
+                            e.Graphics.DrawString(unitRateToDraw.ToString("N2"), font_Data, Brushes.Black,new Rectangle(xStartItemUnitPrice, tab1YStart + itemHeight, widthItemUnitPrice, tab1DataHeight), sfAlignCenterRight);
+                            e.Graphics.DrawString(combinedAmount.ToString("N2"), font_Data, Brushes.Black,new Rectangle(xStartItemAmount, tab1YStart + itemHeight, widthItemAmount, tab1DataHeight), sfAlignCenterRight);
 
                             totalAmount += combinedAmount;
                             itemHeight += tab1DataHeight;
@@ -215,12 +213,12 @@ namespace Custom_QBSI.Clients.NHC
                             continue;
                         }
 
-                        // ✅ Case 4: Regular line
-                        e.Graphics.DrawString(descText, font_Data, Brushes.Black, new Rectangle(xStartItemDesc, tab1YStart + itemHeight, widthItemDesc, tab1DataHeight), sfAlignLeftCenter);
-                        e.Graphics.DrawString(item.Quantity.ToString("N2"), font_Data, Brushes.Black, new Rectangle(xStartItemQty, tab1YStart + itemHeight, widthItemQuantity, tab1DataHeight), sfAlignCenter);
-                        e.Graphics.DrawString(item.UnitOfMeasure, font_Data, Brushes.Black, new Rectangle(xStartItemUOM, tab1YStart + itemHeight, widthItemUOM, tab1DataHeight), sfAlignCenter);
-                        e.Graphics.DrawString(unitRateToDraw.ToString("N2"), font_Data, Brushes.Black, new Rectangle(xStartItemUnitPrice, tab1YStart + itemHeight, widthItemUnitPrice, tab1DataHeight), sfAlignCenterRight);
-                        e.Graphics.DrawString(adjustedAmount.ToString("N2"), font_Data, Brushes.Black, new Rectangle(xStartItemAmount, tab1YStart + itemHeight, widthItemAmount, tab1DataHeight), sfAlignCenterRight);
+                        // ---------- Case 4: Regular line ----------
+                        e.Graphics.DrawString(descText, font_Data, Brushes.Black,new Rectangle(xStartItemDesc, tab1YStart + itemHeight, widthItemDesc, tab1DataHeight), sfAlignLeftCenter);
+                        e.Graphics.DrawString(item.Quantity.ToString("N2"), font_Data, Brushes.Black,new Rectangle(xStartItemQty, tab1YStart + itemHeight, widthItemQuantity, tab1DataHeight), sfAlignCenter);
+                        e.Graphics.DrawString(item.UnitOfMeasure, font_Data, Brushes.Black,new Rectangle(xStartItemUOM, tab1YStart + itemHeight, widthItemUOM, tab1DataHeight), sfAlignCenter);
+                        e.Graphics.DrawString(unitRateToDraw.ToString("N2"), font_Data, Brushes.Black,new Rectangle(xStartItemUnitPrice, tab1YStart + itemHeight, widthItemUnitPrice, tab1DataHeight), sfAlignCenterRight);
+                        e.Graphics.DrawString(adjustedAmount.ToString("N2"), font_Data, Brushes.Black,new Rectangle(xStartItemAmount, tab1YStart + itemHeight, widthItemAmount, tab1DataHeight), sfAlignCenterRight);
 
                         totalAmount += adjustedAmount;
                         itemHeight += tab1DataHeight;
@@ -231,68 +229,71 @@ namespace Custom_QBSI.Clients.NHC
                     for (int i = 0; i < invoice.Lines.Count; i++)
                     {
                         var item = invoice.Lines[i];
-
                         if (item.Description == "Subtotal") continue;
 
                         bool hasNext = i + 1 < invoice.Lines.Count;
                         var nextItem = hasNext ? invoice.Lines[i + 1] : null;
-                        decimal unitRateToDraw = item.Rate; // no adjustment in Exclusive
 
-                        // ✅ Base description with expiry
+                        bool isDiscountLine = (item.Description != null && item.Description.ToLower().Contains("discount"))
+                                              || item.Amount < 0
+                                              || item.Rate.ToString().Contains("%");
+
+                        decimal adjustedAmount = item.Amount; // Exclusive VAT, amount is always raw
+                        decimal unitRateToDraw = item.Rate;
+
+                        // Base description with expiry
                         string descText = item.Description;
                         if (isEnableExpDateChecked && !string.IsNullOrEmpty(item.ExpirationDate))
                         {
                             descText += " (Exp. " + item.ExpirationDate + ")";
                         }
 
-                        // ✅ Classification
+                        // Classification
                         if (invoice.TaxesName == "Zero rated sales")
                             zeroRatedSalesTotal += item.Amount;
                         else if (invoice.TaxesName == "Vat Exempt")
                             vatExemptSalesTotal += item.Amount;
-                        else if (item.Tax != "Non")
+                        else if (!isDiscountLine && item.Tax != "Non")
                             vatableSalesTotal += item.Amount;
 
-                        // ✅ Case 1: Discount line (separate always)
-                        if (item.Description.ToLower().Contains("discount") || item.Rate.ToString().Contains("%") || item.Amount < 0)
+                        // ---------- Case 1: Discount ----------
+                        if (isDiscountLine)
                         {
-                            e.Graphics.DrawString(descText, font_Data, Brushes.Black, new Rectangle(rectItemDescription.X, rectItemDescription.Y + itemHeight, rectItemDescription.Width, tab1DataHeight), sfAlignLeftCenter);
-                            e.Graphics.DrawString(item.Quantity.ToString("N2"), font_Data, Brushes.Black, new Rectangle(rectItemQuantity.X, rectItemQuantity.Y + itemHeight, rectItemQuantity.Width, tab1DataHeight), sfAlignCenter);
-                            e.Graphics.DrawString(item.Rate.ToString("N2"), font_Data, Brushes.Black, new Rectangle(rectItemUnitPrice.X, rectItemUnitPrice.Y + itemHeight, rectItemUnitPrice.Width, tab1DataHeight), sfAlignCenterRight);
-                            e.Graphics.DrawString(item.Amount.ToString("N2"), font_Data, Brushes.Black, new Rectangle(rectItemAmount.X, rectItemAmount.Y + itemHeight, rectItemAmount.Width, tab1DataHeight), sfAlignCenterRight);
+                            e.Graphics.DrawString(descText, font_Data, Brushes.Black,new Rectangle(rectItemDescription.X, rectItemDescription.Y + itemHeight, rectItemDescription.Width, tab1DataHeight), sfAlignLeftCenter);
+                            e.Graphics.DrawString(item.Quantity.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemQuantity.X, rectItemQuantity.Y + itemHeight, rectItemQuantity.Width, tab1DataHeight), sfAlignCenter);
+                            e.Graphics.DrawString(unitRateToDraw.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemUnitPrice.X, rectItemUnitPrice.Y + itemHeight, rectItemUnitPrice.Width, tab1DataHeight), sfAlignCenterRight);
+                            e.Graphics.DrawString(adjustedAmount.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemAmount.X, rectItemAmount.Y + itemHeight, rectItemAmount.Width, tab1DataHeight), sfAlignCenterRight);
 
-                            totalAmount += item.Amount;
+                            totalAmount += adjustedAmount;
                             itemHeight += tab1DataHeight;
                             continue;
                         }
 
-                        // ✅ Case 2: Description-only line after a Subtotal
+                        // ---------- Case 2: Description-only ----------
                         if (item.Rate == 0 && i > 0 && invoice.Lines[i - 1].Description == "Subtotal")
                         {
-                            e.Graphics.DrawString(descText, font_Data, Brushes.Black, new Rectangle(rectItemDescription.X, rectItemDescription.Y + itemHeight, rectItemDescription.Width, tab1DataHeight), sfAlignLeftCenter);
-                            e.Graphics.DrawString(item.Amount.ToString("N2"), font_Data, Brushes.Black, new Rectangle(rectItemAmount.X, rectItemAmount.Y + itemHeight, rectItemAmount.Width, tab1DataHeight), sfAlignCenterRight);
+                            e.Graphics.DrawString(descText, font_Data, Brushes.Black,new Rectangle(rectItemDescription.X, rectItemDescription.Y + itemHeight, rectItemDescription.Width, tab1DataHeight), sfAlignLeftCenter);
+                            e.Graphics.DrawString(adjustedAmount.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemAmount.X, rectItemAmount.Y + itemHeight, rectItemAmount.Width, tab1DataHeight), sfAlignCenterRight);
 
-                            totalAmount += item.Amount;
+                            totalAmount += adjustedAmount;
                             itemHeight += tab1DataHeight;
                             continue;
                         }
 
-                        // ✅ Case 3: Discount follows item with Rate == 0
+                        // ---------- Case 3: Combined line ----------
                         if (item.Rate == 0 && hasNext && nextItem.Rate == 0 && nextItem.Description != "Subtotal")
                         {
-                            decimal combinedAmount = item.Amount + nextItem.Amount;
+                            decimal combinedAmount = adjustedAmount + nextItem.Amount;
                             string desc = $"{item.Description} ({nextItem.Description})";
-
-                            // apply expiry
                             if (isEnableExpDateChecked && !string.IsNullOrEmpty(item.ExpirationDate))
                             {
                                 desc += " (Exp. " + item.ExpirationDate + ")";
                             }
 
-                            e.Graphics.DrawString(desc, font_Data, Brushes.Black, new Rectangle(rectItemDescription.X, rectItemDescription.Y + itemHeight, rectItemDescription.Width, tab1DataHeight), sfAlignLeftCenter);
-                            e.Graphics.DrawString(item.Quantity.ToString("N2"), font_Data, Brushes.Black, new Rectangle(rectItemQuantity.X, rectItemQuantity.Y + itemHeight, rectItemQuantity.Width, tab1DataHeight), sfAlignCenter);
-                            e.Graphics.DrawString(item.Rate.ToString("N2"), font_Data, Brushes.Black, new Rectangle(rectItemUnitPrice.X, rectItemUnitPrice.Y + itemHeight, rectItemUnitPrice.Width, tab1DataHeight), sfAlignCenterRight);
-                            e.Graphics.DrawString(combinedAmount.ToString("N2"), font_Data, Brushes.Black, new Rectangle(rectItemAmount.X, rectItemAmount.Y + itemHeight, rectItemAmount.Width, tab1DataHeight), sfAlignCenterRight);
+                            e.Graphics.DrawString(desc, font_Data, Brushes.Black,new Rectangle(rectItemDescription.X, rectItemDescription.Y + itemHeight, rectItemDescription.Width, tab1DataHeight), sfAlignLeftCenter);
+                            e.Graphics.DrawString(item.Quantity.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemQuantity.X, rectItemQuantity.Y + itemHeight, rectItemQuantity.Width, tab1DataHeight), sfAlignCenter);
+                            e.Graphics.DrawString(unitRateToDraw.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemUnitPrice.X, rectItemUnitPrice.Y + itemHeight, rectItemUnitPrice.Width, tab1DataHeight), sfAlignCenterRight);
+                            e.Graphics.DrawString(combinedAmount.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemAmount.X, rectItemAmount.Y + itemHeight, rectItemAmount.Width, tab1DataHeight), sfAlignCenterRight);
 
                             totalAmount += combinedAmount;
                             itemHeight += tab1DataHeight;
@@ -300,19 +301,21 @@ namespace Custom_QBSI.Clients.NHC
                             continue;
                         }
 
-                        // ✅ Case 4: Regular line item
-                        e.Graphics.DrawString(descText, font_Data, Brushes.Black, new Rectangle(rectItemDescription.X, rectItemDescription.Y + itemHeight, rectItemDescription.Width, tab1DataHeight), sfAlignLeftCenter);
-                        e.Graphics.DrawString(item.Quantity.ToString("N2"), font_Data, Brushes.Black, new Rectangle(rectItemQuantity.X, rectItemQuantity.Y + itemHeight, rectItemQuantity.Width, tab1DataHeight), sfAlignCenter);
-                        e.Graphics.DrawString(unitRateToDraw.ToString("N2"), font_Data, Brushes.Black, new Rectangle(rectItemUnitPrice.X, rectItemUnitPrice.Y + itemHeight, rectItemUnitPrice.Width, tab1DataHeight), sfAlignCenterRight);
-                        e.Graphics.DrawString(item.Amount.ToString("N2"), font_Data, Brushes.Black, new Rectangle(rectItemAmount.X, rectItemAmount.Y + itemHeight, rectItemAmount.Width, tab1DataHeight), sfAlignCenterRight);
+                        // ---------- Case 4: Regular ----------
+                        e.Graphics.DrawString(descText, font_Data, Brushes.Black,new Rectangle(rectItemDescription.X, rectItemDescription.Y + itemHeight, rectItemDescription.Width, tab1DataHeight), sfAlignLeftCenter);
+                        e.Graphics.DrawString(item.Quantity.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemQuantity.X, rectItemQuantity.Y + itemHeight, rectItemQuantity.Width, tab1DataHeight), sfAlignCenter);
+                        e.Graphics.DrawString(unitRateToDraw.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemUnitPrice.X, rectItemUnitPrice.Y + itemHeight, rectItemUnitPrice.Width, tab1DataHeight), sfAlignCenterRight);
+                        e.Graphics.DrawString(adjustedAmount.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemAmount.X, rectItemAmount.Y + itemHeight, rectItemAmount.Width, tab1DataHeight), sfAlignCenterRight);
 
-                        totalAmount += item.Amount;
+                        totalAmount += adjustedAmount;
                         itemHeight += tab1DataHeight;
                     }
                 }
 
                 itemHeight += tab1DataHeight; // Extra spacing per invoice
             }
+
+
 
 
             // LEFT TABLE
