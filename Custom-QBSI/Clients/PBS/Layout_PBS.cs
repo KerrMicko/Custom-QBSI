@@ -6,6 +6,7 @@ using System.Drawing.Printing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using static Custom_QBSI.Clients.PBS.DataClass_PBS;
 
 namespace Custom_QBSI.Clients.PBS
@@ -628,10 +629,18 @@ namespace Custom_QBSI.Clients.PBS
             e.Graphics.DrawString("Series Range :", fontExtraFieldsFooter, Brushes.Black, rectSeriesRange, sfAlignLeftCenter);
 
             e.Graphics.DrawString(detailedPBS.acNo, fontExtraFieldsFooter, Brushes.Black, rectACNoData, sfAlignLeftCenter);
+
+            // Print Date Issued only if user enabled it
             if (includeDateIssued)
             {
-                //e.Graphics.DrawString(detailedPBS.dateIssued, fontExtraFieldsFooter, Brushes.Black, rectDateIssuedData, sfAlignLeftCenter);
+                if (detailedPBS.dateIssued.HasValue)
+                {
+                    string formattedDate = detailedPBS.dateIssued.Value.ToString("MM/dd/yyyy");
+
+                    e.Graphics.DrawString(formattedDate, fontExtraFieldsFooter, Brushes.Black, rectDateIssuedData, sfAlignLeftCenter);
+                }
             }
+
             e.Graphics.DrawString("000001-9999999999", fontExtraFieldsFooter, Brushes.Black, rectSeriesRangeData, sfAlignLeftCenter);
         }
     }

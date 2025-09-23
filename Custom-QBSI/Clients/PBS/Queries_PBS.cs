@@ -132,31 +132,36 @@ namespace Custom_QBSI.Clients.PBS
 
         public void UpdateACNoAndDateIssued(string acNo, DateTime dateIssued)
         {
-            string accessConnectionString = AccessDatabase.GetAccessConnectionString();
+            string connectionString = AccessDatabase.GetAccessConnectionString();
 
-            try
+            using (OleDbConnection connection = new OleDbConnection(connectionString))
             {
-                using (OleDbConnection connection = new OleDbConnection(accessConnectionString))
+                connection.Open();
+
+                string query = "INSERT INTO DetailedPBS (ACNO, DateIssued) VALUES (?, ?)";
+
+                using (OleDbCommand command = new OleDbCommand(query, connection))
                 {
-                    connection.Open();
+                    command.Parameters.AddWithValue("?", acNo);
+                    command.Parameters.AddWithValue("?", dateIssued.ToString("MM/dd/yyyy"));
+                    // store as string since DateIssued column is Short Text
 
-                    string updateQuery = "UPDATE DetailedPBS SET ACNO = ?, DateIssued = ? WHERE ID = 1";
-                    using (OleDbCommand updateCommand = new OleDbCommand(updateQuery, connection))
+                    int rowsAffected = command.ExecuteNonQuery();
+
+                    if (rowsAffected > 0)
                     {
-                        updateCommand.Parameters.AddWithValue("?", acNo);
-                        updateCommand.Parameters.AddWithValue("?", dateIssued);
-                        updateCommand.ExecuteNonQuery();
+                        MessageBox.Show("Record saved successfully!",
+                                        "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
-                    connection.Close();
+                    else
+                    {
+                        MessageBox.Show("Failed to save record.",
+                                        "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
                 }
-
-                MessageBox.Show("ACNo and DateIssued saved to database.", "Notice", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error saving ACNo and DateIssued: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
 
         public (string acNo, DateTime? dateIssued) RetrieveACNoAndDateIssued()
         {
@@ -166,29 +171,35 @@ namespace Custom_QBSI.Clients.PBS
             {
                 connection.Open();
 
-                string selectQuery = "SELECT ACNO, DateIssued FROM DetailedPBS WHERE ID = 1";
+                string selectQuery = "SELECT TOP 1 ACNO, DateIssued FROM DetailedPBS ORDER BY ID DESC";
+                // Get the latest saved record
+
                 using (OleDbCommand selectCommand = new OleDbCommand(selectQuery, connection))
                 using (OleDbDataReader reader = selectCommand.ExecuteReader())
                 {
                     if (reader.Read())
                     {
                         string acNo = reader["ACNO"].ToString();
-                        DateTime? dateIssued = reader["DateIssued"] != DBNull.Value
-                            ? (DateTime?)Convert.ToDateTime(reader["DateIssued"])
-                            : null;
 
-                        connection.Close();
+                        // Safely parse DateIssued (since it's stored as short text)
+                        DateTime? dateIssued = null;
+                        string dateStr = reader["DateIssued"].ToString();
+
+                        if (!string.IsNullOrWhiteSpace(dateStr) &&
+                            DateTime.TryParse(dateStr, out DateTime parsedDate))
+                        {
+                            dateIssued = parsedDate;
+                        }
+
                         return (acNo, dateIssued);
                     }
                     else
                     {
-                        connection.Close();
                         return (string.Empty, null);
                     }
                 }
             }
         }
-
 
 
 

@@ -165,6 +165,15 @@ namespace Custom_QBSI.Clients.PBS
             };
 
             var detailedPBS = queries_PBS.RetrieveACNoAndDateIssued();
+            if (!string.IsNullOrEmpty(detailedPBS.acNo))
+            {
+                textBox_ACNo.Text = detailedPBS.acNo;
+            }
+            if (detailedPBS.dateIssued.HasValue)
+            {
+                dateTimePicker_DateIssued.Value = detailedPBS.dateIssued.Value;
+            }
+
 
             Label label_PWDSignature = new Label
             {
