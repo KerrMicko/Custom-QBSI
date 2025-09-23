@@ -81,6 +81,8 @@ namespace Custom_QBSI.Clients.PBS
 
         private FlowLayoutPanel Main_PanelDetails()
         {
+            Queries_PBS queries_PBS = new Queries_PBS();
+
             int panelDetailsWidth = sideBarWidth + 30;
             int componentWidth = panelDetailsWidth - 20;
 
@@ -162,6 +164,8 @@ namespace Custom_QBSI.Clients.PBS
                 Value = DateTime.Now,
             };
 
+            var detailedPBS = queries_PBS.RetrieveACNoAndDateIssued();
+
             Label label_PWDSignature = new Label
             {
                 Parent = panel_Details,
@@ -224,6 +228,22 @@ namespace Custom_QBSI.Clients.PBS
                 Text = "VAT Exclusive",
                 Width = componentWidth / 2 - 10,
                 Font = font_Label,
+            };
+
+            Button button_Save = new Button
+            {
+                Parent = panel_Details,
+                Height = 26,
+                Width = sideBarWidth - 30,
+                Text = "SAVE",
+                BackColor = Color.Transparent,
+            };
+            button_Save.Click += (sender, e) =>
+            {
+                queries_PBS.UpdateACNoAndDateIssued(
+                  textBox_ACNo.Text,
+                  dateTimePicker_DateIssued.Value
+                  );
             };
 
             return panel_Details;

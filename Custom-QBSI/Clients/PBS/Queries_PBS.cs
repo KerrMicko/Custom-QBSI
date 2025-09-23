@@ -129,6 +129,69 @@ namespace Custom_QBSI.Clients.PBS
             return invoices;
         }
 
+
+        public void UpdateACNoAndDateIssued(string acNo, DateTime dateIssued)
+        {
+            string accessConnectionString = AccessDatabase.GetAccessConnectionString();
+
+            try
+            {
+                using (OleDbConnection connection = new OleDbConnection(accessConnectionString))
+                {
+                    connection.Open();
+
+                    string updateQuery = "UPDATE DetailedPBS SET ACNO = ?, DateIssued = ? WHERE ID = 1";
+                    using (OleDbCommand updateCommand = new OleDbCommand(updateQuery, connection))
+                    {
+                        updateCommand.Parameters.AddWithValue("?", acNo);
+                        updateCommand.Parameters.AddWithValue("?", dateIssued);
+                        updateCommand.ExecuteNonQuery();
+                    }
+                    connection.Close();
+                }
+
+                MessageBox.Show("ACNo and DateIssued saved to database.", "Notice", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error saving ACNo and DateIssued: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        public (string acNo, DateTime? dateIssued) RetrieveACNoAndDateIssued()
+        {
+            string accessConnectionString = AccessDatabase.GetAccessConnectionString();
+
+            using (OleDbConnection connection = new OleDbConnection(accessConnectionString))
+            {
+                connection.Open();
+
+                string selectQuery = "SELECT ACNO, DateIssued FROM DetailedPBS WHERE ID = 1";
+                using (OleDbCommand selectCommand = new OleDbCommand(selectQuery, connection))
+                using (OleDbDataReader reader = selectCommand.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        string acNo = reader["ACNO"].ToString();
+                        DateTime? dateIssued = reader["DateIssued"] != DBNull.Value
+                            ? (DateTime?)Convert.ToDateTime(reader["DateIssued"])
+                            : null;
+
+                        connection.Close();
+                        return (acNo, dateIssued);
+                    }
+                    else
+                    {
+                        connection.Close();
+                        return (string.Empty, null);
+                    }
+                }
+            }
+        }
+
+
+
+
         public void UpdateSignatory(string preparedBy, string checkedBy, string approvedBy)
         {
             string accessConnectionString = AccessDatabase.GetAccessConnectionString();

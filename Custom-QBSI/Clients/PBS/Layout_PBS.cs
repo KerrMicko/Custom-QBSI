@@ -64,7 +64,6 @@ namespace Custom_QBSI.Clients.PBS
             e.Graphics.DrawString("INVOICE", font_ThirteenBold, Brushes.Black, new PointF(xStart, yStart + 100));
 
             e.Graphics.DrawString("NO. " + seriesNumber, font_Thirteen, Brushes.Red, new PointF(xStart + 650, yStart + 100));
-
             int yStartDetails = 180;
             int rectHeight = 28;
             int rightWidth = 180;
@@ -73,10 +72,18 @@ namespace Custom_QBSI.Clients.PBS
             // LEFT
             Rectangle rectCustomerName = new Rectangle(xStart, yStartDetails, leftWidth, rectHeight);
             Rectangle rectBusinessAddress = new Rectangle(xStart, yStartDetails + rectHeight, leftWidth, rectHeight);
-            Rectangle rectBusinessAddress2 = new Rectangle(xStart, yStartDetails + rectHeight * 2, leftWidth, rectHeight);
+            Rectangle rectBusinessAddress2 = new Rectangle(xStart, yStartDetails + rectHeight * 2 + 5, leftWidth, rectHeight);
 
             Rectangle rectCustomerNameData = new Rectangle(xStart + 140, yStartDetails, leftWidth - 140, rectHeight);
-            Rectangle rectBusinessAddressData = new Rectangle(xStart, yStartDetails + rectHeight + 5, leftWidth, rectHeight * 2);
+
+            // ⬇️ Rectangle only tall enough for 2 lines
+            Rectangle rectBusinessAddressData = new Rectangle(
+                xStart,
+                yStartDetails + rectHeight + 5,
+                leftWidth,
+                rectHeight * 2
+            );
+
             // RIGHT
             Rectangle rectDate = new Rectangle(xStart + leftWidth, yStartDetails, rightWidth, rectHeight);
             Rectangle rectTIN = new Rectangle(xStart + leftWidth, yStartDetails + rectHeight, rightWidth, rectHeight);
@@ -86,23 +93,26 @@ namespace Custom_QBSI.Clients.PBS
             Rectangle rectTINData = new Rectangle(xStart + leftWidth + 30, yStartDetails + rectHeight, rightWidth - 30, rectHeight);
             Rectangle rectTermsData = new Rectangle(xStart + leftWidth + 52, yStartDetails + rectHeight * 2, rightWidth - 52, rectHeight);
 
-            /*e.Graphics.DrawRectangle(Pens.Black, rectCustomerName);
-            e.Graphics.DrawRectangle(Pens.Black, rectBusinessAddress);
-            e.Graphics.DrawRectangle(Pens.Black, rectBusinessAddress2);
-            e.Graphics.DrawRectangle(Pens.Black, rectDate);
-            e.Graphics.DrawRectangle(Pens.Black, rectTIN);
-            e.Graphics.DrawRectangle(Pens.Black, rectTerms);*/
-
-            /*e.Graphics.DrawRectangle(Pens.Black, rectCustomerNameData);
-            e.Graphics.DrawRectangle(Pens.Black, rectBusinessAddressData);
-            e.Graphics.DrawRectangle(Pens.Black, rectDateData);
-            e.Graphics.DrawRectangle(Pens.Black, rectTINData);
-            e.Graphics.DrawRectangle(Pens.Black, rectTermsData);*/
-
             string refNumber = invoiceData[0].RefNumber.ToString();
             string customerName = invoiceData[0].CustomerName.ToString();
-            string businessAddress = invoiceData[0].BillAddress1.ToString() + invoiceData[0].BillAddress2.ToString() + invoiceData[0].BillAddress3.ToString() + invoiceData[0].BillAddress4.ToString() + invoiceData[0].BillAddress5.ToString(); ;
-            string indentedAddress = "                                      " + businessAddress; // 5 spaces = approx. 20-30px
+
+            // ⬇️ build multi-line address with max 2 lines
+            string[] addrParts = new[]
+                        {
+                invoiceData[0].BillAddress1?.ToString(),
+                invoiceData[0].BillAddress2?.ToString(),
+                invoiceData[0].BillAddress3?.ToString(),
+                invoiceData[0].BillAddress4?.ToString(),
+                invoiceData[0].BillAddress5?.ToString()
+            };
+
+            // keep only non-empty lines, max 2
+            var partsList = addrParts.Where(p => !string.IsNullOrWhiteSpace(p))
+                                     .Take(2)
+                                     .ToArray();
+
+            // join with single newline (you can use "\n\n" for extra spacing)
+            string indentedAddress = "                                        " + string.Join("\n\n", partsList);
 
             string date = invoiceData[0].TxnDate.ToString("MM/dd/yyyy");
             string tin = invoiceData[0].TINNO.ToString();
@@ -133,6 +143,9 @@ namespace Custom_QBSI.Clients.PBS
 
             e.Graphics.DrawString("Terms :  _______________", font_Ten, Brushes.Black, rectTerms, sfAlignLeftCenter);
             e.Graphics.DrawString(terms, font_Ten, Brushes.Black, rectTermsData, sfAlignLeftCenter);
+
+
+
 
             // EXTRA FIELDS
             int yStartExtraFields = yStartDetails + rectHeight * 3;
@@ -607,14 +620,17 @@ namespace Custom_QBSI.Clients.PBS
 
             Font fontExtraFieldsFooter = font_Seven;
 
+            queries_PBS = new Queries_PBS();
+            var detailedPBS = queries_PBS.RetrieveACNoAndDateIssued();
+
             e.Graphics.DrawString("AC NO : _______________________", fontExtraFieldsFooter, Brushes.Black, rectACNo, sfAlignLeftCenter);
             e.Graphics.DrawString("Date Issued : ___________________", fontExtraFieldsFooter, Brushes.Black, rectDateIssued, sfAlignLeftCenter);
             e.Graphics.DrawString("Series Range :", fontExtraFieldsFooter, Brushes.Black, rectSeriesRange, sfAlignLeftCenter);
 
-            e.Graphics.DrawString(acNo, fontExtraFieldsFooter, Brushes.Black, rectACNoData, sfAlignLeftCenter);
+            e.Graphics.DrawString(detailedPBS.acNo, fontExtraFieldsFooter, Brushes.Black, rectACNoData, sfAlignLeftCenter);
             if (includeDateIssued)
             {
-                e.Graphics.DrawString(dateIssued.ToString("dd/MM/yyyy"), fontExtraFieldsFooter, Brushes.Black, rectDateIssuedData, sfAlignLeftCenter);
+                //e.Graphics.DrawString(detailedPBS.dateIssued, fontExtraFieldsFooter, Brushes.Black, rectDateIssuedData, sfAlignLeftCenter);
             }
             e.Graphics.DrawString("000001-9999999999", fontExtraFieldsFooter, Brushes.Black, rectSeriesRangeData, sfAlignLeftCenter);
         }
