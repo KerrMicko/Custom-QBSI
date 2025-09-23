@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Custom_QBSI.Clients.PBS;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Printing;
@@ -606,14 +607,22 @@ namespace Custom_QBSI.Clients.Enclosure
 
             Font fontExtraFieldsFooter = font_Seven;
 
+            queries_Enclosure = new Queries_Enclosure();
+            var detailedEnclosure = queries_Enclosure.RetrieveACNoAndDateIssued();
+
             e.Graphics.DrawString("AC NO : _______________________", fontExtraFieldsFooter, Brushes.Black, rectACNo, sfAlignLeftCenter);
             e.Graphics.DrawString("Date Issued : ___________________", fontExtraFieldsFooter, Brushes.Black, rectDateIssued, sfAlignLeftCenter);
             e.Graphics.DrawString("Series Range :", fontExtraFieldsFooter, Brushes.Black, rectSeriesRange, sfAlignLeftCenter);
 
-            e.Graphics.DrawString(acNo, fontExtraFieldsFooter, Brushes.Black, rectACNoData, sfAlignLeftCenter);
+            e.Graphics.DrawString(detailedEnclosure.acNo, fontExtraFieldsFooter, Brushes.Black, rectACNoData, sfAlignLeftCenter);
             if (includeDateIssued)
             {
-                e.Graphics.DrawString(dateIssued.ToString("dd/MM/yyyy"), fontExtraFieldsFooter, Brushes.Black, rectDateIssuedData, sfAlignLeftCenter);
+                if (detailedEnclosure.dateIssued.HasValue)
+                {
+                    string formattedDate = detailedEnclosure.dateIssued.Value.ToString("MM/dd/yyyy");
+                    e.Graphics.DrawString(formattedDate, fontExtraFieldsFooter, Brushes.Black, rectDateIssuedData, sfAlignLeftCenter);
+                }
+                    
             }
             e.Graphics.DrawString("000001-9999999999", fontExtraFieldsFooter, Brushes.Black, rectSeriesRangeData, sfAlignLeftCenter);
         }

@@ -129,6 +129,77 @@ namespace Custom_QBSI.Clients.Enclosure
             return invoices;
         }
 
+        public void UpdateACNoAndDateIssued(string acNo, DateTime dateIssued)
+        {
+            string connectionString = AccessDatabase.GetAccessConnectionString();
+
+            using (OleDbConnection connection = new OleDbConnection(connectionString))
+            {
+                connection.Open();
+
+                string query = "INSERT INTO DetailedEnclosure (ACNO, DateIssued) VALUES (?, ?)";
+
+                using (OleDbCommand command = new OleDbCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("?", acNo);
+                    command.Parameters.AddWithValue("?", dateIssued.ToString("MM/dd/yyyy"));
+                    // store as string since DateIssued column is Short Text
+
+                    int rowsAffected = command.ExecuteNonQuery();
+
+                    if (rowsAffected > 0)
+                    {
+                        MessageBox.Show("Record saved successfully!",
+                                        "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    else
+                    {
+                        MessageBox.Show("Failed to save record.",
+                                        "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+        }
+
+
+        public (string acNo, DateTime? dateIssued) RetrieveACNoAndDateIssued()
+        {
+            string accessConnectionString = AccessDatabase.GetAccessConnectionString();
+
+            using (OleDbConnection connection = new OleDbConnection(accessConnectionString))
+            {
+                connection.Open();
+
+                string selectQuery = "SELECT TOP 1 ACNO, DateIssued FROM DetailedEnclosure ORDER BY ID DESC";
+                // Get the latest saved record
+
+                using (OleDbCommand selectCommand = new OleDbCommand(selectQuery, connection))
+                using (OleDbDataReader reader = selectCommand.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        string acNo = reader["ACNO"].ToString();
+
+                        // Safely parse DateIssued (since it's stored as short text)
+                        DateTime? dateIssued = null;
+                        string dateStr = reader["DateIssued"].ToString();
+
+                        if (!string.IsNullOrWhiteSpace(dateStr) &&
+                            DateTime.TryParse(dateStr, out DateTime parsedDate))
+                        {
+                            dateIssued = parsedDate;
+                        }
+
+                        return (acNo, dateIssued);
+                    }
+                    else
+                    {
+                        return (string.Empty, null);
+                    }
+                }
+            }
+        }
+
         public void UpdateSignatory(string preparedBy, string checkedBy, string approvedBy)
         {
             string accessConnectionString = AccessDatabase.GetAccessConnectionString();

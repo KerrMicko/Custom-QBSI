@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Custom_QBSI.Clients.PBS;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Printing;
@@ -80,6 +81,7 @@ namespace Custom_QBSI.Clients.Enclosure
 
         private FlowLayoutPanel Main_PanelDetails()
         {
+            Queries_Enclosure queries_Enclosure = new Queries_Enclosure();
             int panelDetailsWidth = sideBarWidth + 30;
             int componentWidth = panelDetailsWidth - 20;
 
@@ -161,6 +163,16 @@ namespace Custom_QBSI.Clients.Enclosure
                 Value = DateTime.Now,
             };
 
+            var detailedEnclosure = queries_Enclosure.RetrieveACNoAndDateIssued();
+            if (!string.IsNullOrEmpty(detailedEnclosure.acNo))
+            {
+                textBox_ACNo.Text = detailedEnclosure.acNo;
+            }
+            if (detailedEnclosure.dateIssued.HasValue)
+            {
+                dateTimePicker_DateIssued.Value = detailedEnclosure.dateIssued.Value;
+            }
+
             Label label_PWDSignature = new Label
             {
                 Parent = panel_Details,
@@ -177,6 +189,24 @@ namespace Custom_QBSI.Clients.Enclosure
                 Width = componentWidth,
                 Font = font_Label,
                 Visible = false,
+            };
+
+            Button button_Save = new Button
+            {
+                Parent = panel_Details,
+                Height = 26,
+                Margin = new Padding(0, 10, 0, 10),
+                Width = sideBarWidth + 15,
+                Text = "SAVE",
+                BackColor = Color.Transparent,
+            };
+
+            button_Save.Click += (sender, e) =>
+            {
+                queries_Enclosure.UpdateACNoAndDateIssued(
+                  textBox_ACNo.Text,
+                  dateTimePicker_DateIssued.Value
+                  );
             };
 
             checkBox_EnableExpDate = new CheckBox

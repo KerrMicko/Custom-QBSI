@@ -633,7 +633,7 @@ namespace Custom_QBSI.Clients.PBS
             // Print Date Issued only if user enabled it
             if (includeDateIssued)
             {
-                if (detailedPBS.dateIssued.HasValue)
+                
                 {
                     string formattedDate = detailedPBS.dateIssued.Value.ToString("MM/dd/yyyy");
 
