@@ -192,6 +192,23 @@ namespace Custom_QBSI.Clients.PBS
                 Font = font_Label,
                 Visible = false,
             };
+            Button button_Save = new Button
+            {
+                Parent = panel_Details,
+                Height = 26,
+                Margin = new Padding(0, 10, 0, 10),
+                Width = sideBarWidth + 15,
+                Text = "SAVE",
+                BackColor = Color.Transparent,
+            };
+
+            button_Save.Click += (sender, e) =>
+            {
+                queries_PBS.UpdateACNoAndDateIssued(
+                  textBox_ACNo.Text,
+                  dateTimePicker_DateIssued.Value
+                  );
+            };
 
             checkBox_EnableExpDate = new CheckBox
             {
@@ -239,21 +256,7 @@ namespace Custom_QBSI.Clients.PBS
                 Font = font_Label,
             };
 
-            Button button_Save = new Button
-            {
-                Parent = panel_Details,
-                Height = 26,
-                Width = sideBarWidth - 30,
-                Text = "SAVE",
-                BackColor = Color.Transparent,
-            };
-            button_Save.Click += (sender, e) =>
-            {
-                queries_PBS.UpdateACNoAndDateIssued(
-                  textBox_ACNo.Text,
-                  dateTimePicker_DateIssued.Value
-                  );
-            };
+            
 
             return panel_Details;
         }
