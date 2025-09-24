@@ -49,6 +49,7 @@ namespace Custom_QBSI.Clients.NHC
             public string Tax { get; set; }
             public string UnitOfMeasure { get; set; }
             public string ExpirationDate { get; set; }
+            public string SkuCode { get; set; }
             public string TaxesName { get; set; }
             public decimal Rate { get; set; }
             public decimal Amount { get; set; }

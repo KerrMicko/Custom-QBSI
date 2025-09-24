@@ -50,6 +50,7 @@ namespace Custom_QBSI.Clients.NHC
             public decimal Amount { get; set; }
             public decimal TotalAmount { get; set; }
             public string ExpirationDate { get; set; }
+            public string SkuCode { get; set; }
             public string Tax { get; set; }
             public decimal SalesTaxTotal { get; set; }
             public string ServiceDate { get; set; }

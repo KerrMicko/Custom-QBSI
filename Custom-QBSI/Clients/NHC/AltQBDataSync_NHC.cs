@@ -95,6 +95,7 @@ namespace Custom_QBSI.Clients.NHC
                                         Amount = (decimal?)(line.Amount?.GetValue()) ?? 0m,
                                         TotalAmount = (decimal?)(line.Amount?.GetValue()) ?? 0m,
                                         ExpirationDate = line.Other1?.GetValue() ?? string.Empty,
+                                        SkuCode = line.Other2?.GetValue() ?? string.Empty,
                                         Tax = line.SalesTaxCodeRef?.FullName?.GetValue() ?? string.Empty,
                                         SalesTaxTotal = (decimal?)(line.TaxAmount?.GetValue()) ?? 0m,
                                         ServiceDate = line.ServiceDate != null? line.ServiceDate.GetValue().ToShortDateString():string.Empty

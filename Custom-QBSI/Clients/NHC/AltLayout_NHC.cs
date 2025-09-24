@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Printing;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using static Custom_QBSI.Clients.NHC.AltDataClass_NHC;
@@ -97,7 +98,7 @@ namespace Custom_QBSI.Clients.NHC
 
             int tab1XStart = 68;
             int tab1YStart = 280;
-            int tab1DataHeight = 26;
+            int tab1DataHeight = 40;
 
             int widthItemQuantity = 75;
             int widthItemUOM = 67;
@@ -153,6 +154,13 @@ namespace Custom_QBSI.Clients.NHC
 
                         // Base description with expiry
                         string descText = item.Description;
+                        // Start with SKU first (if available)
+                        if (isEnableExpDateChecked && !string.IsNullOrEmpty(item.SkuCode))
+                        {
+                            descText = item.SkuCode + " " + descText;
+                        }
+
+                        // Then add expiration if enabled
                         if (isEnableExpDateChecked && !string.IsNullOrEmpty(item.ExpirationDate))
                         {
                             descText += " (Exp. " + item.ExpirationDate + ")";
@@ -196,10 +204,18 @@ namespace Custom_QBSI.Clients.NHC
                         {
                             decimal combinedAmount = adjustedAmount + (nextItem.Description.ToLower().Contains("discount") ? nextItem.Amount : (isTaxable ? nextItem.Amount * 1.12m : nextItem.Amount));
                             string desc = $"{item.Description} ({nextItem.Description})";
+                            // Start with SKU first (if available)
+                            if (isEnableExpDateChecked && !string.IsNullOrEmpty(item.SkuCode))
+                            {
+                                desc = item.SkuCode + " " + desc;
+                            }
+
+                            // Then add expiration if enabled
                             if (isEnableExpDateChecked && !string.IsNullOrEmpty(item.ExpirationDate))
                             {
                                 desc += " (Exp. " + item.ExpirationDate + ")";
                             }
+
 
                             e.Graphics.DrawString(desc, font_Data, Brushes.Black,new Rectangle(xStartItemDesc, tab1YStart + itemHeight, widthItemDesc, tab1DataHeight), sfAlignLeftCenter);
                             e.Graphics.DrawString(item.Quantity.ToString("N2"), font_Data, Brushes.Black,new Rectangle(xStartItemQty, tab1YStart + itemHeight, widthItemQuantity, tab1DataHeight), sfAlignCenter);
@@ -243,10 +259,18 @@ namespace Custom_QBSI.Clients.NHC
 
                         // Base description with expiry
                         string descText = item.Description;
+                        // Start with SKU first (if available)
+                        if (isEnableExpDateChecked && !string.IsNullOrEmpty(item.SkuCode))
+                        {
+                            descText = item.SkuCode + " " + descText;
+                        }
+
+                        // Then add expiration if enabled
                         if (isEnableExpDateChecked && !string.IsNullOrEmpty(item.ExpirationDate))
                         {
                             descText += " (Exp. " + item.ExpirationDate + ")";
                         }
+
 
                         // Classification
                         if (invoice.TaxesName == "Zero rated sales")
@@ -285,6 +309,13 @@ namespace Custom_QBSI.Clients.NHC
                         {
                             decimal combinedAmount = adjustedAmount + nextItem.Amount;
                             string desc = $"{item.Description} ({nextItem.Description})";
+                            // Start with SKU first (if available)
+                            if (isEnableExpDateChecked && !string.IsNullOrEmpty(item.SkuCode))
+                            {
+                                desc = item.SkuCode + " " + desc;
+                            }
+
+                            // Then add expiration if enabled
                             if (isEnableExpDateChecked && !string.IsNullOrEmpty(item.ExpirationDate))
                             {
                                 desc += " (Exp. " + item.ExpirationDate + ")";
