@@ -23,7 +23,7 @@ namespace Custom_QBSI
          */
 
 
-        public static string client = "NHC";
+        public static string client = "Enclosure";
     }
     public partial class Dashboard : Form
     {

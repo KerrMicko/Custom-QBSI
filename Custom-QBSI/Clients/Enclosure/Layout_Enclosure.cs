@@ -74,7 +74,7 @@ namespace Custom_QBSI.Clients.Enclosure
             // LEFT
             Rectangle rectCustomerName = new Rectangle(xStart, yStartDetails, leftWidth, rectHeight);
             Rectangle rectBusinessAddress = new Rectangle(xStart, yStartDetails + rectHeight, leftWidth, rectHeight);
-            Rectangle rectBusinessAddress2 = new Rectangle(xStart, yStartDetails + rectHeight * 2, leftWidth, rectHeight);
+            Rectangle rectBusinessAddress2 = new Rectangle(xStart, yStartDetails + rectHeight * 2 + 5, leftWidth, rectHeight);
 
             Rectangle rectCustomerNameData = new Rectangle(xStart + 140, yStartDetails, leftWidth - 140, rectHeight);
             Rectangle rectBusinessAddressData = new Rectangle(xStart, yStartDetails + rectHeight + 5, leftWidth, rectHeight * 2);
@@ -102,8 +102,23 @@ namespace Custom_QBSI.Clients.Enclosure
 
             string refNumber = invoiceData[0].RefNumber.ToString();
             string customerName = invoiceData[0].CustomerName.ToString();
-            string businessAddress = invoiceData[0].BillAddress1.ToString() + invoiceData[0].BillAddress2.ToString() + invoiceData[0].BillAddress3.ToString() + invoiceData[0].BillAddress4.ToString() + invoiceData[0].BillAddress5.ToString(); ;
-            string indentedAddress = "                                      " + businessAddress; // 5 spaces = approx. 20-30px
+            // ⬇️ build multi-line address with max 2 lines
+            string[] addrParts = new[]
+                        {
+                invoiceData[0].BillAddress1?.ToString(),
+                invoiceData[0].BillAddress2?.ToString(),
+                invoiceData[0].BillAddress3?.ToString(),
+                invoiceData[0].BillAddress4?.ToString(),
+                invoiceData[0].BillAddress5?.ToString()
+            };
+
+            // keep only non-empty lines, max 2
+            var partsList = addrParts.Where(p => !string.IsNullOrWhiteSpace(p))
+                                     .Take(2)
+                                     .ToArray();
+
+            // join with single newline (you can use "\n\n" for extra spacing)
+            string indentedAddress = "                                        " + string.Join("\n\n", partsList);
 
             string date = invoiceData[0].TxnDate.ToString("MM/dd/yyyy");
             string tin = invoiceData[0].TINNO.ToString();
