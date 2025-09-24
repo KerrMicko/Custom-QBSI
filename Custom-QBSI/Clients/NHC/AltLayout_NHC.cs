@@ -46,7 +46,8 @@ namespace Custom_QBSI.Clients.NHC
             Rectangle rectSoldTo = new Rectangle(145, 140, 285, 20);
             Rectangle rectBusinessStyle = new Rectangle(325, 160, 285, 20);
             Rectangle rectTIN = new Rectangle(145, 160, 285, 20);
-            Rectangle rectBusinessAdd = new Rectangle(145, 180, 285, 25);
+            Rectangle rectBusinessAdd = new Rectangle(145, 180, 485, 25);
+
 
             string refNumber = invoiceData[0].RefNumber.ToString();
             string date = invoiceData[0].TxnDate.ToString("MM/dd/yyyy");
