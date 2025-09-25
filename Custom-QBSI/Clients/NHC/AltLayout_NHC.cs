@@ -481,7 +481,7 @@ namespace Custom_QBSI.Clients.NHC
                 totalAmountDue -= ewtAmount;
 
             if (totalAmountDue > 0)
-                e.Graphics.DrawString("P" + totalAmountDue.ToString("N2"), font_EightBold, Brushes.Black, rectR7TotalAmountDue, sfAlignCenterRight);
+                e.Graphics.DrawString(totalAmountDue.ToString("N2"), font_EightBold, Brushes.Black, rectR7TotalAmountDue, sfAlignCenterRight);
 
 
             // Signatory
