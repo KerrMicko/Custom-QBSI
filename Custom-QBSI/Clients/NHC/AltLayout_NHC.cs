@@ -333,7 +333,7 @@ namespace Custom_QBSI.Clients.NHC
             /*e.Graphics.DrawRectangle(Pens.Yellow, rectNote);*/
             if (!string.IsNullOrEmpty(invoicenote))
             {
-                e.Graphics.DrawString("Note: " + invoicenote, font_Data, Brushes.Black, rectNote, sfAlignLeftCenter);
+                e.Graphics.DrawString("Note: " + invoicenote, font_EightBold, Brushes.Black, rectNote, sfAlignLeftCenter);
             }
 
 
