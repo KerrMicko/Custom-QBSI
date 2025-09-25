@@ -441,7 +441,7 @@ namespace Custom_QBSI.Clients.NHC
                         {
                             if (comboBox_Forms.SelectedIndex == 1)
                             {
-                                altLayout_NHC.Layout_SalesInvoice(ev, invoice, vatType, businessStyle, signatoryName, isEnableExpDateChecked, isLessEWTChecked);
+                                altLayout_NHC.Layout_SalesInvoice(ev, invoice, note, vatType, businessStyle, signatoryName, isEnableExpDateChecked, isLessEWTChecked);
                                 LogMessage("Printing Sales Invoice layout.");
                             }
                             else if (comboBox_Forms.SelectedIndex == 2)

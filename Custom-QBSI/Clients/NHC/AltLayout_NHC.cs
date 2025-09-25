@@ -34,7 +34,7 @@ namespace Custom_QBSI.Clients.NHC
         StringFormat sfAlignLeftCenter = new StringFormat { Alignment = StringAlignment.Near, LineAlignment = StringAlignment.Center };
         StringFormat sfAlignLeftBottom = new StringFormat { Alignment = StringAlignment.Near, LineAlignment = StringAlignment.Far };
 
-        public void Layout_SalesInvoice(PrintPageEventArgs e, List<InvoiceData> invoiceData, string vatType, string businessStyle, string signatoryName,bool isEnableExpDateChecked, bool isLessEWTChecked)
+        public void Layout_SalesInvoice(PrintPageEventArgs e, List<InvoiceData> invoiceData, string note, string vatType, string businessStyle, string signatoryName,bool isEnableExpDateChecked, bool isLessEWTChecked)
         {
 
             /* Image image = Properties.Resources.NATURE_SI;
@@ -99,7 +99,7 @@ namespace Custom_QBSI.Clients.NHC
 
             int tab1XStart = 68;
             int tab1YStart = 280;
-            int tab1DataHeight = 40;
+            int tab1DataHeight = 25;
 
             int widthItemQuantity = 75;
             int widthItemUOM = 67;
@@ -155,17 +155,14 @@ namespace Custom_QBSI.Clients.NHC
 
                         // Base description with expiry
                         string descText = item.Description;
-                        // Start with SKU first (if available)
                         if (isEnableExpDateChecked && !string.IsNullOrEmpty(item.SkuCode))
-                        {
                             descText = item.SkuCode + " " + descText;
-                        }
-
-                        // Then add expiration if enabled
                         if (isEnableExpDateChecked && !string.IsNullOrEmpty(item.ExpirationDate))
-                        {
                             descText += " (Exp. " + item.ExpirationDate + ")";
-                        }
+
+                        // Measure description height
+                        SizeF descSize = e.Graphics.MeasureString(descText, font_Data, widthItemDesc);
+                        int rowHeight = Math.Max((int)Math.Ceiling(descSize.Height), tab1DataHeight);
 
                         // Classification
                         if (invoice.TaxesName == "Zero rated sales")
@@ -178,25 +175,22 @@ namespace Custom_QBSI.Clients.NHC
                         // ---------- Case 1: Discount line ----------
                         if (isDiscountLine)
                         {
-                            e.Graphics.DrawString(descText, font_Data, Brushes.Black,new Rectangle(xStartItemDesc, tab1YStart + itemHeight, widthItemDesc, tab1DataHeight), sfAlignLeftCenter);
-                            e.Graphics.DrawString(item.Quantity.ToString("N2"), font_Data, Brushes.Black,new Rectangle(xStartItemQty, tab1YStart + itemHeight, widthItemQuantity, tab1DataHeight), sfAlignCenter);
-                            e.Graphics.DrawString(item.UnitOfMeasure, font_Data, Brushes.Black,new Rectangle(xStartItemUOM, tab1YStart + itemHeight, widthItemUOM, tab1DataHeight), sfAlignCenter);
-                            e.Graphics.DrawString(unitRateToDraw.ToString("N2"), font_Data, Brushes.Black,new Rectangle(xStartItemUnitPrice, tab1YStart + itemHeight, widthItemUnitPrice, tab1DataHeight), sfAlignCenterRight);
-                            e.Graphics.DrawString(adjustedAmount.ToString("N2"), font_Data, Brushes.Black,new Rectangle(xStartItemAmount, tab1YStart + itemHeight, widthItemAmount, tab1DataHeight), sfAlignCenterRight);
+                            e.Graphics.DrawString(descText, font_Data, Brushes.Black,new Rectangle(xStartItemDesc, tab1YStart + itemHeight, widthItemDesc, rowHeight), sfAlignLeftCenter);
+                            e.Graphics.DrawString(adjustedAmount.ToString("N2"), font_Data, Brushes.Black,new Rectangle(xStartItemAmount, tab1YStart + itemHeight, widthItemAmount, rowHeight), sfAlignCenterRight);
 
                             totalAmount += adjustedAmount;
-                            itemHeight += tab1DataHeight;
+                            itemHeight += rowHeight;
                             continue;
                         }
 
                         // ---------- Case 2: Description-only after Subtotal ----------
                         if (item.Rate == 0 && i > 0 && invoice.Lines[i - 1].Description == "Subtotal")
                         {
-                            e.Graphics.DrawString(descText, font_Data, Brushes.Black,new Rectangle(xStartItemDesc, tab1YStart + itemHeight, widthItemDesc, tab1DataHeight), sfAlignLeftCenter);
-                            e.Graphics.DrawString(adjustedAmount.ToString("N2"), font_Data, Brushes.Black,new Rectangle(xStartItemAmount, tab1YStart + itemHeight, widthItemAmount, tab1DataHeight), sfAlignCenterRight);
+                            e.Graphics.DrawString(descText, font_Data, Brushes.Black,new Rectangle(xStartItemDesc, tab1YStart + itemHeight, widthItemDesc, rowHeight), sfAlignLeftCenter);
+                            e.Graphics.DrawString(adjustedAmount.ToString("N2"), font_Data, Brushes.Black,new Rectangle(xStartItemAmount, tab1YStart + itemHeight, widthItemAmount, rowHeight), sfAlignCenterRight);
 
                             totalAmount += adjustedAmount;
-                            itemHeight += tab1DataHeight;
+                            itemHeight += rowHeight;
                             continue;
                         }
 
@@ -205,40 +199,35 @@ namespace Custom_QBSI.Clients.NHC
                         {
                             decimal combinedAmount = adjustedAmount + (nextItem.Description.ToLower().Contains("discount") ? nextItem.Amount : (isTaxable ? nextItem.Amount * 1.12m : nextItem.Amount));
                             string desc = $"{item.Description} ({nextItem.Description})";
-                            // Start with SKU first (if available)
                             if (isEnableExpDateChecked && !string.IsNullOrEmpty(item.SkuCode))
-                            {
                                 desc = item.SkuCode + " " + desc;
-                            }
-
-                            // Then add expiration if enabled
                             if (isEnableExpDateChecked && !string.IsNullOrEmpty(item.ExpirationDate))
-                            {
                                 desc += " (Exp. " + item.ExpirationDate + ")";
-                            }
 
+                            SizeF descSize2 = e.Graphics.MeasureString(desc, font_Data, widthItemDesc);
+                            int rowHeight2 = Math.Max((int)Math.Ceiling(descSize2.Height), tab1DataHeight);
 
-                            e.Graphics.DrawString(desc, font_Data, Brushes.Black,new Rectangle(xStartItemDesc, tab1YStart + itemHeight, widthItemDesc, tab1DataHeight), sfAlignLeftCenter);
-                            e.Graphics.DrawString(item.Quantity.ToString("N2"), font_Data, Brushes.Black,new Rectangle(xStartItemQty, tab1YStart + itemHeight, widthItemQuantity, tab1DataHeight), sfAlignCenter);
-                            e.Graphics.DrawString(item.UnitOfMeasure, font_Data, Brushes.Black,new Rectangle(xStartItemUOM, tab1YStart + itemHeight, widthItemUOM, tab1DataHeight), sfAlignCenter);
-                            e.Graphics.DrawString(unitRateToDraw.ToString("N2"), font_Data, Brushes.Black,new Rectangle(xStartItemUnitPrice, tab1YStart + itemHeight, widthItemUnitPrice, tab1DataHeight), sfAlignCenterRight);
-                            e.Graphics.DrawString(combinedAmount.ToString("N2"), font_Data, Brushes.Black,new Rectangle(xStartItemAmount, tab1YStart + itemHeight, widthItemAmount, tab1DataHeight), sfAlignCenterRight);
+                            e.Graphics.DrawString(desc, font_Data, Brushes.Black,new Rectangle(xStartItemDesc, tab1YStart + itemHeight, widthItemDesc, rowHeight2), sfAlignLeftCenter);
+                            e.Graphics.DrawString(item.Quantity.ToString("N2"), font_Data, Brushes.Black,new Rectangle(xStartItemQty, tab1YStart + itemHeight, widthItemQuantity, rowHeight2), sfAlignCenter);
+                            e.Graphics.DrawString(item.UnitOfMeasure, font_Data, Brushes.Black,new Rectangle(xStartItemUOM, tab1YStart + itemHeight, widthItemUOM, rowHeight2), sfAlignCenter);
+                            e.Graphics.DrawString(unitRateToDraw.ToString("N2"), font_Data, Brushes.Black,new Rectangle(xStartItemUnitPrice, tab1YStart + itemHeight, widthItemUnitPrice, rowHeight2), sfAlignCenterRight);
+                            e.Graphics.DrawString(combinedAmount.ToString("N2"), font_Data, Brushes.Black,new Rectangle(xStartItemAmount, tab1YStart + itemHeight, widthItemAmount, rowHeight2), sfAlignCenterRight);
 
                             totalAmount += combinedAmount;
-                            itemHeight += tab1DataHeight;
-                            i++; // Skip next
+                            itemHeight += rowHeight2;
+                            i++;
                             continue;
                         }
 
                         // ---------- Case 4: Regular line ----------
-                        e.Graphics.DrawString(descText, font_Data, Brushes.Black,new Rectangle(xStartItemDesc, tab1YStart + itemHeight, widthItemDesc, tab1DataHeight), sfAlignLeftCenter);
-                        e.Graphics.DrawString(item.Quantity.ToString("N2"), font_Data, Brushes.Black,new Rectangle(xStartItemQty, tab1YStart + itemHeight, widthItemQuantity, tab1DataHeight), sfAlignCenter);
-                        e.Graphics.DrawString(item.UnitOfMeasure, font_Data, Brushes.Black,new Rectangle(xStartItemUOM, tab1YStart + itemHeight, widthItemUOM, tab1DataHeight), sfAlignCenter);
-                        e.Graphics.DrawString(unitRateToDraw.ToString("N2"), font_Data, Brushes.Black,new Rectangle(xStartItemUnitPrice, tab1YStart + itemHeight, widthItemUnitPrice, tab1DataHeight), sfAlignCenterRight);
-                        e.Graphics.DrawString(adjustedAmount.ToString("N2"), font_Data, Brushes.Black,new Rectangle(xStartItemAmount, tab1YStart + itemHeight, widthItemAmount, tab1DataHeight), sfAlignCenterRight);
+                        e.Graphics.DrawString(descText, font_Data, Brushes.Black,new Rectangle(xStartItemDesc, tab1YStart + itemHeight, widthItemDesc, rowHeight), sfAlignLeftCenter);
+                        e.Graphics.DrawString(item.Quantity.ToString("N2"), font_Data, Brushes.Black,new Rectangle(xStartItemQty, tab1YStart + itemHeight, widthItemQuantity, rowHeight), sfAlignCenter);
+                        e.Graphics.DrawString(item.UnitOfMeasure, font_Data, Brushes.Black,new Rectangle(xStartItemUOM, tab1YStart + itemHeight, widthItemUOM, rowHeight), sfAlignCenter);
+                        e.Graphics.DrawString(unitRateToDraw.ToString("N2"), font_Data, Brushes.Black,new Rectangle(xStartItemUnitPrice, tab1YStart + itemHeight, widthItemUnitPrice, rowHeight), sfAlignCenterRight);
+                        e.Graphics.DrawString(adjustedAmount.ToString("N2"), font_Data, Brushes.Black,new Rectangle(xStartItemAmount, tab1YStart + itemHeight, widthItemAmount, rowHeight), sfAlignCenterRight);
 
                         totalAmount += adjustedAmount;
-                        itemHeight += tab1DataHeight;
+                        itemHeight += rowHeight;
                     }
                 }
                 else if (vatType == "Exclusive")
@@ -260,18 +249,14 @@ namespace Custom_QBSI.Clients.NHC
 
                         // Base description with expiry
                         string descText = item.Description;
-                        // Start with SKU first (if available)
                         if (isEnableExpDateChecked && !string.IsNullOrEmpty(item.SkuCode))
-                        {
                             descText = item.SkuCode + " " + descText;
-                        }
-
-                        // Then add expiration if enabled
                         if (isEnableExpDateChecked && !string.IsNullOrEmpty(item.ExpirationDate))
-                        {
                             descText += " (Exp. " + item.ExpirationDate + ")";
-                        }
 
+                        // Measure description height
+                        SizeF descSize = e.Graphics.MeasureString(descText, font_Data, rectItemDescription.Width);
+                        int rowHeight = Math.Max((int)Math.Ceiling(descSize.Height), tab1DataHeight);
 
                         // Classification
                         if (invoice.TaxesName == "Zero rated sales")
@@ -284,24 +269,22 @@ namespace Custom_QBSI.Clients.NHC
                         // ---------- Case 1: Discount ----------
                         if (isDiscountLine)
                         {
-                            e.Graphics.DrawString(descText, font_Data, Brushes.Black,new Rectangle(rectItemDescription.X, rectItemDescription.Y + itemHeight, rectItemDescription.Width, tab1DataHeight), sfAlignLeftCenter);
-                            e.Graphics.DrawString(item.Quantity.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemQuantity.X, rectItemQuantity.Y + itemHeight, rectItemQuantity.Width, tab1DataHeight), sfAlignCenter);
-                            e.Graphics.DrawString(unitRateToDraw.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemUnitPrice.X, rectItemUnitPrice.Y + itemHeight, rectItemUnitPrice.Width, tab1DataHeight), sfAlignCenterRight);
-                            e.Graphics.DrawString(adjustedAmount.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemAmount.X, rectItemAmount.Y + itemHeight, rectItemAmount.Width, tab1DataHeight), sfAlignCenterRight);
+                            e.Graphics.DrawString(descText, font_Data, Brushes.Black,new Rectangle(rectItemDescription.X, rectItemDescription.Y + itemHeight, rectItemDescription.Width, rowHeight), sfAlignLeftCenter);
+                            e.Graphics.DrawString(adjustedAmount.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemAmount.X, rectItemAmount.Y + itemHeight, rectItemAmount.Width, rowHeight), sfAlignCenterRight);
 
                             totalAmount += adjustedAmount;
-                            itemHeight += tab1DataHeight;
+                            itemHeight += rowHeight;
                             continue;
                         }
 
                         // ---------- Case 2: Description-only ----------
                         if (item.Rate == 0 && i > 0 && invoice.Lines[i - 1].Description == "Subtotal")
                         {
-                            e.Graphics.DrawString(descText, font_Data, Brushes.Black,new Rectangle(rectItemDescription.X, rectItemDescription.Y + itemHeight, rectItemDescription.Width, tab1DataHeight), sfAlignLeftCenter);
-                            e.Graphics.DrawString(adjustedAmount.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemAmount.X, rectItemAmount.Y + itemHeight, rectItemAmount.Width, tab1DataHeight), sfAlignCenterRight);
+                            e.Graphics.DrawString(descText, font_Data, Brushes.Black,new Rectangle(rectItemDescription.X, rectItemDescription.Y + itemHeight, rectItemDescription.Width, rowHeight), sfAlignLeftCenter);
+                            e.Graphics.DrawString(adjustedAmount.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemAmount.X, rectItemAmount.Y + itemHeight, rectItemAmount.Width, rowHeight), sfAlignCenterRight);
 
                             totalAmount += adjustedAmount;
-                            itemHeight += tab1DataHeight;
+                            itemHeight += rowHeight;
                             continue;
                         }
 
@@ -310,42 +293,51 @@ namespace Custom_QBSI.Clients.NHC
                         {
                             decimal combinedAmount = adjustedAmount + nextItem.Amount;
                             string desc = $"{item.Description} ({nextItem.Description})";
-                            // Start with SKU first (if available)
                             if (isEnableExpDateChecked && !string.IsNullOrEmpty(item.SkuCode))
-                            {
                                 desc = item.SkuCode + " " + desc;
-                            }
-
-                            // Then add expiration if enabled
                             if (isEnableExpDateChecked && !string.IsNullOrEmpty(item.ExpirationDate))
-                            {
                                 desc += " (Exp. " + item.ExpirationDate + ")";
-                            }
 
-                            e.Graphics.DrawString(desc, font_Data, Brushes.Black,new Rectangle(rectItemDescription.X, rectItemDescription.Y + itemHeight, rectItemDescription.Width, tab1DataHeight), sfAlignLeftCenter);
-                            e.Graphics.DrawString(item.Quantity.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemQuantity.X, rectItemQuantity.Y + itemHeight, rectItemQuantity.Width, tab1DataHeight), sfAlignCenter);
-                            e.Graphics.DrawString(unitRateToDraw.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemUnitPrice.X, rectItemUnitPrice.Y + itemHeight, rectItemUnitPrice.Width, tab1DataHeight), sfAlignCenterRight);
-                            e.Graphics.DrawString(combinedAmount.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemAmount.X, rectItemAmount.Y + itemHeight, rectItemAmount.Width, tab1DataHeight), sfAlignCenterRight);
+                            SizeF descSize2 = e.Graphics.MeasureString(desc, font_Data, rectItemDescription.Width);
+                            int rowHeight2 = Math.Max((int)Math.Ceiling(descSize2.Height), tab1DataHeight);
+
+                            e.Graphics.DrawString(desc, font_Data, Brushes.Black,new Rectangle(rectItemDescription.X, rectItemDescription.Y + itemHeight, rectItemDescription.Width, rowHeight2), sfAlignLeftCenter);
+                            e.Graphics.DrawString(item.Quantity.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemQuantity.X, rectItemQuantity.Y + itemHeight, rectItemQuantity.Width, rowHeight2), sfAlignCenter);
+                            e.Graphics.DrawString(unitRateToDraw.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemUnitPrice.X, rectItemUnitPrice.Y + itemHeight, rectItemUnitPrice.Width, rowHeight2), sfAlignCenterRight);
+                            e.Graphics.DrawString(combinedAmount.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemAmount.X, rectItemAmount.Y + itemHeight, rectItemAmount.Width, rowHeight2), sfAlignCenterRight);
 
                             totalAmount += combinedAmount;
-                            itemHeight += tab1DataHeight;
+                            itemHeight += rowHeight2;
                             i++;
                             continue;
                         }
 
                         // ---------- Case 4: Regular ----------
-                        e.Graphics.DrawString(descText, font_Data, Brushes.Black,new Rectangle(rectItemDescription.X, rectItemDescription.Y + itemHeight, rectItemDescription.Width, tab1DataHeight), sfAlignLeftCenter);
-                        e.Graphics.DrawString(item.Quantity.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemQuantity.X, rectItemQuantity.Y + itemHeight, rectItemQuantity.Width, tab1DataHeight), sfAlignCenter);
-                        e.Graphics.DrawString(unitRateToDraw.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemUnitPrice.X, rectItemUnitPrice.Y + itemHeight, rectItemUnitPrice.Width, tab1DataHeight), sfAlignCenterRight);
-                        e.Graphics.DrawString(adjustedAmount.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemAmount.X, rectItemAmount.Y + itemHeight, rectItemAmount.Width, tab1DataHeight), sfAlignCenterRight);
+                        e.Graphics.DrawString(descText, font_Data, Brushes.Black,new Rectangle(rectItemDescription.X, rectItemDescription.Y + itemHeight, rectItemDescription.Width, rowHeight), sfAlignLeftCenter);
+                        e.Graphics.DrawString(item.Quantity.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemQuantity.X, rectItemQuantity.Y + itemHeight, rectItemQuantity.Width, rowHeight), sfAlignCenter);
+                        e.Graphics.DrawString(unitRateToDraw.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemUnitPrice.X, rectItemUnitPrice.Y + itemHeight, rectItemUnitPrice.Width, rowHeight), sfAlignCenterRight);
+                        e.Graphics.DrawString(adjustedAmount.ToString("N2"), font_Data, Brushes.Black,new Rectangle(rectItemAmount.X, rectItemAmount.Y + itemHeight, rectItemAmount.Width, rowHeight), sfAlignCenterRight);
 
                         totalAmount += adjustedAmount;
-                        itemHeight += tab1DataHeight;
+                        itemHeight += rowHeight;
                     }
                 }
 
                 itemHeight += tab1DataHeight; // Extra spacing per invoice
             }
+
+            string invoicenote = note;
+            
+            Rectangle rectNote = new Rectangle(rectItemQuantity.X, rectItemQuantity.Y + itemHeight, rectItemQuantity.Width + 500, tab1DataHeight);
+
+            /*e.Graphics.DrawRectangle(Pens.Yellow, rectNote);*/
+            if (!string.IsNullOrEmpty(invoicenote))
+            {
+                e.Graphics.DrawString("Note: " + invoicenote, font_Data, Brushes.Black, rectNote, sfAlignLeftCenter);
+            }
+
+
+
 
 
 
@@ -528,18 +520,18 @@ namespace Custom_QBSI.Clients.NHC
             string invoiceTin = "";
             string invoiceStoreCode = "";
             foreach (var inv in invoiceData)
-                {
-                    invoiceTin = inv.GetCustomField("TIN");
-                    if (businessStyle == "")
-                    {
-                        invoiceBusinessStyle = inv.GetCustomField("BUSINESS STYLE");
-                    }
-                    else
-                    {
-                        invoiceBusinessStyle = businessStyle;
-                    }
-                    invoiceStoreCode = inv.GetCustomField("Store Code");
-                }
+            {
+                 invoiceTin = inv.GetCustomField("TIN");
+                 if (businessStyle == "")
+                 {
+                    invoiceBusinessStyle = inv.GetCustomField("BUSINESS STYLE");
+                 }
+                 else
+                 {
+                       invoiceBusinessStyle = businessStyle;
+                 }
+                 invoiceStoreCode = inv.GetCustomField("Store Code");
+             }
             string invoiceBusinessAdd = invoiceData[0].ShipAddress1.ToString() + invoiceData[0].ShipAddress2.ToString() + invoiceData[0].ShipAddress3.ToString() + invoiceData[0].ShipAddress4.ToString() + invoiceData[0].ShipAddress5.ToString();
 
 
