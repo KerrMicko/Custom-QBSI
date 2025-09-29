@@ -531,7 +531,7 @@ namespace Custom_QBSI.Clients.NHC
                 Text = "SEARCH",
                 BackColor = Color.Transparent,
             };
-            button_SearchRefNum.Click += async (sender, e) =>
+            button_SearchRefNum.Click += (sender, e) =>
             {
                 try
                 {
@@ -566,67 +566,86 @@ namespace Custom_QBSI.Clients.NHC
                     string poNumber = textBox_PONumber.Text;
                     string tin = textBox_TIN.Text;
 
-                    using (var progressForm = new Form())
+                    // Create progress form
+                    var progressForm = new Form
                     {
-                        progressForm.StartPosition = FormStartPosition.CenterScreen;
-                        progressForm.Size = new System.Drawing.Size(300, 100);
-                        progressForm.FormBorderStyle = FormBorderStyle.FixedDialog;
-                        progressForm.MaximizeBox = false;
-                        progressForm.MinimizeBox = false;
-                        progressForm.ControlBox = false;
-                        progressForm.Text = "Querying";
+                        StartPosition = FormStartPosition.CenterScreen,
+                        Size = new System.Drawing.Size(300, 100),
+                        FormBorderStyle = FormBorderStyle.FixedDialog,
+                        MaximizeBox = false,
+                        MinimizeBox = false,
+                        ControlBox = false,
+                        Text = "Querying"
+                    };
 
-                        var label = new Label
+                    var label = new Label
+                    {
+                        Text = "Querying data from QuickBooks. Please wait...",
+                        Dock = DockStyle.Fill,
+                        TextAlign = System.Drawing.ContentAlignment.MiddleCenter
+                    };
+                    progressForm.Controls.Add(label);
+
+                    // Handle async query when form is shown
+                    progressForm.Shown += async (s, ev) =>
+                    {
+                        await Task.Run(() =>
                         {
-                            Text = "Querying data from QuickBooks. Please wait...",
-                            Dock = DockStyle.Fill,
-                            TextAlign = System.Drawing.ContentAlignment.MiddleCenter
-                        };
-                        progressForm.Controls.Add(label);
-
-                        progressForm.Show();
-                        progressForm.Refresh();
-
-                        // Run queries in background thread
-                        var invoiceTask = Task.Run(() => AltQBDataSync_NHC.GetInvoiceByRefNumber(refNumber));
-                        var transfersTask = Task.Run(() => AltQBDataSync_NHC.GetTransferInventoryByRefNumber(refNumber));
-
-                        var invoice = await invoiceTask;
-                        var transfers = await transfersTask;
-
-                        progressForm.Close();
-
-                        if (invoice.Count == 0)
-                        {
-                            MessageBox.Show("No invoice found for the given reference number.", "Notice", MessageBoxButtons.OK);
-                            LogMessage($"No invoice found for RefNumber: {refNumber}");
-                            return;
-                        }
-
-                        AltLayout_NHC altLayout_NHC = new AltLayout_NHC();
-                        PaperSize paperSize = new PaperSize("Custom", 850, 1100);
-
-                        printDocument = new PrintDocument();
-                        printDocument.DefaultPageSettings.PaperSize = paperSize;
-                        printDocument.PrinterSettings.DefaultPageSettings.PaperSize = paperSize;
-                        printDocument.PrintPage += (s, ev) =>
-                        {
-                            if (comboBox_Forms.SelectedIndex == 1)
+                            try
                             {
-                                altLayout_NHC.Layout_SalesInvoice(ev, invoice, note, vatType, businessStyle, signatoryName, isEnableExpDateChecked, isLessEWTChecked);
-                                LogMessage("Printing Sales Invoice layout.");
-                            }
-                            else if (comboBox_Forms.SelectedIndex == 2)
-                            {
-                                altLayout_NHC.Layout_DeliveryReceipt(ev, transfers, note, businessStyle, pwdSignature, address, terms, storeCode, poNumber, tin, isEnableExpDateChecked, signatoryName);
-                                LogMessage("Printing Delivery Receipt layout.");
-                            }
-                        };
-                    }
+                                var invoice = AltQBDataSync_NHC.GetInvoiceByRefNumber(refNumber);
+                                var transfers = AltQBDataSync_NHC.GetTransferInventoryByRefNumber(refNumber);
 
-                    printPreviewControl.Document = printDocument;
-                    printPreviewControl.Visible = true;
-                    panel_Printing.Visible = true;
+                                progressForm.Invoke((Action)(() =>
+                                {
+                                    progressForm.Close(); // close modal dialog
+
+                                    if (invoice.Count == 0)
+                                    {
+                                        MessageBox.Show("No invoice found for the given reference number.", "Notice", MessageBoxButtons.OK);
+                                        LogMessage($"No invoice found for RefNumber: {refNumber}");
+                                        return;
+                                    }
+
+                                    AltLayout_NHC altLayout_NHC = new AltLayout_NHC();
+                                    PaperSize paperSize = new PaperSize("Custom", 850, 1100);
+
+                                    printDocument = new PrintDocument();
+                                    printDocument.DefaultPageSettings.PaperSize = paperSize;
+                                    printDocument.PrinterSettings.DefaultPageSettings.PaperSize = paperSize;
+                                    printDocument.PrintPage += (ps, evArgs) =>
+                                    {
+                                        if (comboBox_Forms.SelectedIndex == 1)
+                                        {
+                                            altLayout_NHC.Layout_SalesInvoice(evArgs, invoice, note, vatType, businessStyle, signatoryName, isEnableExpDateChecked, isLessEWTChecked);
+                                            LogMessage("Printing Sales Invoice layout.");
+                                        }
+                                        else if (comboBox_Forms.SelectedIndex == 2)
+                                        {
+                                            altLayout_NHC.Layout_DeliveryReceipt(evArgs, transfers, note, businessStyle, pwdSignature, address, terms, storeCode, poNumber, tin, isEnableExpDateChecked, signatoryName);
+                                            LogMessage("Printing Delivery Receipt layout.");
+                                        }
+                                    };
+
+                                    printPreviewControl.Document = printDocument;
+                                    printPreviewControl.Visible = true;
+                                    panel_Printing.Visible = true;
+                                }));
+                            }
+                            catch (Exception ex)
+                            {
+                                progressForm.Invoke((Action)(() =>
+                                {
+                                    progressForm.Close();
+                                    MessageBox.Show($"An error occurred: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                    LogMessage($"ERROR: {ex}");
+                                }));
+                            }
+                        });
+                    };
+
+                    // Show modal dialog (disables background until closed)
+                    progressForm.ShowDialog();
                 }
                 catch (Exception ex)
                 {
