@@ -188,18 +188,17 @@ namespace Custom_QBSI.Clients.NHC
 
                                             string itemListID = line.ItemRef?.ListID?.GetValue();
 
-                                            // Call GetItemByListID to get UnitOfMeasureListID
+                                            // Get item details including UnitOfMeasureListID and SalesPrice
                                             List<ItemData> itemDetails = GetItemByListID(itemListID);
-                                            string uomListRefID = itemDetails.FirstOrDefault()?.UnitOfMeasureListID;
-
-                                            Console.WriteLine($"UOM ListRefID for {line.ItemRef?.FullName?.GetValue()}: {uomListRefID}");
+                                            ItemData itemInfo = itemDetails.FirstOrDefault();
 
                                             TransferInventoryLineData lineData = new TransferInventoryLineData
                                             {
                                                 ItemRefFullNameTransfer = line.ItemRef?.FullName?.GetValue(),
                                                 ItemRefListID = itemListID,
                                                 QuantityTransfer = line.QuantityTransferred?.GetValue() ?? 0,
-                                                UnitOfMeasureListID = uomListRefID // assign the UOM here
+                                                UnitOfMeasureListID = itemInfo?.UnitOfMeasureListID,
+                                                SalesPrice = itemInfo?.SalesPrice ?? 0
                                             };
 
                                             data.Lines.Add(lineData);
@@ -258,7 +257,7 @@ namespace Custom_QBSI.Clients.NHC
                 IItemInventoryQuery invQuery = requestMsgSet.AppendItemInventoryQueryRq();
                 invQuery.IncludeRetElementList.Add("ListID");
                 invQuery.IncludeRetElementList.Add("UnitOfMeasureSetRef");
-
+                invQuery.IncludeRetElementList.Add("SalesPrice"); // added SalesPrice
 
                 // Send request
                 IMsgSetResponse responseMsgSet = sessionManager.DoRequests(requestMsgSet);
@@ -282,7 +281,8 @@ namespace Custom_QBSI.Clients.NHC
                                 items.Add(new ItemData
                                 {
                                     ListID = invItem.ListID?.GetValue(),
-                                    UnitOfMeasureListID = invItem.UnitOfMeasureSetRef?.ListID?.GetValue()
+                                    UnitOfMeasureListID = invItem.UnitOfMeasureSetRef?.ListID?.GetValue(),
+                                    SalesPrice = invItem.SalesPrice?.GetValue() ?? 0 // added SalesPrice
                                 });
                             }
                         }
@@ -305,6 +305,7 @@ namespace Custom_QBSI.Clients.NHC
 
             return items;
         }
+
 
 
         private static Dictionary<string, string> GetCustomerCustomFields(QBSessionManager sessionManager, string customerListID)

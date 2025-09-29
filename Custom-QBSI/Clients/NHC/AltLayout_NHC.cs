@@ -548,7 +548,7 @@ namespace Custom_QBSI.Clients.NHC
             int widthItemNo = 67;
             int widthItemQuantity = 75;
             int widthItemUnit = 45;
-            int widthItemDescription = 640;
+            int widthItemDescription = 600;
 
             int xStartItemQuantity = tabXStart;
             int xStartItemUnit = tabXStart + widthItemQuantity;
@@ -581,12 +581,19 @@ namespace Custom_QBSI.Clients.NHC
                     // Item Name
                     e.Graphics.DrawString(lineItem.ItemRefFullNameTransfer,font_Data,Brushes.Black,new Rectangle(xStartItemDescription, tabYStart + itemHeight, widthItemDescription, tabDataHeight),sfAlignLeftCenter);
 
+                    // --- Item Amount / SalesPrice ---
+                    if (isEnableExpDateChecked) // your checkbox condition
+                    {
+                        Rectangle rectitemtotAmount = new Rectangle(xStartItemAmount, tabYStart + itemHeight, widthItemDescription, tabDataHeight);
+                        double lineAmount = lineItem.SalesPrice * lineItem.QuantityTransfer;
+
+                        e.Graphics.DrawString(lineItem.SalesPrice.ToString("N2"),font_Data,Brushes.Black, rectitemtotAmount, sfAlignCenterRight);
+                    }
                     // Move down to next row
                     itemHeight += tabDataHeight;
                     counter++;
                 }
             }
-
 
             Rectangle rectNote = new Rectangle(50, tabYStart + itemHeight, widthItemDescription, tabDataHeight);
 

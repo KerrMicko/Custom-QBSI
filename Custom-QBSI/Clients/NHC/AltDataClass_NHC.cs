@@ -76,6 +76,7 @@ namespace Custom_QBSI.Clients.NHC
             public double QuantityTransfer { get; set; }
             public string BaseUnitName { get; set; }
             public string UnitOfMeasureListID { get; set; }
+            public double SalesPrice { get; set; }
         }
 
         public class ItemData
