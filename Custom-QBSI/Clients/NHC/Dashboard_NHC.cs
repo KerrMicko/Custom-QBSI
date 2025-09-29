@@ -32,6 +32,23 @@ namespace Custom_QBSI.Clients.NHC
         private RadioButton radioButton_VATInclusive;
         private RadioButton radioButton_VATExclusive;
 
+        private FlowLayoutPanel panel_POTIN;
+        private Label label_PONumber;
+        private TextBox textBox_PONumber;
+
+        private Label label_TIN;
+        private TextBox textBox_TIN;
+
+        private Label label_Address;
+        private TextBox textBox_Address;
+
+        private Label label_Terms;
+        private TextBox textBox_Terms;
+
+        private Label label_StoreCode;
+        private TextBox textBox_StoreCode;
+
+
         // Signatory
         private TextBox textBox_SignatoryName;
 
@@ -135,6 +152,100 @@ namespace Custom_QBSI.Clients.NHC
                 Visible = false,
             };
 
+            label_Address = new Label
+            {
+                Parent = panel_Details,
+                Width = componentWidth,
+                Text = "Address:",
+                TextAlign = ContentAlignment.MiddleLeft,
+                Font = font_Label,
+                Visible = false, // hidden by default
+            };
+            textBox_Address = new TextBox
+            {
+                Parent = panel_Details,
+                Width = componentWidth,
+                Font = font_Label,
+                Multiline = true,
+                Height = 50,
+                Visible = false, // hidden by default
+            };
+
+            label_Terms = new Label
+            {
+                Parent = panel_Details,
+                Width = componentWidth,
+                Text = "Terms:",
+                TextAlign = ContentAlignment.MiddleLeft,
+                Font = font_Label,
+                Visible = false, // hidden by default
+            };
+            textBox_Terms = new TextBox
+            {
+                Parent = panel_Details,
+                Width = componentWidth,
+                Font = font_Label,
+                Visible = false, // hidden by default
+            };
+
+            label_StoreCode = new Label
+            {
+                Parent = panel_Details,
+                Width = componentWidth,
+                Text = "Store Code:",
+                TextAlign = ContentAlignment.MiddleLeft,
+                Font = font_Label,
+                Visible = false, // hidden by default
+            };
+            textBox_StoreCode = new TextBox
+            {
+                Parent = panel_Details,
+                Width = componentWidth,
+                Font = font_Label,
+                Visible = false, // hidden by default
+            };
+
+            panel_POTIN = new FlowLayoutPanel
+            {
+                Parent = panel_Details,
+                Width = 280,           // max width
+                Height = 30,
+                FlowDirection = FlowDirection.LeftToRight,
+                WrapContents = false,
+                Visible = false // hidden by default
+            };
+
+            label_PONumber = new Label
+            {
+                Parent = panel_POTIN,
+                Width = 35,
+                Text = "PO#:",
+                TextAlign = ContentAlignment.MiddleLeft,
+                Font = font_Label
+            };
+            textBox_PONumber = new TextBox
+            {
+                Parent = panel_POTIN,
+                Width = 89,
+                Font = font_Label
+            };
+
+            label_TIN = new Label
+            {
+                Parent = panel_POTIN,
+                Width = 30,
+                Text = "TIN:",
+                TextAlign = ContentAlignment.MiddleLeft,
+                Font = font_Label
+            };
+            textBox_TIN = new TextBox
+            {
+                Parent = panel_POTIN,
+                Width = 85,
+                Font = font_Label
+            };
+
+
             checkBox_EnableExpDate = new CheckBox
             {
                 Parent = panel_Details,
@@ -172,8 +283,13 @@ namespace Custom_QBSI.Clients.NHC
             };
 
 
+            
+
+
+
             return panel_Details;
         }
+
 
         public Panel TitlePanel()
         {
@@ -422,6 +538,12 @@ namespace Custom_QBSI.Clients.NHC
                         bool isLessEWTChecked = checkBox_LessEWT.Checked;
                         string signatoryName = textBox_SignatoryName.Text;
 
+                        string address = textBox_Address.Text;
+                        string terms = textBox_Terms.Text;
+                        string storeCode = textBox_StoreCode.Text;
+                        string poNumber = textBox_PONumber.Text;
+                        string tin = textBox_TIN.Text;
+
                         List<AltDataClass_NHC.InvoiceData> invoice = AltQBDataSync_NHC.GetInvoiceByRefNumber(refNumber);
                         List<AltDataClass_NHC.TransferInventoryData> transfers = AltQBDataSync_NHC.GetTransferInventoryByRefNumber(refNumber);
 
@@ -448,7 +570,7 @@ namespace Custom_QBSI.Clients.NHC
                             }
                             else if (comboBox_Forms.SelectedIndex == 2)
                             {
-                                altLayout_NHC.Layout_DeliveryReceipt(ev, transfers, note, businessStyle, pwdSignature, isEnableExpDateChecked, signatoryName);
+                                altLayout_NHC.Layout_DeliveryReceipt(ev, transfers, note, businessStyle, pwdSignature, address, terms, storeCode, poNumber, tin, isEnableExpDateChecked, signatoryName);
                                 LogMessage("Printing Delivery Receipt layout.");
                             }
                         };
@@ -628,24 +750,60 @@ namespace Custom_QBSI.Clients.NHC
                 checkBox_EnableExpDate.Visible = true;
                 checkBox_LessEWT.Visible = true;
 
-                // ✅ Show radio buttons again
                 radioButton_VATInclusive.Visible = true;
                 radioButton_VATExclusive.Visible = true;
+
+                label_Address.Visible = false;
+                textBox_Address.Visible = false;
+                label_Terms.Visible = false;
+                textBox_Terms.Visible = false;
+                label_StoreCode.Visible = false;
+                textBox_StoreCode.Visible = false;
+                label_PONumber.Visible = false;
+                textBox_PONumber.Visible = false;
+                label_TIN.Visible = false;
+                textBox_TIN.Visible = false;
+                panel_POTIN.Visible = false;
             }
             else if (comboBox_Forms.SelectedIndex == 2)
             {
                 checkBox_EnableExpDate.Visible = true;
                 checkBox_LessEWT.Visible = false;
+
                 radioButton_VATInclusive.Visible = false;
                 radioButton_VATExclusive.Visible = false;
+
+                label_Address.Visible = true;
+                textBox_Address.Visible = true;
+                label_Terms.Visible = true;
+                textBox_Terms.Visible = true;
+                label_StoreCode.Visible = true;
+                textBox_StoreCode.Visible = true;
+                label_PONumber.Visible = true;
+                textBox_PONumber.Visible = true;
+                label_TIN.Visible = true;
+                textBox_TIN.Visible = true;
+                panel_POTIN.Visible = true;
+
             }
             else
             {
-                // Optional: reset everything if other options are selected
                 checkBox_EnableExpDate.Visible = false;
                 checkBox_LessEWT.Visible = false;
                 radioButton_VATInclusive.Visible = false;
                 radioButton_VATExclusive.Visible = false;
+
+                label_Address.Visible = false;
+                textBox_Address.Visible = false;
+                label_Terms.Visible = false;
+                textBox_Terms.Visible = false;
+                label_StoreCode.Visible = false;
+                textBox_StoreCode.Visible = false;
+                label_PONumber.Visible = false;
+                textBox_PONumber.Visible = false;
+                label_TIN.Visible = false;
+                textBox_TIN.Visible = false;
+                panel_POTIN.Visible = false;
             }
         }
 

@@ -495,7 +495,7 @@ namespace Custom_QBSI.Clients.NHC
 
         }
 
-        public void Layout_DeliveryReceipt(PrintPageEventArgs e, List<TransferInventoryData> transfers, string note, string businessStyle, string pwdSignature, bool isEnableExpDateChecked, string signatoryName)
+        public void Layout_DeliveryReceipt(PrintPageEventArgs e, List<TransferInventoryData> transfers, string note, string businessStyle, string pwdSignature,string address,string terms, string storeCode, string poNumber, string tin, bool isEnableExpDateChecked, string signatoryName)
         {
             /*Image image = Properties.Resources.NATURE_DR;
             e.Graphics.DrawImage(image, e.PageBounds);*/
@@ -506,7 +506,7 @@ namespace Custom_QBSI.Clients.NHC
             Rectangle rectSoldTo = new Rectangle(125, 135, 285, 20);
             Rectangle rectBusinessStyle = new Rectangle(615, 138, 205, 20);
             Rectangle rectTIN = new Rectangle(125, 155, 285, 20);
-            Rectangle rectBusinessAdd = new Rectangle(125, 175, 285, 25);
+            Rectangle rectBusinessAdd = new Rectangle(125, 175, 500, 25);
 
             /*e.Graphics.DrawRectangle(Pens.Orange, rectDate);
             e.Graphics.DrawRectangle(Pens.Orange, rectSoldTo);
@@ -515,12 +515,14 @@ namespace Custom_QBSI.Clients.NHC
             e.Graphics.DrawRectangle(Pens.Green, rectBusinessAdd);*/
 
             string Date = transfers[0].TxnDate.ToString("MM/dd/yyyy");
-            string invoiceTin = "";
-            string invoiceBusinessAdd = "";
-           
+            string invoiceTin = tin;
+            string invoiceBusinessAdd = address;
+            string invoiceBusinessStyle = businessStyle;
+
 
             e.Graphics.DrawString(Date, font_Data, Brushes.Black, rectDate, sfAlignCenter);
             e.Graphics.DrawString(invoiceTin, font_Data, Brushes.Black, rectTIN);
+            e.Graphics.DrawString(invoiceBusinessStyle, font_Data, Brushes.Black, rectBusinessStyle);
             e.Graphics.DrawString(invoiceBusinessAdd, font_Data, Brushes.Black, rectBusinessAdd);
 
             Rectangle rectPoNo = new Rectangle(125, 205, 285, 15);
@@ -531,9 +533,9 @@ namespace Custom_QBSI.Clients.NHC
             e.Graphics.DrawRectangle(Pens.Yellow, rectStoreCode);
             e.Graphics.DrawRectangle(Pens.Pink, rectTerms);*/
 
-            string invoicePoNo = "";
-            string invoiceTerms = "";
-            string invoiceStoreCode = "";
+            string invoicePoNo = poNumber;
+            string invoiceTerms = terms;
+            string invoiceStoreCode = storeCode;
 
             e.Graphics.DrawString(invoicePoNo, font_Data, Brushes.Black, rectPoNo);
             e.Graphics.DrawString(invoiceStoreCode, font_Data, Brushes.Black, rectStoreCode);
@@ -574,22 +576,17 @@ namespace Custom_QBSI.Clients.NHC
                 {
                     // Quantity
                     e.Graphics.DrawString(lineItem.QuantityTransfer.ToString("N2"),font_Data,Brushes.Black,new Rectangle(xStartItemQuantity, tabYStart + itemHeight, widthItemQuantity, tabDataHeight),sfAlignCenter);
-
-                    // Unit of Measure (if you added this property to your TransferInventoryLineData)
                     e.Graphics.DrawString(lineItem.BaseUnitName,font_Data,Brushes.Black,new Rectangle(xStartItemUnit, tabYStart + itemHeight, widthItemUnit, tabDataHeight),sfAlignCenter);
-
-                    // Item Name
                     e.Graphics.DrawString(lineItem.ItemRefFullNameTransfer,font_Data,Brushes.Black,new Rectangle(xStartItemDescription, tabYStart + itemHeight, widthItemDescription, tabDataHeight),sfAlignLeftCenter);
 
-                    // --- Item Amount / SalesPrice ---
-                    if (isEnableExpDateChecked) // your checkbox condition
+                    if (isEnableExpDateChecked)
                     {
                         Rectangle rectitemtotAmount = new Rectangle(xStartItemAmount, tabYStart + itemHeight, widthItemDescription, tabDataHeight);
                         double lineAmount = lineItem.SalesPrice * lineItem.QuantityTransfer;
 
                         e.Graphics.DrawString(lineItem.SalesPrice.ToString("N2"),font_Data,Brushes.Black, rectitemtotAmount, sfAlignCenterRight);
                     }
-                    // Move down to next row
+
                     itemHeight += tabDataHeight;
                     counter++;
                 }
