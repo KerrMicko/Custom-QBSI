@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -182,6 +183,7 @@ namespace Custom_QBSI.Clients.NHC
 
                                     if (ti.TransferInventoryLineRetList != null && ti.TransferInventoryLineRetList.Count > 0)
                                     {
+                                        // Inside the loop for each TransferInventoryLineRet
                                         for (int k = 0; k < ti.TransferInventoryLineRetList.Count; k++)
                                         {
                                             ITransferInventoryLineRet line = ti.TransferInventoryLineRetList.GetAt(k);
@@ -192,12 +194,20 @@ namespace Custom_QBSI.Clients.NHC
                                             List<ItemData> itemDetails = GetItemByListID(itemListID);
                                             ItemData itemInfo = itemDetails.FirstOrDefault();
 
+                                            // Get BaseUnitName using UnitOfMeasureListID
+                                            string baseUnitName = null;
+                                            if (!string.IsNullOrEmpty(itemInfo?.UnitOfMeasureListID))
+                                            {
+                                                baseUnitName = GetBaseUnitNameByUOMListID(itemInfo.UnitOfMeasureListID);
+                                            }
+
                                             TransferInventoryLineData lineData = new TransferInventoryLineData
                                             {
                                                 ItemRefFullNameTransfer = line.ItemRef?.FullName?.GetValue(),
                                                 ItemRefListID = itemListID,
                                                 QuantityTransfer = line.QuantityTransferred?.GetValue() ?? 0,
                                                 UnitOfMeasureListID = itemInfo?.UnitOfMeasureListID,
+                                                BaseUnitName = baseUnitName,   // <-- added here
                                                 SalesPrice = itemInfo?.SalesPrice ?? 0
                                             };
 
@@ -305,6 +315,71 @@ namespace Custom_QBSI.Clients.NHC
 
             return items;
         }
+
+        public static string GetBaseUnitNameByUOMListID(string uomListID)
+        {
+            if (string.IsNullOrEmpty(uomListID)) return null;
+
+            QBSessionManager sessionManager = new QBSessionManager();
+            string baseUnitName = null;
+
+            try
+            {
+                string AppName = "QBSI";
+                LogDataSync($"Opening QuickBooks session for UOM ListID: {uomListID}");
+
+                sessionManager.OpenConnection("", AppName);
+                sessionManager.BeginSession("", ENOpenMode.omDontCare);
+
+                IMsgSetRequest requestMsgSet = sessionManager.CreateMsgSetRequest("US", 13, 0);
+                requestMsgSet.Attributes.OnError = ENRqOnError.roeContinue;
+
+                // --- UnitOfMeasureSet Query ---
+                IUnitOfMeasureSetQuery uomQuery = requestMsgSet.AppendUnitOfMeasureSetQueryRq();
+                uomQuery.IncludeRetElementList.Add("ListID");
+                uomQuery.IncludeRetElementList.Add("BaseUnit");
+
+                // Send request
+                IMsgSetResponse responseMsgSet = sessionManager.DoRequests(requestMsgSet);
+
+                if (responseMsgSet?.ResponseList != null && responseMsgSet.ResponseList.Count > 0)
+                {
+                    IResponse response = responseMsgSet.ResponseList.GetAt(0);
+
+                    IUnitOfMeasureSetRetList uomList = response.Detail as IUnitOfMeasureSetRetList;
+                    if (uomList != null && uomList.Count > 0)
+                    {
+                        for (int i = 0; i < uomList.Count; i++)
+                        {
+                            IUnitOfMeasureSetRet uom = uomList.GetAt(i);
+                            if (uom.ListID?.GetValue().Equals(uomListID, StringComparison.OrdinalIgnoreCase) == true)
+                            {
+                                baseUnitName = uom.BaseUnit?.Name?.GetValue();
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogDataSync($"Error in GetBaseUnitNameByUOMListID: {ex.Message}");
+            }
+            finally
+            {
+                sessionManager.EndSession();
+                sessionManager.CloseConnection();
+            }
+
+            return baseUnitName;
+        }
+
+
+
+
+
+
+
+
 
 
 

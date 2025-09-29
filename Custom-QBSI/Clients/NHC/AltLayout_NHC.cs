@@ -595,9 +595,12 @@ namespace Custom_QBSI.Clients.NHC
                 }
             }
 
-            Rectangle rectNote = new Rectangle(50, tabYStart + itemHeight, widthItemDescription, tabDataHeight);
+            if (!string.IsNullOrEmpty(note))
+            {
+                Rectangle rectNote = new Rectangle(50, tabYStart + itemHeight, widthItemDescription, tabDataHeight);
+                e.Graphics.DrawString("Note: " + note, font_Data, Brushes.Black, rectNote, sfAlignLeftCenter);
+            }
 
-            e.Graphics.DrawString("Note: " + note, font_Data, Brushes.Black, rectNote, sfAlignLeftCenter);
 
             // Signatory
             string Signatory = signatoryName;
