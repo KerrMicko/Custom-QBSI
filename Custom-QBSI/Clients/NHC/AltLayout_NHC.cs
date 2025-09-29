@@ -495,7 +495,7 @@ namespace Custom_QBSI.Clients.NHC
 
         }
 
-        public void Layout_DeliveryReceipt(PrintPageEventArgs e, List<InvoiceData> invoiceData, string note, string businessStyle, string pwdSignature, bool isEnableExpDateChecked, string signatoryName)
+        public void Layout_DeliveryReceipt(PrintPageEventArgs e, List<TransferInventoryData> transfers, string note, string businessStyle, string pwdSignature, bool isEnableExpDateChecked, string signatoryName)
         {
             /*Image image = Properties.Resources.NATURE_DR;
             e.Graphics.DrawImage(image, e.PageBounds);*/
@@ -514,30 +514,12 @@ namespace Custom_QBSI.Clients.NHC
             e.Graphics.DrawRectangle(Pens.Blue, rectTIN);
             e.Graphics.DrawRectangle(Pens.Green, rectBusinessAdd);*/
 
-            string Date = invoiceData[0].TxnDate.ToString("MM/dd/yyyy");
-            string invoiceSoldTo = invoiceData[0].CustomerName.ToString();
-            string invoiceBusinessStyle = "";
+            string Date = transfers[0].TxnDate.ToString("MM/dd/yyyy");
             string invoiceTin = "";
-            string invoiceStoreCode = "";
-            foreach (var inv in invoiceData)
-            {
-                 invoiceTin = inv.GetCustomField("TIN");
-                 if (businessStyle == "")
-                 {
-                    invoiceBusinessStyle = inv.GetCustomField("BUSINESS STYLE");
-                 }
-                 else
-                 {
-                       invoiceBusinessStyle = businessStyle;
-                 }
-                 invoiceStoreCode = inv.GetCustomField("Store Code");
-             }
-            string invoiceBusinessAdd = invoiceData[0].ShipAddress1.ToString() + invoiceData[0].ShipAddress2.ToString() + invoiceData[0].ShipAddress3.ToString() + invoiceData[0].ShipAddress4.ToString() + invoiceData[0].ShipAddress5.ToString();
-
+            string invoiceBusinessAdd = "";
+           
 
             e.Graphics.DrawString(Date, font_Data, Brushes.Black, rectDate, sfAlignCenter);
-            e.Graphics.DrawString(invoiceSoldTo, font_Data, Brushes.Black, rectSoldTo);
-            e.Graphics.DrawString(invoiceBusinessStyle, font_Data, Brushes.Black, rectBusinessStyle);
             e.Graphics.DrawString(invoiceTin, font_Data, Brushes.Black, rectTIN);
             e.Graphics.DrawString(invoiceBusinessAdd, font_Data, Brushes.Black, rectBusinessAdd);
 
@@ -549,8 +531,9 @@ namespace Custom_QBSI.Clients.NHC
             e.Graphics.DrawRectangle(Pens.Yellow, rectStoreCode);
             e.Graphics.DrawRectangle(Pens.Pink, rectTerms);*/
 
-            string invoicePoNo = invoiceData[0].PONumber.ToString();
-            string invoiceTerms = invoiceData[0].Terms.ToString();
+            string invoicePoNo = "";
+            string invoiceTerms = "";
+            string invoiceStoreCode = "";
 
             e.Graphics.DrawString(invoicePoNo, font_Data, Brushes.Black, rectPoNo);
             e.Graphics.DrawString(invoiceStoreCode, font_Data, Brushes.Black, rectStoreCode);
@@ -582,41 +565,31 @@ namespace Custom_QBSI.Clients.NHC
             e.Graphics.DrawRectangle(Pens.Pink, rectItemDescription);
             e.Graphics.DrawRectangle(Pens.Blue, rectItemAmount);*/
 
-            decimal totalAmount = 0;
             int itemHeight = 0;
             int counter = 1;
 
-            foreach (var invoice in invoiceData)
+            foreach (var tran in transfers)
             {
-                foreach (var lineItem in invoice.Lines)
+                foreach (var lineItem in tran.Lines)
                 {
-                    e.Graphics.DrawString(lineItem.Quantity.ToString("N2"), font_Data, Brushes.Black, new Rectangle(xStartItemQuantity, tabYStart + itemHeight, widthItemQuantity, tabDataHeight), sfAlignCenter);
-                    e.Graphics.DrawString(lineItem.UnitOfMeasure, font_Data, Brushes.Black, new Rectangle(xStartItemUnit, tabYStart + itemHeight, widthItemUnit, tabDataHeight), sfAlignCenter);
+                    // Quantity
+                    e.Graphics.DrawString(lineItem.QuantityTransfer.ToString("N2"),font_Data,Brushes.Black,new Rectangle(xStartItemQuantity, tabYStart + itemHeight, widthItemQuantity, tabDataHeight),sfAlignCenter);
 
-                    if (isEnableExpDateChecked)
-                    {
-                        e.Graphics.DrawString(lineItem.Description + "(Exp." + lineItem.ExpirationDate + ")", font_Data, Brushes.Black, new Rectangle(xStartItemDescription, tabYStart + itemHeight, widthItemDescription, tabDataHeight), sfAlignLeftCenter);
-                        e.Graphics.DrawString(lineItem.Amount.ToString("N2"), font_Data, Brushes.Black, new Rectangle(xStartItemAmount, tabYStart + itemHeight, widthItemDescription, tabDataHeight), sfAlignCenterRight);
-                        totalAmount += lineItem.Amount;
-                    }
-                    else
-                    {
-                        e.Graphics.DrawString(lineItem.Description, font_Data, Brushes.Black, new Rectangle(xStartItemDescription, tabYStart + itemHeight, widthItemDescription, tabDataHeight), sfAlignLeftCenter);
-                    }
+                    // Unit of Measure (if you added this property to your TransferInventoryLineData)
+                    e.Graphics.DrawString(lineItem.BaseUnitName,font_Data,Brushes.Black,new Rectangle(xStartItemUnit, tabYStart + itemHeight, widthItemUnit, tabDataHeight),sfAlignCenter);
 
+                    // Item Name
+                    e.Graphics.DrawString(lineItem.ItemRefFullNameTransfer,font_Data,Brushes.Black,new Rectangle(xStartItemDescription, tabYStart + itemHeight, widthItemDescription, tabDataHeight),sfAlignLeftCenter);
 
+                    // Move down to next row
                     itemHeight += tabDataHeight;
                     counter++;
                 }
             }
 
-            Rectangle rectTotalAmount = new Rectangle(xStartItemAmount, tabYStart + itemHeight, widthItemDescription, tabDataHeight);
+
             Rectangle rectNote = new Rectangle(50, tabYStart + itemHeight, widthItemDescription, tabDataHeight);
 
-            if (isEnableExpDateChecked)
-            {
-                e.Graphics.DrawString(totalAmount.ToString("N2"), font_Data, Brushes.Black, rectTotalAmount, sfAlignCenterRight);
-            }
             e.Graphics.DrawString("Note: " + note, font_Data, Brushes.Black, rectNote, sfAlignLeftCenter);
 
             // Signatory

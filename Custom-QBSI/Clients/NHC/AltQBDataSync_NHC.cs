@@ -132,6 +132,186 @@ namespace Custom_QBSI.Clients.NHC
             return invoices;
         }
 
+        public static List<TransferInventoryData> GetTransferInventoryByRefNumber(string refNumber)
+        {
+            QBSessionManager sessionManager = new QBSessionManager();
+            List<TransferInventoryData> transfers = new List<TransferInventoryData>();
+
+            try
+            {
+                string AppName = "QBSI";
+                LogDataSync($"Opening QuickBooks session for TransferInventory RefNumber: {refNumber}");
+
+                // Start QuickBooks session
+                sessionManager.OpenConnection("", AppName);
+                sessionManager.BeginSession("", ENOpenMode.omDontCare);
+
+                IMsgSetRequest requestMsgSet = sessionManager.CreateMsgSetRequest("US", 13, 0);
+                requestMsgSet.Attributes.OnError = ENRqOnError.roeContinue;
+
+                // Build TransferInventory query
+                ITransferInventoryQuery tiQuery = requestMsgSet.AppendTransferInventoryQueryRq();
+                tiQuery.IncludeLineItems.SetValue(true);
+
+                // Send request
+                IMsgSetResponse responseMsgSet = sessionManager.DoRequests(requestMsgSet);
+
+                if (responseMsgSet != null && responseMsgSet.ResponseList != null)
+                {
+                    for (int i = 0; i < responseMsgSet.ResponseList.Count; i++)
+                    {
+                        IResponse response = responseMsgSet.ResponseList.GetAt(i);
+                        ITransferInventoryRetList tiList = response.Detail as ITransferInventoryRetList;
+
+                        if (tiList != null)
+                        {
+                            for (int j = 0; j < tiList.Count; j++)
+                            {
+                                ITransferInventoryRet ti = tiList.GetAt(j);
+
+                                // ✅ Filter manually by RefNumber
+                                if (ti.RefNumber != null && ti.RefNumber.GetValue().Equals(refNumber, StringComparison.OrdinalIgnoreCase))
+                                {
+                                    TransferInventoryData data = new TransferInventoryData
+                                    {
+                                        TxnID = ti.TxnID?.GetValue(),
+                                        TxnDate = ti.TxnDate?.GetValue() ?? DateTime.MinValue,
+                                        RefNumber = ti.RefNumber?.GetValue(),
+                                        Lines = new List<TransferInventoryLineData>()
+                                    };
+
+                                    if (ti.TransferInventoryLineRetList != null)
+                                    {
+                                        for (int k = 0; k < ti.TransferInventoryLineRetList.Count; k++)
+                                        {
+                                            ITransferInventoryLineRet line = ti.TransferInventoryLineRetList.GetAt(k);
+
+                                            string itemListID = line.ItemRef?.ListID?.GetValue();
+                                            string uomSetListID = GetUnitOfMeasureSetListID(sessionManager, itemListID); // ✅ now returns UnitOfMeasureSetRef.ListID
+                                            string baseUnitName = GetBaseUnitName(sessionManager, uomSetListID);        // ✅ fetch base unit name
+
+                                            TransferInventoryLineData lineData = new TransferInventoryLineData
+                                            {
+                                                ItemRefFullNameTransfer = line.ItemRef?.FullName?.GetValue(),
+                                                ItemRefListID = itemListID,
+                                                QuantityTransfer = line.QuantityTransferred?.GetValue() ?? 0,
+                                                BaseUnitName = baseUnitName  // ✅ you now have the base unit name
+                                            };
+
+                                            data.Lines.Add(lineData);
+                                        }
+                                    }
+
+                                    transfers.Add(data);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogDataSync($"Error in GetTransferInventoryByRefNumber: {ex.Message}");
+            }
+            finally
+            {
+                sessionManager.EndSession();
+                sessionManager.CloseConnection();
+            }
+
+            return transfers;
+        }
+
+        private static string GetUnitOfMeasureSetListID(QBSessionManager sessionManager, string itemListID)
+        {
+            if (string.IsNullOrWhiteSpace(itemListID))
+                return null;
+
+            IMsgSetRequest requestMsgSet = sessionManager.CreateMsgSetRequest("US", 13, 0);
+            requestMsgSet.Attributes.OnError = ENRqOnError.roeContinue;
+
+            IItemQuery itemQuery = requestMsgSet.AppendItemQueryRq();
+            itemQuery.ORListQuery.ListIDList.Add(itemListID);
+
+            IMsgSetResponse responseMsgSet = sessionManager.DoRequests(requestMsgSet);
+            if (responseMsgSet?.ResponseList == null || responseMsgSet.ResponseList.Count == 0)
+                return null;
+
+            IResponse response = responseMsgSet.ResponseList.GetAt(0);
+            if (response?.Detail == null)
+                return null;
+
+            // check for known item types
+            switch (response.Detail)
+            {
+                case IItemInventoryRet invItem:
+                    return invItem.UnitOfMeasureSetRef?.ListID?.GetValue();
+
+                case IItemServiceRet serviceItem:
+                    return serviceItem.UnitOfMeasureSetRef?.ListID?.GetValue();
+
+                case IItemNonInventoryRet nonInvItem:
+                    return nonInvItem.UnitOfMeasureSetRef?.ListID?.GetValue();
+
+                case IItemInventoryAssemblyRet assemblyItem:
+                    return assemblyItem.UnitOfMeasureSetRef?.ListID?.GetValue();
+
+                default:
+                    return null; // if item type doesn’t have UOM
+            }
+        }
+
+
+        private static string GetBaseUnitName(QBSessionManager sessionManager, string uomSetListID)
+        {
+            if (string.IsNullOrEmpty(uomSetListID))
+            {
+                Console.WriteLine("⚠️ No UnitOfMeasureSetRef found.");
+                return null;
+            }
+
+            IMsgSetRequest request = sessionManager.CreateMsgSetRequest("US", 13, 0);
+            request.Attributes.OnError = ENRqOnError.roeContinue;
+
+            IUnitOfMeasureSetQuery query = request.AppendUnitOfMeasureSetQueryRq();
+            query.ORListQuery.ListIDList.Add(uomSetListID);
+
+            IMsgSetResponse response = sessionManager.DoRequests(request);
+
+            if (response.ResponseList.Count > 0)
+            {
+                IResponse resp = response.ResponseList.GetAt(0);
+                if (resp.Detail is IUnitOfMeasureSetRet uomSet)
+                {
+                    if (uomSet.BaseUnit != null && uomSet.BaseUnit.Name != null)
+                    {
+                        string baseName = uomSet.BaseUnit.Name.GetValue();
+                        Console.WriteLine($"✅ BaseUnitName found: {baseName}");
+                        return baseName;
+                    }
+                    else
+                    {
+                        Console.WriteLine("⚠️ BaseUnitName is null in UOMSet.");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("⚠️ No IUnitOfMeasureSetRet detail returned.");
+                }
+            }
+            else
+            {
+                Console.WriteLine("⚠️ No response from UnitOfMeasureSetQuery.");
+            }
+
+            return null;
+        }
+
+
+
+
+
+
         private static Dictionary<string, string> GetCustomerCustomFields(QBSessionManager sessionManager, string customerListID)
         {
             var customFields = new Dictionary<string, string>();

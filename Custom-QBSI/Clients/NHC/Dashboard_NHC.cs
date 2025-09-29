@@ -423,6 +423,7 @@ namespace Custom_QBSI.Clients.NHC
                         string signatoryName = textBox_SignatoryName.Text;
 
                         List<AltDataClass_NHC.InvoiceData> invoice = AltQBDataSync_NHC.GetInvoiceByRefNumber(refNumber);
+                        List<AltDataClass_NHC.TransferInventoryData> transfers = AltQBDataSync_NHC.GetTransferInventoryByRefNumber(refNumber);
 
                         if (invoice.Count == 0)
                         {
@@ -432,6 +433,7 @@ namespace Custom_QBSI.Clients.NHC
                         }
 
                         AltLayout_NHC altLayout_NHC = new AltLayout_NHC();
+
                         PaperSize paperSize = new PaperSize("Custom", 850, 1100);
 
                         printDocument = new PrintDocument();
@@ -446,7 +448,7 @@ namespace Custom_QBSI.Clients.NHC
                             }
                             else if (comboBox_Forms.SelectedIndex == 2)
                             {
-                                altLayout_NHC.Layout_DeliveryReceipt(ev, invoice, note, businessStyle, pwdSignature, isEnableExpDateChecked, signatoryName);
+                                altLayout_NHC.Layout_DeliveryReceipt(ev, transfers, note, businessStyle, pwdSignature, isEnableExpDateChecked, signatoryName);
                                 LogMessage("Printing Delivery Receipt layout.");
                             }
                         };

@@ -56,5 +56,25 @@ namespace Custom_QBSI.Clients.NHC
             public string ServiceDate { get; set; }
 
         }
+
+        public class TransferInventoryData
+        {
+            public string TxnID { get; set; }
+            public DateTime TxnDate { get; set; }
+            public string RefNumber { get; set; }
+            public string Memo { get; set; }
+            public List<TransferInventoryLineData> Lines { get; set; } = new List<TransferInventoryLineData>();
+        }
+
+        public class TransferInventoryLineData
+        {
+            public string TxnID { get; set; }
+            public DateTime TxnDate { get; set; }
+            public string RefNumber { get; set; }
+            public string ItemRefListID { get; set; }
+            public string ItemRefFullNameTransfer { get; set; }
+            public double QuantityTransfer { get; set; }
+            public string BaseUnitName { get; set; }
+        }
     }
 }
