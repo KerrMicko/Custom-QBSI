@@ -274,7 +274,6 @@ namespace Custom_QBSI.Clients.NHC
 
                 if (responseMsgSet?.ResponseList != null && responseMsgSet.ResponseList.Count > 0)
                 {
-                    // --- Inventory Items ---
                     IResponse invResponse = responseMsgSet.ResponseList.GetAt(0);
                     IItemInventoryRetList invList = invResponse.Detail as IItemInventoryRetList;
 
@@ -284,7 +283,6 @@ namespace Custom_QBSI.Clients.NHC
                         {
                             IItemInventoryRet invItem = invList.GetAt(i);
 
-                            // Manual filter by ListID
                             if (string.IsNullOrEmpty(itemListID) ||
                                 invItem.ListID?.GetValue().Equals(itemListID, StringComparison.OrdinalIgnoreCase) == true)
                             {
@@ -372,14 +370,6 @@ namespace Custom_QBSI.Clients.NHC
 
             return baseUnitName;
         }
-
-
-
-
-
-
-
-
 
 
 
