@@ -187,15 +187,15 @@ namespace Custom_QBSI.Clients.NHC
                                             ITransferInventoryLineRet line = ti.TransferInventoryLineRetList.GetAt(k);
 
                                             string itemListID = line.ItemRef?.ListID?.GetValue();
-                                            string uomSetListID = GetUnitOfMeasureSetListID(sessionManager, itemListID); // ✅ now returns UnitOfMeasureSetRef.ListID
-                                            string baseUnitName = GetBaseUnitName(sessionManager, uomSetListID);        // ✅ fetch base unit name
+                                            string uomSetListID = GetUnitOfMeasureSetListID(sessionManager, itemListID);
+                                            string baseUnitName = GetBaseUnitName(sessionManager, uomSetListID); 
 
                                             TransferInventoryLineData lineData = new TransferInventoryLineData
                                             {
                                                 ItemRefFullNameTransfer = line.ItemRef?.FullName?.GetValue(),
                                                 ItemRefListID = itemListID,
                                                 QuantityTransfer = line.QuantityTransferred?.GetValue() ?? 0,
-                                                BaseUnitName = baseUnitName  // ✅ you now have the base unit name
+                                                BaseUnitName = baseUnitName
                                             };
 
                                             data.Lines.Add(lineData);

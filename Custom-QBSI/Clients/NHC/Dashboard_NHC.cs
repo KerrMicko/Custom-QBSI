@@ -625,22 +625,29 @@ namespace Custom_QBSI.Clients.NHC
         {
             if (comboBox_Forms.SelectedIndex == 1)
             {
-                //panel_Details.Visible = false;
-                //panel_Details.Width = 0;
                 checkBox_EnableExpDate.Visible = true;
                 checkBox_LessEWT.Visible = true;
+
+                // ✅ Show radio buttons again
+                radioButton_VATInclusive.Visible = true;
+                radioButton_VATExclusive.Visible = true;
             }
             else if (comboBox_Forms.SelectedIndex == 2)
             {
-                //panel_Details.Visible = true;
-                //panel_Details.Width = sideBarWidth + 30;
                 checkBox_EnableExpDate.Visible = true;
                 checkBox_LessEWT.Visible = false;
+                radioButton_VATInclusive.Visible = false;
+                radioButton_VATExclusive.Visible = false;
             }
             else
             {
-
+                // Optional: reset everything if other options are selected
+                checkBox_EnableExpDate.Visible = false;
+                checkBox_LessEWT.Visible = false;
+                radioButton_VATInclusive.Visible = false;
+                radioButton_VATExclusive.Visible = false;
             }
         }
+
     }
 }
