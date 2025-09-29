@@ -336,12 +336,6 @@ namespace Custom_QBSI.Clients.NHC
                 e.Graphics.DrawString("Note: " + invoicenote, font_EightBold, Brushes.Black, rectNote, sfAlignLeftCenter);
             }
 
-
-
-
-
-
-
             // LEFT TABLE
             int dataHeight = 18;
             int xStart = 230;

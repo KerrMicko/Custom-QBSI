@@ -371,8 +371,6 @@ namespace Custom_QBSI.Clients.NHC
             return baseUnitName;
         }
 
-
-
         private static Dictionary<string, string> GetCustomerCustomFields(QBSessionManager sessionManager, string customerListID)
         {
             var customFields = new Dictionary<string, string>();

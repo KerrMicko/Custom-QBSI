@@ -48,6 +48,7 @@ namespace Custom_QBSI.Clients.NHC
         private Label label_StoreCode;
         private TextBox textBox_StoreCode;
 
+        private Button button_SaveDetails;
 
         // Signatory
         private TextBox textBox_SignatoryName;
@@ -245,7 +246,6 @@ namespace Custom_QBSI.Clients.NHC
                 Font = font_Label
             };
 
-
             checkBox_EnableExpDate = new CheckBox
             {
                 Parent = panel_Details,
@@ -265,6 +265,27 @@ namespace Custom_QBSI.Clients.NHC
                 Checked = false,
             };
 
+            button_SaveDetails = new Button
+            {
+                Parent = panel_Details,
+                Height = 26,
+                Width = componentWidth,
+                Text = "SAVE DETAILS",
+                BackColor = Color.Transparent,
+                Visible = false,
+            };
+            button_SaveDetails.Click += (sender, e) =>
+            {
+                string address = textBox_Address.Text;
+                string terms = textBox_Terms.Text;
+                string storeCode = textBox_StoreCode.Text;
+                string poNumber = textBox_PONumber.Text;
+                string tin = textBox_TIN.Text;
+
+                Queries_NHC queries_NHC = new Queries_NHC();
+                queries_NHC.UpdateSignatory_DR(address, terms, storeCode, poNumber, tin);
+            };
+
             radioButton_VATInclusive = new RadioButton
             {
                 Parent = panel_Details,
@@ -281,11 +302,6 @@ namespace Custom_QBSI.Clients.NHC
                 Width = componentWidth / 2 - 10,
                 Font = font_Label,
             };
-
-
-            
-
-
 
             return panel_Details;
         }
@@ -339,7 +355,6 @@ namespace Custom_QBSI.Clients.NHC
                 "2020",
             });
             comboBox_Year.SelectedIndex = 0;
-
 
             button_SyncData.Click += async (sender, e) =>
             {
@@ -516,7 +531,7 @@ namespace Custom_QBSI.Clients.NHC
                 Text = "SEARCH",
                 BackColor = Color.Transparent,
             };
-            button_SearchRefNum.Click += (sender, e) =>
+            button_SearchRefNum.Click += async (sender, e) =>
             {
                 try
                 {
@@ -524,28 +539,62 @@ namespace Custom_QBSI.Clients.NHC
                     {
                         MessageBox.Show("Please select a form.", "Notice", MessageBoxButtons.OK);
                         LogMessage("User did not select a form.");
+                        return;
                     }
-                    else if (comboBox_Forms.SelectedIndex != 0 && textBox_ReferenceNumber.Text != "")
+
+                    if (string.IsNullOrWhiteSpace(textBox_ReferenceNumber.Text))
                     {
-                        string refNumber = textBox_ReferenceNumber.Text;
-                        LogMessage($"Searching invoice for RefNumber: {refNumber}");
+                        MessageBox.Show("Please enter a reference number.", "Notice", MessageBoxButtons.OK);
+                        LogMessage("Reference number was empty.");
+                        return;
+                    }
 
-                        string vatType = radioButton_VATInclusive.Checked ? "Inclusive" : "Exclusive";
-                        string note = textBox_Note.Text;
-                        string businessStyle = textBox_BusinessStyle.Text;
-                        string pwdSignature = textBox_PWDSignature.Text;
-                        bool isEnableExpDateChecked = checkBox_EnableExpDate.Checked;
-                        bool isLessEWTChecked = checkBox_LessEWT.Checked;
-                        string signatoryName = textBox_SignatoryName.Text;
+                    string refNumber = textBox_ReferenceNumber.Text;
+                    LogMessage($"Searching invoice for RefNumber: {refNumber}");
 
-                        string address = textBox_Address.Text;
-                        string terms = textBox_Terms.Text;
-                        string storeCode = textBox_StoreCode.Text;
-                        string poNumber = textBox_PONumber.Text;
-                        string tin = textBox_TIN.Text;
+                    string vatType = radioButton_VATInclusive.Checked ? "Inclusive" : "Exclusive";
+                    string note = textBox_Note.Text;
+                    string businessStyle = textBox_BusinessStyle.Text;
+                    string pwdSignature = textBox_PWDSignature.Text;
+                    bool isEnableExpDateChecked = checkBox_EnableExpDate.Checked;
+                    bool isLessEWTChecked = checkBox_LessEWT.Checked;
+                    string signatoryName = textBox_SignatoryName.Text;
 
-                        List<AltDataClass_NHC.InvoiceData> invoice = AltQBDataSync_NHC.GetInvoiceByRefNumber(refNumber);
-                        List<AltDataClass_NHC.TransferInventoryData> transfers = AltQBDataSync_NHC.GetTransferInventoryByRefNumber(refNumber);
+                    string address = textBox_Address.Text;
+                    string terms = textBox_Terms.Text;
+                    string storeCode = textBox_StoreCode.Text;
+                    string poNumber = textBox_PONumber.Text;
+                    string tin = textBox_TIN.Text;
+
+                    using (var progressForm = new Form())
+                    {
+                        progressForm.StartPosition = FormStartPosition.CenterScreen;
+                        progressForm.Size = new System.Drawing.Size(300, 100);
+                        progressForm.FormBorderStyle = FormBorderStyle.FixedDialog;
+                        progressForm.MaximizeBox = false;
+                        progressForm.MinimizeBox = false;
+                        progressForm.ControlBox = false;
+                        progressForm.Text = "Querying";
+
+                        var label = new Label
+                        {
+                            Text = "Querying data from QuickBooks. Please wait...",
+                            Dock = DockStyle.Fill,
+                            TextAlign = System.Drawing.ContentAlignment.MiddleCenter
+                        };
+                        progressForm.Controls.Add(label);
+
+                        progressForm.Show();
+                        progressForm.Refresh();
+
+                        // Run queries in background thread
+                        var invoiceTask = Task.Run(() => AltQBDataSync_NHC.GetInvoiceByRefNumber(refNumber));
+                        var transfersTask = Task.Run(() => AltQBDataSync_NHC.GetTransferInventoryByRefNumber(refNumber));
+
+                        var invoice = await invoiceTask;
+                        var transfers = await transfersTask;
+
+                        progressForm.Close();
 
                         if (invoice.Count == 0)
                         {
@@ -555,7 +604,6 @@ namespace Custom_QBSI.Clients.NHC
                         }
 
                         AltLayout_NHC altLayout_NHC = new AltLayout_NHC();
-
                         PaperSize paperSize = new PaperSize("Custom", 850, 1100);
 
                         printDocument = new PrintDocument();
@@ -574,20 +622,16 @@ namespace Custom_QBSI.Clients.NHC
                                 LogMessage("Printing Delivery Receipt layout.");
                             }
                         };
-                        printPreviewControl.Document = printDocument;
-                        printPreviewControl.Visible = true;
-                        panel_Printing.Visible = true;
                     }
-                    else
-                    {
-                        MessageBox.Show("Please enter a reference number.", "Notice", MessageBoxButtons.OK);
-                        LogMessage("Reference number was empty.");
-                    }
+
+                    printPreviewControl.Document = printDocument;
+                    printPreviewControl.Visible = true;
+                    panel_Printing.Visible = true;
                 }
                 catch (Exception ex)
                 {
                     MessageBox.Show($"An error occurred: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    LogMessage($"ERROR: {ex.ToString()}");
+                    LogMessage($"ERROR: {ex}");
                 }
             };
 
@@ -764,6 +808,8 @@ namespace Custom_QBSI.Clients.NHC
                 label_TIN.Visible = false;
                 textBox_TIN.Visible = false;
                 panel_POTIN.Visible = false;
+
+                button_SaveDetails.Visible = false;
             }
             else if (comboBox_Forms.SelectedIndex == 2)
             {
@@ -785,6 +831,16 @@ namespace Custom_QBSI.Clients.NHC
                 textBox_TIN.Visible = true;
                 panel_POTIN.Visible = true;
 
+                button_SaveDetails.Visible = true;
+
+                Queries_NHC queries_NHC = new Queries_NHC();
+                var data = queries_NHC.RetrieveSignatory_DR();
+
+                textBox_Address.Text = data[0];
+                textBox_Terms.Text = data[1];
+                textBox_StoreCode.Text = data[2];
+                textBox_PONumber.Text = data[3];
+                textBox_TIN.Text = data[4];
             }
             else
             {
@@ -804,6 +860,7 @@ namespace Custom_QBSI.Clients.NHC
                 label_TIN.Visible = false;
                 textBox_TIN.Visible = false;
                 panel_POTIN.Visible = false;
+
             }
         }
 

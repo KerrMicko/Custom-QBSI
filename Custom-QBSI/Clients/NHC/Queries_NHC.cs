@@ -182,5 +182,87 @@ namespace Custom_QBSI.Clients.NHC
                 }
             }
         }
+
+        public void UpdateSignatory_DR(string address, string terms, string storeCode, string po, string tin)
+        {
+            string accessConnectionString = AccessDatabase.GetAccessConnectionString();
+
+            try
+            {
+                using (OleDbConnection connection = new OleDbConnection(accessConnectionString))
+                {
+                    connection.Open();
+
+                    string updateQuery = @"
+                        UPDATE Signatory_NHC 
+                        SET 
+                            Address = ?, 
+                            Terms = ?, 
+                            StoreCode = ?, 
+                            PONo = ?, 
+                            TINNo = ?
+                        WHERE ID = 1";
+
+                    using (OleDbCommand updateCommand = new OleDbCommand(updateQuery, connection))
+                    {
+                        updateCommand.Parameters.AddWithValue("?", address ?? (object)DBNull.Value);
+                        updateCommand.Parameters.AddWithValue("?", terms ?? (object)DBNull.Value);
+                        updateCommand.Parameters.AddWithValue("?", storeCode ?? (object)DBNull.Value);
+                        updateCommand.Parameters.AddWithValue("?", po ?? (object)DBNull.Value);
+                        updateCommand.Parameters.AddWithValue("?", tin ?? (object)DBNull.Value);
+
+                        updateCommand.ExecuteNonQuery();
+                    }
+                    connection.Close();
+                }
+                MessageBox.Show("Details saved to database.", "Notice", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error saving name to database: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        public string[] RetrieveSignatory_DR()
+        {
+            string accessConnectionString = AccessDatabase.GetAccessConnectionString();
+
+            try
+            {
+                using (OleDbConnection connection = new OleDbConnection(accessConnectionString))
+                {
+                    connection.Open();
+
+                    string selectQuery = @"
+                        SELECT [Address], [Terms], [StoreCode], [PONo], [TINNo]
+                        FROM Signatory_NHC 
+                        WHERE ID = 1";
+
+                    using (OleDbCommand selectCommand = new OleDbCommand(selectQuery, connection))
+                    using (OleDbDataReader reader = selectCommand.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            return new string[]
+                            {
+                                reader["Address"]?.ToString(),
+                                reader["Terms"]?.ToString(),
+                                reader["StoreCode"]?.ToString(),
+                                reader["PONo"]?.ToString(),
+                                reader["TINNo"]?.ToString()
+                            };
+                        }
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error retrieving data from Access database: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Console.WriteLine(ex.ToString());
+            }
+
+            return new string[0]; // empty if no record found
+        }
     }
 }
