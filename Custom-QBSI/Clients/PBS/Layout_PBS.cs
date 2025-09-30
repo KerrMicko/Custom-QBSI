@@ -239,7 +239,7 @@ namespace Custom_QBSI.Clients.PBS
                         // ✅ Classification
                         if (item.TaxesName == "Zero Rated Sales")
                             zeroRatedSalesTotal += item.Amount;
-                        else if (item.TaxesName == "VAT Exempt")
+                        else if (item.TaxesName == "Vat Exempt")
                             vatExemptSalesTotal += item.Amount;
                         else if (isTaxable)
                             vatableSalesTotal += item.Amount;
@@ -316,7 +316,7 @@ namespace Custom_QBSI.Clients.PBS
                         // ✅ Classification
                         if (item.TaxesName == "Zero Rated Sales")
                             zeroRatedSalesTotal += item.Amount;
-                        else if (item.TaxesName == "VAT Exempt")
+                        else if (item.TaxesName == "Vat Exempt")
                             vatExemptSalesTotal += item.Amount;
                         else if (item.Tax != "Non")
                             vatableSalesTotal += item.Amount;
@@ -424,7 +424,7 @@ namespace Custom_QBSI.Clients.PBS
                 }
             }
 
-            bool isVAT = invoiceData[0].LineItems[0].Tax != "Non" || invoiceData[0].LineItems[0].TaxesName == "VAT";
+            bool isVAT = invoiceData[0].LineItems[0].Tax != "Non" || invoiceData[0].LineItems[0].TaxesName == "Vatable";
             bool hasVAT = invoiceData[0].LineItems[0].SalesTaxTotal > 0;
 
             if (isVAT && hasVAT)
@@ -630,16 +630,11 @@ namespace Custom_QBSI.Clients.PBS
 
             e.Graphics.DrawString(detailedPBS.acNo, fontExtraFieldsFooter, Brushes.Black, rectACNoData, sfAlignLeftCenter);
 
-            // Print Date Issued only if user enabled it
-            if (includeDateIssued)
-            {
-                
-                {
-                    string formattedDate = detailedPBS.dateIssued.Value.ToString("MM/dd/yyyy");
+            
+            string formattedDate = detailedPBS.dateIssued.Value.ToString("MM/dd/yyyy");
 
-                    e.Graphics.DrawString(formattedDate, fontExtraFieldsFooter, Brushes.Black, rectDateIssuedData, sfAlignLeftCenter);
-                }
-            }
+            e.Graphics.DrawString(formattedDate, fontExtraFieldsFooter, Brushes.Black, rectDateIssuedData, sfAlignLeftCenter);
+            
 
             e.Graphics.DrawString("000001-9999999999", fontExtraFieldsFooter, Brushes.Black, rectSeriesRangeData, sfAlignLeftCenter);
         }

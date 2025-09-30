@@ -21,7 +21,7 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_87019342895C43BF8A9D08AA8C9F21F8"
+        "MsmKey" = "8:_5096C49C89F5415A9819DBA4D17A88D1"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -175,7 +175,7 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_87019342895C43BF8A9D08AA8C9F21F8"
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_5096C49C89F5415A9819DBA4D17A88D1"
             {
             "SourcePath" = "8:..\\Custom-QBSI\\bin\\x64\\Release\\CustomQBSIDatabase.accdb"
             "TargetName" = "8:CustomQBSIDatabase.accdb"
@@ -272,7 +272,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:QBSIINSTALLER"
         "ProductCode" = "8:{EE9D41BF-74E9-48C6-883F-06CD32597888}"
-        "PackageCode" = "8:{C94B0DB7-26D2-46A3-A62C-5A7360D7C296}"
+        "PackageCode" = "8:{FA05E683-A535-43E4-8D22-184347A210FA}"
         "UpgradeCode" = "8:{97A6F377-A2BE-467E-8046-ED0307F20637}"
         "AspNetVersion" = "8:2.0.50727.0"
         "RestartWWWService" = "11:FALSE"
