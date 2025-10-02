@@ -143,18 +143,21 @@ namespace Custom_QBSI.Clients.NHC
                 string AppName = "QBSI";
                 LogDataSync($"Opening QuickBooks session for TransferInventory RefNumber: {refNumber}");
 
-                // --- Open one QB session ---
+                // --- Open QB session ---
                 sessionManager.OpenConnection("", AppName);
                 sessionManager.BeginSession("", ENOpenMode.omDontCare);
                 LogDataSync("QuickBooks session opened.");
 
-                // --- Step 1: Query all TransferInventory records ---
+                // --- Step 1: Query TransferInventory for the specific RefNumber ---
                 IMsgSetRequest requestMsgSet = sessionManager.CreateMsgSetRequest("US", 13, 0);
                 requestMsgSet.Attributes.OnError = ENRqOnError.roeContinue;
 
                 ITransferInventoryQuery tiQuery = requestMsgSet.AppendTransferInventoryQueryRq();
                 tiQuery.IncludeLineItems.SetValue(true);
-                LogDataSync("TransferInventory query built, sending request...");
+
+                tiQuery.ORTransferInventoryQuery.TxnFilterNoCurrency.ORRefNumberFilter.RefNumberFilter.MatchCriterion.SetValue(ENMatchCriterion.mcStartsWith);
+                tiQuery.ORTransferInventoryQuery.TxnFilterNoCurrency.ORRefNumberFilter.RefNumberFilter.RefNumber.SetValue(refNumber);
+                LogDataSync($"Query built for RefNumber: {refNumber}");
 
                 IMsgSetResponse responseMsgSet = sessionManager.DoRequests(requestMsgSet);
                 LogDataSync("TransferInventory response received.");
@@ -163,9 +166,7 @@ namespace Custom_QBSI.Clients.NHC
                 {
                     LogDataSync($"ResponseList count: {responseMsgSet.ResponseList.Count}");
 
-                    // Step 2: Collect all lines and item IDs
                     HashSet<string> itemIDs = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                    List<(TransferInventoryData data, ITransferInventoryRet ti)> tiMapping = new List<(TransferInventoryData, ITransferInventoryRet)>();
 
                     for (int i = 0; i < responseMsgSet.ResponseList.Count; i++)
                     {
@@ -175,75 +176,60 @@ namespace Custom_QBSI.Clients.NHC
                         if (tiList != null)
                         {
                             LogDataSync($"Processing Response {i}, TransferInventory count: {tiList.Count}");
+
                             for (int j = 0; j < tiList.Count; j++)
                             {
                                 ITransferInventoryRet ti = tiList.GetAt(j);
-                                LogDataSync($"Found TransferInventory RefNumber: {ti.RefNumber?.GetValue()}");
-
-                                if (ti.RefNumber != null && ti.RefNumber.GetValue().Equals(refNumber, StringComparison.OrdinalIgnoreCase))
+                                TransferInventoryData data = new TransferInventoryData
                                 {
-                                    TransferInventoryData data = new TransferInventoryData
-                                    {
-                                        TxnID = ti.TxnID?.GetValue(),
-                                        TxnDate = ti.TxnDate?.GetValue() ?? DateTime.MinValue,
-                                        RefNumber = ti.RefNumber?.GetValue(),
-                                        Lines = new List<TransferInventoryLineData>()
-                                    };
+                                    TxnID = ti.TxnID?.GetValue(),
+                                    TxnDate = ti.TxnDate?.GetValue() ?? DateTime.MinValue,
+                                    RefNumber = ti.RefNumber?.GetValue(),
+                                    Lines = new List<TransferInventoryLineData>()
+                                };
 
-                                    if (ti.TransferInventoryLineRetList != null)
+                                if (ti.TransferInventoryLineRetList != null)
+                                {
+                                    LogDataSync($"TransferInventory has {ti.TransferInventoryLineRetList.Count} lines.");
+                                    for (int k = 0; k < ti.TransferInventoryLineRetList.Count; k++)
                                     {
-                                        LogDataSync($"TransferInventory has {ti.TransferInventoryLineRetList.Count} lines.");
-                                        for (int k = 0; k < ti.TransferInventoryLineRetList.Count; k++)
+                                        ITransferInventoryLineRet line = ti.TransferInventoryLineRetList.GetAt(k);
+                                        string itemListID = line.ItemRef?.ListID?.GetValue();
+                                        if (!string.IsNullOrEmpty(itemListID)) itemIDs.Add(itemListID);
+
+                                        data.Lines.Add(new TransferInventoryLineData
                                         {
-                                            ITransferInventoryLineRet line = ti.TransferInventoryLineRetList.GetAt(k);
-                                            string itemListID = line.ItemRef?.ListID?.GetValue();
-                                            if (!string.IsNullOrEmpty(itemListID)) itemIDs.Add(itemListID);
+                                            ItemRefFullNameTransfer = line.ItemRef?.FullName?.GetValue(),
+                                            ItemRefListID = itemListID,
+                                            QuantityTransfer = line.QuantityTransferred?.GetValue() ?? 0
+                                        });
 
-                                            data.Lines.Add(new TransferInventoryLineData
-                                            {
-                                                ItemRefFullNameTransfer = line.ItemRef?.FullName?.GetValue(),
-                                                ItemRefListID = itemListID,
-                                                QuantityTransfer = line.QuantityTransferred?.GetValue() ?? 0
-                                            });
-                                            LogDataSync($"Processed line {k} for item: {line.ItemRef?.FullName?.GetValue()}");
-                                        }
+                                        LogDataSync($"Processed line {k} for item: {line.ItemRef?.FullName?.GetValue()}");
                                     }
-                                    else
-                                    {
-                                        LogDataSync("No lines found for this TransferInventory.");
-                                    }
+                                }
 
-                                    transfers.Add(data);
-                                    tiMapping.Add((data, ti));
-                                }
-                                else
-                                {
-                                    LogDataSync("RefNumber did not match.");
-                                }
+                                transfers.Add(data);
                             }
-                        }
-                        else
-                        {
-                            LogDataSync("No TransferInventory records in this response.");
                         }
                     }
 
-                    // --- Step 3: Batch query all item details ---
+                    // --- Step 2: Batch query all item details ---
                     LogDataSync($"Querying {itemIDs.Count} unique items...");
                     Dictionary<string, ItemData> itemDetailsDict = GetItemsByListIDs(sessionManager, itemIDs.ToList());
                     LogDataSync($"Item details retrieved: {itemDetailsDict.Count}");
 
-                    // --- Step 4: Collect all UOM IDs and batch query BaseUnit names ---
+                    // --- Step 3: Batch query UOM BaseUnits ---
                     HashSet<string> uomIDs = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                     foreach (var item in itemDetailsDict.Values)
                     {
                         if (!string.IsNullOrEmpty(item.UnitOfMeasureListID)) uomIDs.Add(item.UnitOfMeasureListID);
                     }
+
                     LogDataSync($"Querying {uomIDs.Count} unique UOMs...");
                     Dictionary<string, string> uomBaseNames = GetBaseUnitNamesByListIDs(sessionManager, uomIDs.ToList());
                     LogDataSync($"UOM BaseUnit names retrieved: {uomBaseNames.Count}");
 
-                    // --- Step 5: Map item details and UOM BaseUnit names to lines ---
+                    // --- Step 4: Map item details and UOM BaseUnits to lines ---
                     foreach (var transfer in transfers)
                     {
                         foreach (var line in transfer.Lines)
@@ -263,7 +249,7 @@ namespace Custom_QBSI.Clients.NHC
                 }
                 else
                 {
-                    LogDataSync("No responses returned from QuickBooks.");
+                    LogDataSync("No TransferInventory found for the specified RefNumber.");
                 }
             }
             catch (Exception ex)
@@ -279,6 +265,8 @@ namespace Custom_QBSI.Clients.NHC
 
             return transfers;
         }
+
+
 
 
         // -------------------------
