@@ -535,26 +535,9 @@ namespace Custom_QBSI.Clients.NHC
             {
                 try
                 {
-                    // Validate form selection
-                    if (comboBox_Forms.SelectedIndex == 0)
-                    {
-                        MessageBox.Show("Please select a form.", "Notice", MessageBoxButtons.OK);
-                        LogMessage("User did not select a form.");
-                        return;
-                    }
-
-                    // Validate reference number
-                    if (string.IsNullOrWhiteSpace(textBox_ReferenceNumber.Text))
-                    {
-                        MessageBox.Show("Please enter a reference number.", "Notice", MessageBoxButtons.OK);
-                        LogMessage("Reference number was empty.");
-                        return;
-                    }
-
+                    // 1️⃣ Read all UI control values BEFORE Task.Run
+                    int selectedFormIndex = comboBox_Forms.SelectedIndex;
                     string refNumber = textBox_ReferenceNumber.Text.Trim();
-                    LogMessage($"Searching invoice for RefNumber: {refNumber}");
-
-                    // Gather user inputs
                     string vatType = radioButton_VATInclusive.Checked ? "Inclusive" : "Exclusive";
                     string note = textBox_Note.Text;
                     string businessStyle = textBox_BusinessStyle.Text;
@@ -568,104 +551,118 @@ namespace Custom_QBSI.Clients.NHC
                     string poNumber = textBox_PONumber.Text;
                     string tin = textBox_TIN.Text;
 
-                    // Create modal progress form
-                    using (var progressForm = new Form())
+                    // 2️⃣ Validate inputs
+                    if (selectedFormIndex == 0)
                     {
-                        progressForm.StartPosition = FormStartPosition.CenterScreen;
-                        progressForm.Size = new System.Drawing.Size(400, 120);
-                        progressForm.FormBorderStyle = FormBorderStyle.FixedDialog;
-                        progressForm.MaximizeBox = false;
-                        progressForm.MinimizeBox = false;
-                        progressForm.ControlBox = false;
-                        progressForm.Text = "Querying";
-
-                        // Label
-                        var label = new Label
-                        {
-                            Text = "Querying data from QuickBooks. Please wait...",
-                            Dock = DockStyle.Top,
-                            TextAlign = System.Drawing.ContentAlignment.MiddleCenter,
-                            Height = 40
-                        };
-                        progressForm.Controls.Add(label);
-
-                        // Determinate progress bar
-                        var progressBar = new ProgressBar
-                        {
-                            Minimum = 0,
-                            Maximum = 100,
-                            Value = 0,
-                            Dock = DockStyle.Bottom,
-                            Height = 20
-                        };
-                        progressForm.Controls.Add(progressBar);
-
-                        // Timer to simulate progress
-                        var timer = new System.Windows.Forms.Timer { Interval = 50 }; // increments every 50ms
-                        timer.Tick += (s, args) =>
-                        {
-                            if (progressBar.Value < 95) // simulate progress
-                                progressBar.Value += 1;
-                        };
-                        timer.Start();
-
-                        // Start async query
-                        var queryTask = Task.Run(() =>
-                        {
-                            var invoice = AltQBDataSync_NHC.GetInvoiceByRefNumber(refNumber);
-                            var transfers = AltQBDataSync_NHC.GetTransferInventoryByRefNumber(refNumber);
-                            return new { Invoice = invoice, Transfers = transfers };
-                        });
-
-                        progressForm.Shown += async (s, args) =>
-                        {
-                            var result = await queryTask;
-
-                            // Stop timer and set progress to 100%
-                            timer.Stop();
-                            progressBar.Value = 100;
-
-                            await Task.Delay(200);
-                            progressForm.Close();
-
-                            if (comboBox_Forms.SelectedIndex == 1 && result.Invoice.Count == 0)
-                            {
-                                MessageBox.Show("No invoice found for the given reference number.", "Notice", MessageBoxButtons.OK);
-                                LogMessage($"No invoice found for RefNumber: {refNumber}");
-                                return;
-                            }
-
-                            if (comboBox_Forms.SelectedIndex == 2 && result.Transfers.Count == 0)
-                            {
-                                MessageBox.Show("No transfer records found for the given reference number.", "Notice", MessageBoxButtons.OK);
-                                LogMessage($"No transfers found for RefNumber: {refNumber}");
-                                return;
-                            }
-
-                            AltLayout_NHC altLayout_NHC = new AltLayout_NHC();
-                            PaperSize paperSize = new PaperSize("Custom", 850, 1100);
-
-                            printDocument = new PrintDocument();
-                            printDocument.DefaultPageSettings.PaperSize = paperSize;
-                            printDocument.PrinterSettings.DefaultPageSettings.PaperSize = paperSize;
-
-                            printDocument.PrintPage += (pSender, ev) =>
-                            {
-                                if (comboBox_Forms.SelectedIndex == 1)
-                                    altLayout_NHC.Layout_SalesInvoice(ev, result.Invoice, note, vatType, businessStyle, signatoryName, isEnableExpDateChecked, isLessEWTChecked);
-                                else if (comboBox_Forms.SelectedIndex == 2)
-                                    altLayout_NHC.Layout_DeliveryReceipt(ev, result.Transfers, note, businessStyle, pwdSignature, address, terms, storeCode, poNumber, tin, isEnableExpDateChecked, signatoryName);
-                            };
-
-                            // Show print preview
-                            printPreviewControl.Document = printDocument;
-                            printPreviewControl.Visible = true;
-                            panel_Printing.Visible = true;
-                        };
-
-                        // Show modal form
-                        progressForm.ShowDialog();
+                        MessageBox.Show("Please select a form.", "Notice", MessageBoxButtons.OK);
+                        LogMessage("User did not select a form.");
+                        return;
                     }
+
+                    if (string.IsNullOrWhiteSpace(refNumber))
+                    {
+                        MessageBox.Show("Please enter a reference number.", "Notice", MessageBoxButtons.OK);
+                        LogMessage("Reference number was empty.");
+                        return;
+                    }
+
+                    LogMessage($"Searching invoice for RefNumber: {refNumber}");
+
+                    // 3️⃣ Create progress form (non-blocking)
+                    var progressForm = new Form
+                    {
+                        StartPosition = FormStartPosition.CenterScreen,
+                        Size = new Size(400, 120),
+                        FormBorderStyle = FormBorderStyle.FixedDialog,
+                        MaximizeBox = false,
+                        MinimizeBox = false,
+                        ControlBox = false,
+                        Text = "Querying"
+                    };
+
+                    var label = new Label
+                    {
+                        Text = "Querying data from QuickBooks. Please wait...",
+                        Dock = DockStyle.Top,
+                        TextAlign = ContentAlignment.MiddleCenter,
+                        Height = 40
+                    };
+                    progressForm.Controls.Add(label);
+
+                    var progressBar = new ProgressBar
+                    {
+                        Minimum = 0,
+                        Maximum = 100,
+                        Value = 0,
+                        Dock = DockStyle.Bottom,
+                        Height = 20
+                    };
+                    progressForm.Controls.Add(progressBar);
+
+                    var timer = new Timer { Interval = 50 };
+                    timer.Tick += (s, args) =>
+                    {
+                        if (progressBar.Value < 95)
+                            progressBar.Value += 1;
+                    };
+                    timer.Start();
+
+                    progressForm.Show(); // Non-blocking
+
+                    // 4️⃣ Run query asynchronously (no UI control access inside Task.Run)
+                    var result = await Task.Run(() =>
+                    {
+                        List<Custom_QBSI.Clients.NHC.AltDataClass_NHC.InvoiceData> invoice = null;
+                        List<Custom_QBSI.Clients.NHC.AltDataClass_NHC.TransferInventoryData> transfers = null;
+
+                        if (selectedFormIndex == 1)
+                            invoice = AltQBDataSync_NHC.GetInvoiceByRefNumber(refNumber);
+                        else if (selectedFormIndex == 2)
+                            transfers = AltQBDataSync_NHC.GetTransferInventoryByRefNumber(refNumber);
+
+                        return new { Invoice = invoice, Transfers = transfers };
+                    });
+
+                    // 5️⃣ Stop progress and close form
+                    timer.Stop();
+                    progressBar.Value = 100;
+                    await Task.Delay(200);
+                    progressForm.Close();
+
+                    // 6️⃣ Check results
+                    if (selectedFormIndex == 1 && (result.Invoice == null || result.Invoice.Count == 0))
+                    {
+                        MessageBox.Show("No invoice found for the given reference number.", "Notice", MessageBoxButtons.OK);
+                        LogMessage($"No invoice found for RefNumber: {refNumber}");
+                        return;
+                    }
+
+                    if (selectedFormIndex == 2 && (result.Transfers == null || result.Transfers.Count == 0))
+                    {
+                        MessageBox.Show("No transfer records found for the given reference number.", "Notice", MessageBoxButtons.OK);
+                        LogMessage($"No transfers found for RefNumber: {refNumber}");
+                        return;
+                    }
+
+                    // 7️⃣ Prepare print
+                    AltLayout_NHC altLayout_NHC = new AltLayout_NHC();
+                    PaperSize paperSize = new PaperSize("Custom", 850, 1100);
+
+                    printDocument = new PrintDocument();
+                    printDocument.DefaultPageSettings.PaperSize = paperSize;
+                    printDocument.PrinterSettings.DefaultPageSettings.PaperSize = paperSize;
+
+                    printDocument.PrintPage += (pSender, ev) =>
+                    {
+                        if (selectedFormIndex == 1)
+                            altLayout_NHC.Layout_SalesInvoice(ev, result.Invoice, note, vatType, businessStyle, signatoryName, isEnableExpDateChecked, isLessEWTChecked);
+                        else if (selectedFormIndex == 2)
+                            altLayout_NHC.Layout_DeliveryReceipt(ev, result.Transfers, note, businessStyle, pwdSignature, address, terms, storeCode, poNumber, tin, isEnableExpDateChecked, signatoryName);
+                    };
+
+                    printPreviewControl.Document = printDocument;
+                    printPreviewControl.Visible = true;
+                    panel_Printing.Visible = true;
                 }
                 catch (Exception ex)
                 {
@@ -673,6 +670,9 @@ namespace Custom_QBSI.Clients.NHC
                     LogMessage($"ERROR: {ex}");
                 }
             };
+
+
+
 
 
             return panel_RefNumber;
