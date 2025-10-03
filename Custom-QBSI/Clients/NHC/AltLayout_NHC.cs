@@ -560,12 +560,12 @@ namespace Custom_QBSI.Clients.NHC
             int tabXStart = 50;
             int tabYStart = 285;
 
-            int tabDataHeight = 30;
+            int tabDataHeight = 24;
 
             int widthItemNo = 67;
             int widthItemQuantity = 75;
             int widthItemUnit = 45;
-            int widthItemDescription = 600;
+            int widthItemDescription = 520;
 
             int xStartItemQuantity = tabXStart;
             int xStartItemUnit = tabXStart + widthItemQuantity;
@@ -589,29 +589,43 @@ namespace Custom_QBSI.Clients.NHC
             {
                 foreach (var lineItem in tran.Lines)
                 {
-                    // Quantity
-                    e.Graphics.DrawString(lineItem.QuantityTransfer.ToString("N2"),font_Data,Brushes.Black,new Rectangle(xStartItemQuantity, tabYStart + itemHeight, widthItemQuantity, tabDataHeight),sfAlignCenter);
-                    e.Graphics.DrawString(lineItem.BaseUnitName,font_Data,Brushes.Black,new Rectangle(xStartItemUnit, tabYStart + itemHeight, widthItemUnit, tabDataHeight),sfAlignCenter);
-                    e.Graphics.DrawString(lineItem.ItemDescription, font_Data, Brushes.Black,new Rectangle(xStartItemDescription, tabYStart + itemHeight, widthItemDescription, tabDataHeight), sfAlignLeftCenter);
+                    // Calculate the height of the ItemDescription
+                    SizeF descSize = e.Graphics.MeasureString(lineItem.ItemDescription, font_Data, widthItemDescription);
+                    int lineHeight = (int)Math.Ceiling(descSize.Height); // total height of the description
+                    int rowHeight = Math.Max(tabDataHeight, lineHeight); // take max to accommodate taller rows
 
+                    // Draw Quantity
+                    e.Graphics.DrawString(lineItem.QuantityTransfer.ToString("N2"),font_Data, Brushes.Black,new Rectangle(xStartItemQuantity, tabYStart + itemHeight, widthItemQuantity, rowHeight),sfAlignCenter);
+
+                    // Draw Unit
+                    e.Graphics.DrawString(lineItem.BaseUnitName,font_Data, Brushes.Black,new Rectangle(xStartItemUnit, tabYStart + itemHeight, widthItemUnit, rowHeight),sfAlignCenter);
+
+                    // Draw ItemDescription
+                    e.Graphics.DrawString(lineItem.ItemDescription, font_Data, Brushes.Black,new Rectangle(xStartItemDescription, tabYStart + itemHeight, widthItemDescription, rowHeight),sfAlignLeftCenter);
+
+                    // Draw Sales Price if enabled
                     if (isEnableExpDateChecked)
                     {
-                        Rectangle rectitemtotAmount = new Rectangle(xStartItemAmount, tabYStart + itemHeight, widthItemDescription, tabDataHeight);
+                        Rectangle rectItemAmount2 = new Rectangle(xStartItemAmount, tabYStart + itemHeight, widthItemDescription + 60, rowHeight);
                         double lineAmount = lineItem.SalesPrice * lineItem.QuantityTransfer;
 
-                        e.Graphics.DrawString(lineItem.SalesPrice.ToString("N2"),font_Data,Brushes.Black, rectitemtotAmount, sfAlignCenterRight);
+                        e.Graphics.DrawString(lineItem.SalesPrice.ToString("N2"),
+                            font_Data, Brushes.Black, rectItemAmount2, sfAlignCenterRight);
                     }
 
-                    itemHeight += tabDataHeight;
+                    // Increment itemHeight by the rowHeight, not fixed tabDataHeight
+                    itemHeight += rowHeight;
                     counter++;
                 }
             }
 
+            // Draw Note
             if (!string.IsNullOrEmpty(note))
             {
                 Rectangle rectNote = new Rectangle(50, tabYStart + itemHeight, widthItemDescription, tabDataHeight);
                 e.Graphics.DrawString("Note: " + note, font_EightBold, Brushes.Black, rectNote, sfAlignLeftCenter);
             }
+
 
 
             // Signatory
