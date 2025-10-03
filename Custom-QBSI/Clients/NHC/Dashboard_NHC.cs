@@ -22,6 +22,7 @@ namespace Custom_QBSI.Clients.NHC
         private PrintPreviewControl printPreviewControl;
 
         private ComboBox comboBox_Forms;
+        private DataGridView dataGridView_Lines;
 
         // Details
         private CheckBox checkBox_EnableExpDate;
@@ -255,6 +256,39 @@ namespace Custom_QBSI.Clients.NHC
                 Checked = true,
                 Visible = true,
             };
+
+            dataGridView_Lines = new DataGridView
+            {
+                Parent = panel_Details,
+                Width = componentWidth,
+                Height = 200,
+                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
+                AllowUserToAddRows = false,
+                AllowUserToDeleteRows = false,
+                Font = font_Label,
+                ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize,
+                ScrollBars = ScrollBars.Vertical,
+                Visible = false // hidden initially
+            };
+
+            // Columns: ItemDescription, SalesPrice, ExpirationDate
+            dataGridView_Lines.Columns.Clear();
+
+            dataGridView_Lines.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                HeaderText = "Description",
+                Name = "Description"
+            });
+            dataGridView_Lines.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                HeaderText = "Price",
+                Name = "Price"
+            });
+            dataGridView_Lines.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                HeaderText = "Expiration Date",
+                Name = "ExpirationDate"
+            });
 
             checkBox_LessEWT = new CheckBox
             {
@@ -837,6 +871,7 @@ namespace Custom_QBSI.Clients.NHC
                 radioButton_VATInclusive.Visible = true;
                 radioButton_VATExclusive.Visible = true;
 
+                // Hide all textboxes
                 label_Address.Visible = false;
                 textBox_Address.Visible = false;
                 label_Terms.Visible = false;
@@ -850,6 +885,9 @@ namespace Custom_QBSI.Clients.NHC
                 panel_POTIN.Visible = false;
 
                 button_SaveDetails.Visible = false;
+
+                // Hide DataGridView
+                dataGridView_Lines.Visible = false;
             }
             else if (comboBox_Forms.SelectedIndex == 2)
             {
@@ -872,6 +910,14 @@ namespace Custom_QBSI.Clients.NHC
                 panel_POTIN.Visible = true;
 
                 button_SaveDetails.Visible = true;
+
+                // Show DataGridView
+                dataGridView_Lines.Visible = true;
+
+                // Optional: populate DataGridView with sample or existing data
+                dataGridView_Lines.Rows.Clear();
+                dataGridView_Lines.Rows.Add("Sample Item 1", "100.00", "");
+                dataGridView_Lines.Rows.Add("Sample Item 2", "250.00", "");
 
                 Queries_NHC queries_NHC = new Queries_NHC();
                 var data = queries_NHC.RetrieveSignatory_DR();
@@ -901,8 +947,13 @@ namespace Custom_QBSI.Clients.NHC
                 textBox_TIN.Visible = false;
                 panel_POTIN.Visible = false;
 
+                button_SaveDetails.Visible = false;
+
+                // Hide DataGridView
+                dataGridView_Lines.Visible = false;
             }
         }
+
 
     }
 }

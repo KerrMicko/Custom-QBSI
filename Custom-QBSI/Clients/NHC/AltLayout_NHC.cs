@@ -591,8 +591,8 @@ namespace Custom_QBSI.Clients.NHC
                 {
                     // Calculate the height of the ItemDescription
                     SizeF descSize = e.Graphics.MeasureString(lineItem.ItemDescription, font_Data, widthItemDescription);
-                    int lineHeight = (int)Math.Ceiling(descSize.Height); // total height of the description
-                    int rowHeight = Math.Max(tabDataHeight, lineHeight); // take max to accommodate taller rows
+                    int lineHeight = (int)Math.Ceiling(descSize.Height);
+                    int rowHeight = Math.Max(tabDataHeight, lineHeight);
 
                     // Draw Quantity
                     e.Graphics.DrawString(lineItem.QuantityTransfer.ToString("N2"),font_Data, Brushes.Black,new Rectangle(xStartItemQuantity, tabYStart + itemHeight, widthItemQuantity, rowHeight),sfAlignCenter);
