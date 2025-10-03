@@ -175,7 +175,6 @@ namespace Custom_QBSI.Clients.NHC
                                     data.Lines.Add(new TransferInventoryLineData
                                     {
                                         ItemRefListID = line.ItemRef?.ListID?.GetValue(),
-                                        ItemRefFullNameTransfer = line.ItemRef?.FullName?.GetValue(),
                                         QuantityTransfer = line.QuantityTransferred?.GetValue() ?? 0
                                     });
                                 }
@@ -212,6 +211,7 @@ namespace Custom_QBSI.Clients.NHC
                 invQuery.IncludeRetElementList.Add("ListID");
                 invQuery.IncludeRetElementList.Add("UnitOfMeasureSetRef");
                 invQuery.IncludeRetElementList.Add("SalesPrice");
+                invQuery.IncludeRetElementList.Add("SalesDesc");
             }
 
             var responseMsgSet = sessionManager.DoRequests(requestMsgSet);
@@ -231,7 +231,8 @@ namespace Custom_QBSI.Clients.NHC
                             {
                                 ListID = invItem.ListID?.GetValue(),
                                 UnitOfMeasureListID = invItem.UnitOfMeasureSetRef?.ListID?.GetValue(),
-                                SalesPrice = invItem.SalesPrice?.GetValue() ?? 0
+                                SalesPrice = invItem.SalesPrice?.GetValue() ?? 0,
+                                SalesDesc = invItem.SalesDesc?.GetValue()
                             };
                         }
                     }
@@ -297,6 +298,7 @@ namespace Custom_QBSI.Clients.NHC
                                 uoms.TryGetValue(item.UnitOfMeasureListID, out var baseUnit))
                             {
                                 line.BaseUnitName = baseUnit;
+                                line.ItemDescription = item.SalesDesc;
                             }
                         }
                     }

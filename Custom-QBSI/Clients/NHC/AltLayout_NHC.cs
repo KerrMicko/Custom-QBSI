@@ -571,7 +571,7 @@ namespace Custom_QBSI.Clients.NHC
                     // Quantity
                     e.Graphics.DrawString(lineItem.QuantityTransfer.ToString("N2"),font_Data,Brushes.Black,new Rectangle(xStartItemQuantity, tabYStart + itemHeight, widthItemQuantity, tabDataHeight),sfAlignCenter);
                     e.Graphics.DrawString(lineItem.BaseUnitName,font_Data,Brushes.Black,new Rectangle(xStartItemUnit, tabYStart + itemHeight, widthItemUnit, tabDataHeight),sfAlignCenter);
-                    e.Graphics.DrawString(lineItem.ItemRefFullNameTransfer,font_Data,Brushes.Black,new Rectangle(xStartItemDescription, tabYStart + itemHeight, widthItemDescription, tabDataHeight),sfAlignLeftCenter);
+                    e.Graphics.DrawString(lineItem.ItemDescription, font_Data, Brushes.Black,new Rectangle(xStartItemDescription, tabYStart + itemHeight, widthItemDescription, tabDataHeight), sfAlignLeftCenter);
 
                     if (isEnableExpDateChecked)
                     {

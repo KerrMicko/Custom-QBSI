@@ -72,7 +72,7 @@ namespace Custom_QBSI.Clients.NHC
             public DateTime TxnDate { get; set; }
             public string RefNumber { get; set; }
             public string ItemRefListID { get; set; }
-            public string ItemRefFullNameTransfer { get; set; }
+            public string ItemDescription { get; set; }
             public double QuantityTransfer { get; set; }
             public string BaseUnitName { get; set; }
             public string UnitOfMeasureListID { get; set; }
@@ -85,6 +85,7 @@ namespace Custom_QBSI.Clients.NHC
             public string FullName { get; set; }
             public double SalesPrice { get; set; }
             public string UnitOfMeasureListID { get; set; }
+            public string SalesDesc { get; set; }
         }
 
     }
