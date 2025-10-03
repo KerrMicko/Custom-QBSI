@@ -137,6 +137,8 @@ namespace Custom_QBSI.Clients.NHC
         {
             List<TransferInventoryData> transfers = new List<TransferInventoryData>();
 
+            LogDataSync($"[TransferInventoryBase] Fetching TransferInventory for RefNumber={refNumber}");
+
             IMsgSetRequest requestMsgSet = sessionManager.CreateMsgSetRequest("US", 13, 0);
             requestMsgSet.Attributes.OnError = ENRqOnError.roeContinue;
 
@@ -156,6 +158,7 @@ namespace Custom_QBSI.Clients.NHC
                     var tiList = response.Detail as ITransferInventoryRetList;
                     if (tiList != null)
                     {
+                        LogDataSync($"[TransferInventoryBase] Found {tiList.Count} transfer(s) for RefNumber={refNumber}");
                         for (int j = 0; j < tiList.Count; j++)
                         {
                             var ti = tiList.GetAt(j);
@@ -175,10 +178,17 @@ namespace Custom_QBSI.Clients.NHC
                                     data.Lines.Add(new TransferInventoryLineData
                                     {
                                         ItemRefListID = line.ItemRef?.ListID?.GetValue(),
-                                        QuantityTransfer = line.QuantityTransferred?.GetValue() ?? 0
+                                        QuantityTransfer = line.QuantityTransferred?.GetValue() ?? 0,
+                                        SiteListID = ti.ToInventorySiteRef?.ListID?.GetValue()
                                     });
+
+                                    LogDataSync($"[TransferInventoryBase] Line Added: " +
+                                                $"Item={line.ItemRef?.ListID?.GetValue()}, " +
+                                                $"Qty={line.QuantityTransferred?.GetValue()}, " +
+                                                $"Site={ti.ToInventorySiteRef?.ListID?.GetValue()}");
                                 }
                             }
+
 
                             transfers.Add(data);
                         }
@@ -193,13 +203,17 @@ namespace Custom_QBSI.Clients.NHC
 
 
 
-
-
         public static Dictionary<string, ItemData> GetItemsByListIDs(QBSessionManager sessionManager, List<string> itemListIDs)
         {
             Dictionary<string, ItemData> items = new Dictionary<string, ItemData>(StringComparer.OrdinalIgnoreCase);
 
-            if (itemListIDs == null || itemListIDs.Count == 0) return items;
+            if (itemListIDs == null || itemListIDs.Count == 0)
+            {
+                LogDataSync("[ItemsByListIDs] No Item IDs to query.");
+                return items;
+            }
+
+            LogDataSync($"[ItemsByListIDs] Querying {itemListIDs.Count} item(s)...");
 
             IMsgSetRequest requestMsgSet = sessionManager.CreateMsgSetRequest("US", 13, 0);
             requestMsgSet.Attributes.OnError = ENRqOnError.roeContinue;
@@ -224,6 +238,7 @@ namespace Custom_QBSI.Clients.NHC
                     var invList = response.Detail as IItemInventoryRetList;
                     if (invList != null)
                     {
+                        LogDataSync($"[ItemsByListIDs] Found {invList.Count} item(s).");
                         for (int j = 0; j < invList.Count; j++)
                         {
                             var invItem = invList.GetAt(j);
@@ -234,6 +249,7 @@ namespace Custom_QBSI.Clients.NHC
                                 SalesPrice = invItem.SalesPrice?.GetValue() ?? 0,
                                 SalesDesc = invItem.SalesDesc?.GetValue()
                             };
+                            LogDataSync($"[ItemsByListIDs] Item Loaded: {invItem.ListID?.GetValue()} - {invItem.SalesDesc?.GetValue()}");
                         }
                     }
                 }
@@ -248,7 +264,13 @@ namespace Custom_QBSI.Clients.NHC
         {
             Dictionary<string, string> uomBaseNames = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
-            if (uomListIDs == null || uomListIDs.Count == 0) return uomBaseNames;
+            if (uomListIDs == null || uomListIDs.Count == 0)
+            {
+                LogDataSync("[UOMByListIDs] No UOM IDs to query.");
+                return uomBaseNames;
+            }
+
+            LogDataSync($"[UOMByListIDs] Querying {uomListIDs.Count} UOM(s)...");
 
             IMsgSetRequest requestMsgSet = sessionManager.CreateMsgSetRequest("US", 13, 0);
             requestMsgSet.Attributes.OnError = ENRqOnError.roeContinue;
@@ -271,11 +293,15 @@ namespace Custom_QBSI.Clients.NHC
                     var uomList = response.Detail as IUnitOfMeasureSetRetList;
                     if (uomList != null)
                     {
+                        LogDataSync($"[UOMByListIDs] Found {uomList.Count} UOM(s).");
                         for (int j = 0; j < uomList.Count; j++)
                         {
                             var uom = uomList.GetAt(j);
                             if (!string.IsNullOrEmpty(uom.ListID?.GetValue()))
+                            {
                                 uomBaseNames[uom.ListID.GetValue()] = uom.BaseUnit?.Name?.GetValue();
+                                LogDataSync($"[UOMByListIDs] UOM Loaded: {uom.ListID?.GetValue()} - {uom.BaseUnit?.Name?.GetValue()}");
+                            }
                         }
                     }
                 }
@@ -284,26 +310,121 @@ namespace Custom_QBSI.Clients.NHC
             return uomBaseNames;
         }
 
-        public static void MapTransferLineDetails(List<TransferInventoryData> transfers,Dictionary<string, ItemData> items,Dictionary<string, string> uoms)
-            {
-                foreach (var transfer in transfers)
-                {
-                    foreach (var line in transfer.Lines)
-                    {
-                        if (line.ItemRefListID != null && items.TryGetValue(line.ItemRefListID, out var item))
-                        {
-                            line.SalesPrice = item.SalesPrice;
 
-                            if (!string.IsNullOrEmpty(item.UnitOfMeasureListID) &&
-                                uoms.TryGetValue(item.UnitOfMeasureListID, out var baseUnit))
+
+        public static Dictionary<string, InventorySiteData> GetInventorySitesByListIDs(QBSessionManager sessionManager, List<string> siteListIDs)
+        {
+            var sites = new Dictionary<string, InventorySiteData>(StringComparer.OrdinalIgnoreCase);
+
+            if (siteListIDs == null || siteListIDs.Count == 0)
+            {
+                LogDataSync("[SitesByListIDs] No Site IDs to query.");
+                return sites;
+            }
+
+            LogDataSync($"[SitesByListIDs] Querying {siteListIDs.Count} site(s)...");
+
+            IMsgSetRequest requestMsgSet = sessionManager.CreateMsgSetRequest("US", 13, 0);
+            requestMsgSet.Attributes.OnError = ENRqOnError.roeContinue;
+
+            foreach (var id in siteListIDs)
+            {
+                IInventorySiteQuery siteQuery = requestMsgSet.AppendInventorySiteQueryRq();
+                siteQuery.ORInventorySiteQuery.ListIDList.Add(id);
+                siteQuery.IncludeRetElementList.Add("ListID");
+                siteQuery.IncludeRetElementList.Add("Name");
+                siteQuery.IncludeRetElementList.Add("SiteDesc");
+                siteQuery.IncludeRetElementList.Add("SiteAddressBlock");
+            }
+
+            var responseMsgSet = sessionManager.DoRequests(requestMsgSet);
+
+            if (responseMsgSet?.ResponseList != null)
+            {
+                for (int i = 0; i < responseMsgSet.ResponseList.Count; i++)
+                {
+                    var response = responseMsgSet.ResponseList.GetAt(i);
+                    var siteList = response.Detail as IInventorySiteRetList;
+                    if (siteList != null)
+                    {
+                        LogDataSync($"[SitesByListIDs] Found {siteList.Count} site(s).");
+                        for (int j = 0; j < siteList.Count; j++)
+                        {
+                            var site = siteList.GetAt(j);
+                            if (!string.IsNullOrEmpty(site.ListID?.GetValue()))
                             {
-                                line.BaseUnitName = baseUnit;
-                                line.ItemDescription = item.SalesDesc;
+                                var siteData = new InventorySiteData
+                                {
+                                    ListID = site.ListID?.GetValue(),
+                                    Name = site.Name?.GetValue(),
+                                    Description = site.SiteDesc?.GetValue(),
+                                    SiteAddressBlockAddr1 = site.SiteAddressBlock?.Addr1?.GetValue(),
+                                    SiteAddressBlockAddr2 = site.SiteAddressBlock?.Addr2?.GetValue(),
+                                    SiteAddressBlockAddr3 = site.SiteAddressBlock?.Addr3?.GetValue(),
+                                    SiteAddressBlockAddr4 = site.SiteAddressBlock?.Addr4?.GetValue(),
+                                    SiteAddressBlockAddr5 = site.SiteAddressBlock?.Addr5?.GetValue()
+                                };
+
+                                sites[site.ListID.GetValue()] = siteData;
+
+                                LogDataSync($"[SitesByListIDs] Site Loaded: {site.ListID?.GetValue()} - {site.Name?.GetValue()} - {site.SiteDesc?.GetValue()} " +
+                                $"Addr1={site.SiteAddressBlock?.Addr1?.GetValue()} Addr2={site.SiteAddressBlock?.Addr2?.GetValue()} " +
+                                $"Addr3={site.SiteAddressBlock?.Addr3?.GetValue()} Addr4={site.SiteAddressBlock?.Addr4?.GetValue()} " +
+                                $"Addr5={site.SiteAddressBlock?.Addr5?.GetValue()}");
                             }
                         }
                     }
                 }
             }
+
+            return sites;
+        }
+
+
+
+
+        public static void MapTransferLineDetails(List<TransferInventoryData> transfers,
+                                          Dictionary<string, ItemData> items,
+                                          Dictionary<string, string> uoms,
+                                          Dictionary<string, InventorySiteData> sites)
+        {
+            LogDataSync("[MapTransferLineDetails] Mapping transfer line details...");
+
+            foreach (var transfer in transfers)
+            {
+                foreach (var line in transfer.Lines)
+                {
+                    if (line.ItemRefListID != null && items.TryGetValue(line.ItemRefListID, out var item))
+                    {
+                        line.SalesPrice = item.SalesPrice;
+                        line.ItemDescription = item.SalesDesc;
+
+                        if (!string.IsNullOrEmpty(item.UnitOfMeasureListID) &&
+                            uoms.TryGetValue(item.UnitOfMeasureListID, out var baseUnit))
+                        {
+                            line.BaseUnitName = baseUnit;
+                        }
+                    }
+
+                    if (!string.IsNullOrEmpty(line.SiteListID) &&sites.TryGetValue(line.SiteListID, out var siteData))
+                    {
+                        line.SiteName = siteData.Name;
+                        line.SiteDescription = siteData.Description;
+
+                        // Map the full address
+                        line.SiteAddr1 = siteData.SiteAddressBlockAddr1;
+                        line.SiteAddr2 = siteData.SiteAddressBlockAddr2;
+                        line.SiteAddr3 = siteData.SiteAddressBlockAddr3;
+                        line.SiteAddr4 = siteData.SiteAddressBlockAddr4;
+                        line.SiteAddr5 = siteData.SiteAddressBlockAddr5;
+                    }
+
+
+                    LogDataSync($"[MapTransferLineDetails] Line mapped: Item={line.ItemRefListID}, Desc={line.ItemDescription}, Price={line.SalesPrice}, UOM={line.BaseUnitName}, Site={line.SiteName}");
+                }
+            }
+        }
+
 
 
         public static List<TransferInventoryData> GetTransferInventoryByRefNumber(string refNumber)
@@ -313,15 +434,13 @@ namespace Custom_QBSI.Clients.NHC
 
             try
             {
+                LogDataSync($"[GetTransferInventoryByRefNumber] Starting process for RefNumber={refNumber}");
+
                 sessionManager.OpenConnection("", "QBSI");
                 sessionManager.BeginSession("", ENOpenMode.omDontCare);
 
-                // STEP 1: Base data
                 transfers = GetTransferInventoryBase(sessionManager, refNumber);
 
-                // Show these in UI right away ✅
-
-                // STEP 2: Extra details
                 var itemIDs = transfers.SelectMany(t => t.Lines)
                                        .Select(l => l.ItemRefListID)
                                        .Where(id => !string.IsNullOrEmpty(id))
@@ -337,12 +456,21 @@ namespace Custom_QBSI.Clients.NHC
 
                 var uoms = GetBaseUnitNamesByListIDs(sessionManager, uomIDs);
 
-                // STEP 3: Map them back
-                MapTransferLineDetails(transfers, items, uoms);
+                var siteIDs = transfers.SelectMany(t => t.Lines)
+                                       .Select(l => l.SiteListID)
+                                       .Where(id => !string.IsNullOrEmpty(id))
+                                       .Distinct()
+                                       .ToList();
+
+                var sites = GetInventorySitesByListIDs(sessionManager, siteIDs);
+
+                MapTransferLineDetails(transfers, items, uoms, sites);
+
+                LogDataSync($"[GetTransferInventoryByRefNumber] Completed for RefNumber={refNumber}, Transfer Count={transfers.Count}");
             }
             catch (Exception ex)
             {
-                LogDataSync($"Error: {ex.Message}");
+                LogDataSync($"[GetTransferInventoryByRefNumber] Error: {ex.Message}");
             }
             finally
             {
@@ -356,6 +484,7 @@ namespace Custom_QBSI.Clients.NHC
 
             return transfers;
         }
+
 
 
 

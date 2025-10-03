@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Printing;
+using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -510,10 +511,30 @@ namespace Custom_QBSI.Clients.NHC
 
             string Date = transfers[0].TxnDate.ToString("MM/dd/yyyy");
             string invoiceTin = tin;
-            string invoiceBusinessAdd = address;
             string invoiceBusinessStyle = businessStyle;
 
 
+            string invoiceBusinessAdd = !string.IsNullOrWhiteSpace(address)? address: "";
+
+            var firstLine = transfers[0].Lines.FirstOrDefault();
+            if (string.IsNullOrEmpty(invoiceBusinessAdd) && firstLine != null)
+            {
+                invoiceBusinessAdd = string.Join(", ", new[]
+                            {
+                    firstLine.SiteAddr1,
+                    firstLine.SiteAddr2,
+                    firstLine.SiteAddr3,
+                    firstLine.SiteAddr4,
+                    firstLine.SiteAddr5
+                }.Where(s => !string.IsNullOrEmpty(s)));
+            }
+
+
+            string invoiceSoldTo = transfers[0].Lines.FirstOrDefault()?.SiteDescription ?? "";
+
+
+
+            e.Graphics.DrawString(invoiceSoldTo, font_Data, Brushes.Black, rectSoldTo);
             e.Graphics.DrawString(Date, font_Data, Brushes.Black, rectDate, sfAlignCenter);
             e.Graphics.DrawString(invoiceTin, font_Data, Brushes.Black, rectTIN);
             e.Graphics.DrawString(invoiceBusinessStyle, font_Data, Brushes.Black, rectBusinessStyle);

@@ -60,32 +60,49 @@ namespace Custom_QBSI.Clients.NHC
         public class TransferInventoryData
         {
             public string TxnID { get; set; }
-            public DateTime TxnDate { get; set; }
             public string RefNumber { get; set; }
-            public string Memo { get; set; }
-            public List<TransferInventoryLineData> Lines { get; set; } = new List<TransferInventoryLineData>();
+            public DateTime TxnDate { get; set; }
+            public List<TransferInventoryLineData> Lines { get; set; }
         }
 
         public class TransferInventoryLineData
         {
-            public string TxnID { get; set; }
-            public DateTime TxnDate { get; set; }
-            public string RefNumber { get; set; }
             public string ItemRefListID { get; set; }
-            public string ItemDescription { get; set; }
             public double QuantityTransfer { get; set; }
-            public string BaseUnitName { get; set; }
-            public string UnitOfMeasureListID { get; set; }
+
             public double SalesPrice { get; set; }
+            public string ItemDescription { get; set; }
+
+            public string BaseUnitName { get; set; }
+
+            public string SiteListID { get; set; }
+            public string SiteName { get; set; }
+            public string SiteDescription { get; set; }
+            public string SiteAddr1 { get; set; }
+            public string SiteAddr2 { get; set; }
+            public string SiteAddr3 { get; set; }
+            public string SiteAddr4 { get; set; }
+            public string SiteAddr5 { get; set; }
         }
 
         public class ItemData
         {
             public string ListID { get; set; }
-            public string FullName { get; set; }
-            public double SalesPrice { get; set; }
             public string UnitOfMeasureListID { get; set; }
+            public double SalesPrice { get; set; }
             public string SalesDesc { get; set; }
+        }
+
+        public class InventorySiteData
+        {
+            public string ListID { get; set; }
+            public string Name { get; set; }
+            public string Description { get; set; }
+            public string SiteAddressBlockAddr1 { get; set; }
+            public string SiteAddressBlockAddr2 { get; set; }
+            public string SiteAddressBlockAddr3 { get; set; }
+            public string SiteAddressBlockAddr4 { get; set; }
+            public string SiteAddressBlockAddr5 { get; set; }
         }
 
     }
