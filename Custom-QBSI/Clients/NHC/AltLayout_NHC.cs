@@ -560,7 +560,7 @@ namespace Custom_QBSI.Clients.NHC
             int tabXStart = 50;
             int tabYStart = 285;
 
-            int tabDataHeight = 24;
+            int tabDataHeight = 23;
 
             int widthItemNo = 67;
             int widthItemQuantity = 75;
@@ -596,13 +596,10 @@ namespace Custom_QBSI.Clients.NHC
 
                     // Draw Quantity
                     e.Graphics.DrawString(lineItem.QuantityTransfer.ToString("N2"),font_Data, Brushes.Black,new Rectangle(xStartItemQuantity, tabYStart + itemHeight, widthItemQuantity, rowHeight),sfAlignCenter);
-
                     // Draw Unit
                     e.Graphics.DrawString(lineItem.BaseUnitName,font_Data, Brushes.Black,new Rectangle(xStartItemUnit, tabYStart + itemHeight, widthItemUnit, rowHeight),sfAlignCenter);
-
                     // Draw ItemDescription
                     e.Graphics.DrawString(lineItem.ItemDescription, font_Data, Brushes.Black,new Rectangle(xStartItemDescription, tabYStart + itemHeight, widthItemDescription, rowHeight),sfAlignLeftCenter);
-
                     // Draw Sales Price if enabled
                     if (isEnableExpDateChecked)
                     {
@@ -612,7 +609,6 @@ namespace Custom_QBSI.Clients.NHC
                         e.Graphics.DrawString(lineItem.SalesPrice.ToString("N2"),
                             font_Data, Brushes.Black, rectItemAmount2, sfAlignCenterRight);
                     }
-
                     // Increment itemHeight by the rowHeight, not fixed tabDataHeight
                     itemHeight += rowHeight;
                     counter++;
