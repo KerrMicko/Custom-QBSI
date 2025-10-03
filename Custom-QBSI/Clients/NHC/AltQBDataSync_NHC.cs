@@ -133,155 +133,74 @@ namespace Custom_QBSI.Clients.NHC
             return invoices;
         }
 
-        public static List<TransferInventoryData> GetTransferInventoryByRefNumber(string refNumber)
+        public static List<TransferInventoryData> GetTransferInventoryBase(QBSessionManager sessionManager, string refNumber)
         {
-            QBSessionManager sessionManager = new QBSessionManager();
             List<TransferInventoryData> transfers = new List<TransferInventoryData>();
 
-            try
+            IMsgSetRequest requestMsgSet = sessionManager.CreateMsgSetRequest("US", 13, 0);
+            requestMsgSet.Attributes.OnError = ENRqOnError.roeContinue;
+
+            var tiQuery = requestMsgSet.AppendTransferInventoryQueryRq();
+            tiQuery.IncludeLineItems.SetValue(true);
+
+            tiQuery.ORTransferInventoryQuery.TxnFilterNoCurrency.ORRefNumberFilter.RefNumberFilter.RefNumber.SetValue(refNumber);
+            tiQuery.ORTransferInventoryQuery.TxnFilterNoCurrency.ORRefNumberFilter.RefNumberFilter.MatchCriterion.SetValue(ENMatchCriterion.mcStartsWith);
+
+            var responseMsgSet = sessionManager.DoRequests(requestMsgSet);
+
+            if (responseMsgSet?.ResponseList != null)
             {
-                string AppName = "QBSI";
-                LogDataSync($"Opening QuickBooks session for TransferInventory RefNumber: {refNumber}");
-
-                // --- Open QB session ---
-                sessionManager.OpenConnection("", AppName);
-                sessionManager.BeginSession("", ENOpenMode.omDontCare);
-                LogDataSync("QuickBooks session opened.");
-
-                // --- Step 1: Query TransferInventory for the specific RefNumber ---
-                IMsgSetRequest requestMsgSet = sessionManager.CreateMsgSetRequest("US", 13, 0);
-                requestMsgSet.Attributes.OnError = ENRqOnError.roeContinue;
-
-                ITransferInventoryQuery tiQuery = requestMsgSet.AppendTransferInventoryQueryRq();
-                tiQuery.IncludeLineItems.SetValue(true);
-
-                tiQuery.ORTransferInventoryQuery.TxnFilterNoCurrency.ORRefNumberFilter.RefNumberFilter.MatchCriterion.SetValue(ENMatchCriterion.mcStartsWith);
-                tiQuery.ORTransferInventoryQuery.TxnFilterNoCurrency.ORRefNumberFilter.RefNumberFilter.RefNumber.SetValue(refNumber);
-                LogDataSync($"Query built for RefNumber: {refNumber}");
-
-                IMsgSetResponse responseMsgSet = sessionManager.DoRequests(requestMsgSet);
-                LogDataSync("TransferInventory response received.");
-
-                if (responseMsgSet?.ResponseList != null && responseMsgSet.ResponseList.Count > 0)
+                for (int i = 0; i < responseMsgSet.ResponseList.Count; i++)
                 {
-                    LogDataSync($"ResponseList count: {responseMsgSet.ResponseList.Count}");
-
-                    HashSet<string> itemIDs = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-                    for (int i = 0; i < responseMsgSet.ResponseList.Count; i++)
+                    var response = responseMsgSet.ResponseList.GetAt(i);
+                    var tiList = response.Detail as ITransferInventoryRetList;
+                    if (tiList != null)
                     {
-                        IResponse response = responseMsgSet.ResponseList.GetAt(i);
-                        ITransferInventoryRetList tiList = response.Detail as ITransferInventoryRetList;
-
-                        if (tiList != null)
+                        for (int j = 0; j < tiList.Count; j++)
                         {
-                            LogDataSync($"Processing Response {i}, TransferInventory count: {tiList.Count}");
-
-                            for (int j = 0; j < tiList.Count; j++)
+                            var ti = tiList.GetAt(j);
+                            var data = new TransferInventoryData
                             {
-                                ITransferInventoryRet ti = tiList.GetAt(j);
-                                TransferInventoryData data = new TransferInventoryData
-                                {
-                                    TxnID = ti.TxnID?.GetValue(),
-                                    TxnDate = ti.TxnDate?.GetValue() ?? DateTime.MinValue,
-                                    RefNumber = ti.RefNumber?.GetValue(),
-                                    Lines = new List<TransferInventoryLineData>()
-                                };
+                                TxnID = ti.TxnID?.GetValue(),
+                                RefNumber = ti.RefNumber?.GetValue(),
+                                TxnDate = ti.TxnDate?.GetValue() ?? DateTime.MinValue,
+                                Lines = new List<TransferInventoryLineData>()
+                            };
 
-                                if (ti.TransferInventoryLineRetList != null)
+                            if (ti.TransferInventoryLineRetList != null)
+                            {
+                                for (int k = 0; k < ti.TransferInventoryLineRetList.Count; k++)
                                 {
-                                    LogDataSync($"TransferInventory has {ti.TransferInventoryLineRetList.Count} lines.");
-                                    for (int k = 0; k < ti.TransferInventoryLineRetList.Count; k++)
+                                    var line = ti.TransferInventoryLineRetList.GetAt(k);
+                                    data.Lines.Add(new TransferInventoryLineData
                                     {
-                                        ITransferInventoryLineRet line = ti.TransferInventoryLineRetList.GetAt(k);
-                                        string itemListID = line.ItemRef?.ListID?.GetValue();
-                                        if (!string.IsNullOrEmpty(itemListID)) itemIDs.Add(itemListID);
-
-                                        data.Lines.Add(new TransferInventoryLineData
-                                        {
-                                            ItemRefFullNameTransfer = line.ItemRef?.FullName?.GetValue(),
-                                            ItemRefListID = itemListID,
-                                            QuantityTransfer = line.QuantityTransferred?.GetValue() ?? 0
-                                        });
-
-                                        LogDataSync($"Processed line {k} for item: {line.ItemRef?.FullName?.GetValue()}");
-                                    }
-                                }
-
-                                transfers.Add(data);
-                            }
-                        }
-                    }
-
-                    // --- Step 2: Batch query all item details ---
-                    LogDataSync($"Querying {itemIDs.Count} unique items...");
-                    Dictionary<string, ItemData> itemDetailsDict = GetItemsByListIDs(sessionManager, itemIDs.ToList());
-                    LogDataSync($"Item details retrieved: {itemDetailsDict.Count}");
-
-                    // --- Step 3: Batch query UOM BaseUnits ---
-                    HashSet<string> uomIDs = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                    foreach (var item in itemDetailsDict.Values)
-                    {
-                        if (!string.IsNullOrEmpty(item.UnitOfMeasureListID)) uomIDs.Add(item.UnitOfMeasureListID);
-                    }
-
-                    LogDataSync($"Querying {uomIDs.Count} unique UOMs...");
-                    Dictionary<string, string> uomBaseNames = GetBaseUnitNamesByListIDs(sessionManager, uomIDs.ToList());
-                    LogDataSync($"UOM BaseUnit names retrieved: {uomBaseNames.Count}");
-
-                    // --- Step 4: Map item details and UOM BaseUnits to lines ---
-                    foreach (var transfer in transfers)
-                    {
-                        foreach (var line in transfer.Lines)
-                        {
-                            if (line.ItemRefListID != null && itemDetailsDict.TryGetValue(line.ItemRefListID, out var item))
-                            {
-                                line.SalesPrice = item.SalesPrice;
-                                if (!string.IsNullOrEmpty(item.UnitOfMeasureListID) && uomBaseNames.TryGetValue(item.UnitOfMeasureListID, out var baseUnit))
-                                {
-                                    line.BaseUnitName = baseUnit;
+                                        ItemRefListID = line.ItemRef?.ListID?.GetValue(),
+                                        ItemRefFullNameTransfer = line.ItemRef?.FullName?.GetValue(),
+                                        QuantityTransfer = line.QuantityTransferred?.GetValue() ?? 0
+                                    });
                                 }
                             }
+
+                            transfers.Add(data);
                         }
                     }
-
-                    LogDataSync($"TransferInventory processing completed. Total transfers: {transfers.Count}");
-                }
-                else
-                {
-                    LogDataSync("No TransferInventory found for the specified RefNumber.");
                 }
             }
-            catch (Exception ex)
-            {
-                LogDataSync($"Error in GetTransferInventoryByRefNumber: {ex.Message}");
-            }
-            finally
-            {
-                sessionManager.EndSession();
-                sessionManager.CloseConnection();
-                LogDataSync("QuickBooks session closed.");
-            }
 
-            return transfers;
+            return transfers
+                .Where(t => string.Equals(t.RefNumber, refNumber, StringComparison.OrdinalIgnoreCase))
+                .ToList();
         }
 
 
 
 
-        // -------------------------
-        // Optimized batch item query
+
         public static Dictionary<string, ItemData> GetItemsByListIDs(QBSessionManager sessionManager, List<string> itemListIDs)
         {
             Dictionary<string, ItemData> items = new Dictionary<string, ItemData>(StringComparer.OrdinalIgnoreCase);
 
-            if (itemListIDs == null || itemListIDs.Count == 0)
-            {
-                LogDataSync("No item IDs provided for item query.");
-                return items;
-            }
-
-            LogDataSync($"Starting batch item query for {itemListIDs.Count} items...");
+            if (itemListIDs == null || itemListIDs.Count == 0) return items;
 
             IMsgSetRequest requestMsgSet = sessionManager.CreateMsgSetRequest("US", 13, 0);
             requestMsgSet.Attributes.OnError = ENRqOnError.roeContinue;
@@ -293,53 +212,42 @@ namespace Custom_QBSI.Clients.NHC
                 invQuery.IncludeRetElementList.Add("ListID");
                 invQuery.IncludeRetElementList.Add("UnitOfMeasureSetRef");
                 invQuery.IncludeRetElementList.Add("SalesPrice");
-                LogDataSync($"Prepared query for item ListID: {id}");
             }
 
-            IMsgSetResponse responseMsgSet = sessionManager.DoRequests(requestMsgSet);
-            LogDataSync("Item query response received.");
+            var responseMsgSet = sessionManager.DoRequests(requestMsgSet);
 
             if (responseMsgSet?.ResponseList != null)
             {
                 for (int i = 0; i < responseMsgSet.ResponseList.Count; i++)
                 {
-                    IResponse response = responseMsgSet.ResponseList.GetAt(i);
-                    IItemInventoryRetList invList = response.Detail as IItemInventoryRetList;
+                    var response = responseMsgSet.ResponseList.GetAt(i);
+                    var invList = response.Detail as IItemInventoryRetList;
                     if (invList != null)
                     {
                         for (int j = 0; j < invList.Count; j++)
                         {
-                            IItemInventoryRet invItem = invList.GetAt(j);
+                            var invItem = invList.GetAt(j);
                             items[invItem.ListID?.GetValue()] = new ItemData
                             {
                                 ListID = invItem.ListID?.GetValue(),
                                 UnitOfMeasureListID = invItem.UnitOfMeasureSetRef?.ListID?.GetValue(),
                                 SalesPrice = invItem.SalesPrice?.GetValue() ?? 0
                             };
-                            LogDataSync($"Processed item: {invItem.ListID?.GetValue()}, SalesPrice: {invItem.SalesPrice?.GetValue() ?? 0}");
                         }
                     }
                 }
             }
 
-            LogDataSync($"Batch item query completed. Total items retrieved: {items.Count}");
             return items;
         }
 
 
-        // -------------------------
-        // Optimized batch UOM query
+
         public static Dictionary<string, string> GetBaseUnitNamesByListIDs(QBSessionManager sessionManager, List<string> uomListIDs)
         {
             Dictionary<string, string> uomBaseNames = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
-            if (uomListIDs == null || uomListIDs.Count == 0)
-            {
-                LogDataSync("No UOM IDs provided for UOM query.");
-                return uomBaseNames;
-            }
-
-            LogDataSync($"Starting batch UOM query for {uomListIDs.Count} UOMs...");
+            if (uomListIDs == null || uomListIDs.Count == 0) return uomBaseNames;
 
             IMsgSetRequest requestMsgSet = sessionManager.CreateMsgSetRequest("US", 13, 0);
             requestMsgSet.Attributes.OnError = ENRqOnError.roeContinue;
@@ -350,36 +258,105 @@ namespace Custom_QBSI.Clients.NHC
                 uomQuery.ORListQuery.ListIDList.Add(id);
                 uomQuery.IncludeRetElementList.Add("ListID");
                 uomQuery.IncludeRetElementList.Add("BaseUnit");
-                LogDataSync($"Prepared query for UOM ListID: {id}");
             }
 
-            IMsgSetResponse responseMsgSet = sessionManager.DoRequests(requestMsgSet);
-            LogDataSync("UOM query response received.");
+            var responseMsgSet = sessionManager.DoRequests(requestMsgSet);
 
             if (responseMsgSet?.ResponseList != null)
             {
                 for (int i = 0; i < responseMsgSet.ResponseList.Count; i++)
                 {
-                    IResponse response = responseMsgSet.ResponseList.GetAt(i);
-                    IUnitOfMeasureSetRetList uomList = response.Detail as IUnitOfMeasureSetRetList;
+                    var response = responseMsgSet.ResponseList.GetAt(i);
+                    var uomList = response.Detail as IUnitOfMeasureSetRetList;
                     if (uomList != null)
                     {
                         for (int j = 0; j < uomList.Count; j++)
                         {
-                            IUnitOfMeasureSetRet uom = uomList.GetAt(j);
+                            var uom = uomList.GetAt(j);
                             if (!string.IsNullOrEmpty(uom.ListID?.GetValue()))
-                            {
                                 uomBaseNames[uom.ListID.GetValue()] = uom.BaseUnit?.Name?.GetValue();
-                                LogDataSync($"Processed UOM: {uom.ListID?.GetValue()}, BaseUnit: {uom.BaseUnit?.Name?.GetValue()}");
+                        }
+                    }
+                }
+            }
+
+            return uomBaseNames;
+        }
+
+        public static void MapTransferLineDetails(List<TransferInventoryData> transfers,Dictionary<string, ItemData> items,Dictionary<string, string> uoms)
+            {
+                foreach (var transfer in transfers)
+                {
+                    foreach (var line in transfer.Lines)
+                    {
+                        if (line.ItemRefListID != null && items.TryGetValue(line.ItemRefListID, out var item))
+                        {
+                            line.SalesPrice = item.SalesPrice;
+
+                            if (!string.IsNullOrEmpty(item.UnitOfMeasureListID) &&
+                                uoms.TryGetValue(item.UnitOfMeasureListID, out var baseUnit))
+                            {
+                                line.BaseUnitName = baseUnit;
                             }
                         }
                     }
                 }
             }
 
-            LogDataSync($"Batch UOM query completed. Total UOMs retrieved: {uomBaseNames.Count}");
-            return uomBaseNames;
+
+        public static List<TransferInventoryData> GetTransferInventoryByRefNumber(string refNumber)
+        {
+            QBSessionManager sessionManager = new QBSessionManager();
+            List<TransferInventoryData> transfers = new List<TransferInventoryData>();
+
+            try
+            {
+                sessionManager.OpenConnection("", "QBSI");
+                sessionManager.BeginSession("", ENOpenMode.omDontCare);
+
+                // STEP 1: Base data
+                transfers = GetTransferInventoryBase(sessionManager, refNumber);
+
+                // Show these in UI right away ✅
+
+                // STEP 2: Extra details
+                var itemIDs = transfers.SelectMany(t => t.Lines)
+                                       .Select(l => l.ItemRefListID)
+                                       .Where(id => !string.IsNullOrEmpty(id))
+                                       .Distinct()
+                                       .ToList();
+
+                var items = GetItemsByListIDs(sessionManager, itemIDs);
+
+                var uomIDs = items.Values.Select(i => i.UnitOfMeasureListID)
+                                         .Where(id => !string.IsNullOrEmpty(id))
+                                         .Distinct()
+                                         .ToList();
+
+                var uoms = GetBaseUnitNamesByListIDs(sessionManager, uomIDs);
+
+                // STEP 3: Map them back
+                MapTransferLineDetails(transfers, items, uoms);
+            }
+            catch (Exception ex)
+            {
+                LogDataSync($"Error: {ex.Message}");
+            }
+            finally
+            {
+                try
+                {
+                    sessionManager.EndSession();
+                    sessionManager.CloseConnection();
+                }
+                catch { }
+            }
+
+            return transfers;
         }
+
+
+
 
 
 
