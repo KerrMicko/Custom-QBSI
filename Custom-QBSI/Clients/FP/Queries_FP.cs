@@ -5,11 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using static Custom_QBSI.Clients.PBS.DataClass_PBS;
+using static Custom_QBSI.Clients.FP.DataClass_FP;
 
-namespace Custom_QBSI.Clients.PBS
+namespace Custom_QBSI.Clients.FP
 {
-    public class Queries_PBS
+    public class Queries_FP
     {
         public List<InvoiceData> GetInvoiceData(string refNumber)
         {
@@ -109,7 +109,6 @@ namespace Custom_QBSI.Clients.PBS
                                                     }
                                                 }
                                             }
-
                                             newInvoiceItem.LineItems.Add(lineItem);
                                         }
                                     }
@@ -128,6 +127,7 @@ namespace Custom_QBSI.Clients.PBS
             return invoices;
         }
 
+
         public void UpdateACNoAndDateIssued(string acNo, DateTime dateIssued)
         {
             string connectionString = AccessDatabase.GetAccessConnectionString();
@@ -136,7 +136,7 @@ namespace Custom_QBSI.Clients.PBS
             {
                 connection.Open();
 
-                string query = "INSERT INTO DetailedPBS (ACNO, DateIssued) VALUES (?, ?)";
+                string query = "INSERT INTO DetailedFP (ACNO, DateIssued) VALUES (?, ?)";
 
                 using (OleDbCommand command = new OleDbCommand(query, connection))
                 {
@@ -168,7 +168,7 @@ namespace Custom_QBSI.Clients.PBS
             {
                 connection.Open();
 
-                string selectQuery = "SELECT TOP 1 ACNO, DateIssued FROM DetailedPBS ORDER BY ID DESC";
+                string selectQuery = "SELECT TOP 1 ACNO, DateIssued FROM DetailedFP ORDER BY ID DESC";
                 // Get the latest saved record
 
                 using (OleDbCommand selectCommand = new OleDbCommand(selectQuery, connection))
@@ -208,7 +208,7 @@ namespace Custom_QBSI.Clients.PBS
                 {
                     connection.Open();
 
-                    string updateQuery = "UPDATE Signatory_PBS SET PreparedBy = ?, CheckedBy = ?, ApprovedBy = ? WHERE ID = 1";
+                    string updateQuery = "UPDATE Signatory_FP SET PreparedBy = ?, CheckedBy = ?, ApprovedBy = ? WHERE ID = 1";
                     using (OleDbCommand updateCommand = new OleDbCommand(updateQuery, connection))
                     {
                         updateCommand.Parameters.AddWithValue("?", preparedBy);
@@ -234,7 +234,7 @@ namespace Custom_QBSI.Clients.PBS
             {
                 connection.Open();
 
-                string selectQuery = "SELECT PreparedBy, CheckedBy, ApprovedBy FROM Signatory_PBS WHERE ID = 1";
+                string selectQuery = "SELECT PreparedBy, CheckedBy, ApprovedBy FROM Signatory_FP WHERE ID = 1";
                 using (OleDbCommand selectCommand = new OleDbCommand(selectQuery, connection))
                 using (OleDbDataReader reader = selectCommand.ExecuteReader())
                 {

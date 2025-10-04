@@ -1,4 +1,5 @@
 ﻿using Custom_QBSI.Clients.Enclosure;
+using Custom_QBSI.Clients.FP;
 using Custom_QBSI.Clients.NHC;
 using Custom_QBSI.Clients.PBS;
 using System;
@@ -17,13 +18,14 @@ namespace Custom_QBSI
     {
         /* 
          * Current clients:
-         * NHC
          * Enclosure 
+         * FP
+         * NHC
          * PBS
          */
 
 
-        public static string client = "NHC";
+        public static string client = "FP";
     }
     public partial class Dashboard : Form
     {
@@ -46,23 +48,33 @@ namespace Custom_QBSI
                 //BackColor = Color.Aqua,
             };
 
-            if (GlobalVariables.client == "NHC")
-            {
-                Dashboard_NHC dashboard_NHC = new Dashboard_NHC();
-                Panel panel_Main = dashboard_NHC.MainPanel();
-                Panel panel_Sidebar = dashboard_NHC.SidebarPanel();
-                Panel panel_Title = dashboard_NHC.TitlePanel();
-
-                panel.Controls.Add(panel_Sidebar);
-                panel.Controls.Add(panel_Title);
-                panel.Controls.Add(panel_Main);
-            }
-            else if (GlobalVariables.client == "Enclosure")
+            if (GlobalVariables.client == "Enclosure")
             {
                 Dashboard_Enclosure dashboard_Enclosure = new Dashboard_Enclosure();
                 Panel panel_Main = dashboard_Enclosure.MainPanel();
                 Panel panel_Sidebar = dashboard_Enclosure.SidebarPanel();
                 Panel panel_Title = dashboard_Enclosure.TitlePanel();
+
+                panel.Controls.Add(panel_Sidebar);
+                panel.Controls.Add(panel_Title);
+                panel.Controls.Add(panel_Main);
+            }
+            else if (GlobalVariables.client == "FP")
+            {
+                Dashboard_FP dashboard_FP = new Dashboard_FP();
+                Panel panel_Main = dashboard_FP.MainPanel();
+                Panel panel_Sidebar = dashboard_FP.SidebarPanel();
+                Panel panel_Title = dashboard_FP.TitlePanel();
+                panel.Controls.Add(panel_Sidebar);
+                panel.Controls.Add(panel_Title);
+                panel.Controls.Add(panel_Main);
+            }
+            else if (GlobalVariables.client == "NHC")
+            {
+                Dashboard_NHC dashboard_NHC = new Dashboard_NHC();
+                Panel panel_Main = dashboard_NHC.MainPanel();
+                Panel panel_Sidebar = dashboard_NHC.SidebarPanel();
+                Panel panel_Title = dashboard_NHC.TitlePanel();
 
                 panel.Controls.Add(panel_Sidebar);
                 panel.Controls.Add(panel_Title);

@@ -1,5 +1,4 @@
-﻿using Custom_QBSI.Clients.Enclosure;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Printing;
@@ -7,18 +6,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using static Custom_QBSI.Clients.PBS.DataClass_PBS;
+using static Custom_QBSI.Clients.FP.DataClass_FP;
 
-namespace Custom_QBSI.Clients.PBS
+namespace Custom_QBSI.Clients.FP
 {
-    public class Dashboard_PBS
+    public class Dashboard_FP
     {
         private static readonly List<string> tableNames = new List<string> { "Account",
             "Company", "Customer",
             "Invoice", "InvoiceLine", "InvoiceLinkedTxn",
             "Item" };
 
-        readonly string tableName = "PBS";
+        readonly string tableName = "FP";
 
         private PrintDocument printDocument;
         private PrintPreviewControl printPreviewControl;
@@ -81,10 +80,9 @@ namespace Custom_QBSI.Clients.PBS
 
             return panel_Container;
         }
-
         private FlowLayoutPanel Main_PanelDetails()
         {
-            Queries_PBS queries_PBS = new Queries_PBS();
+            Queries_FP queries_FP = new Queries_FP();
 
             int panelDetailsWidth = sideBarWidth + 30;
             int componentWidth = panelDetailsWidth - 20;
@@ -167,16 +165,15 @@ namespace Custom_QBSI.Clients.PBS
                 Value = DateTime.Now,
             };
 
-            var detailedPBS = queries_PBS.RetrieveACNoAndDateIssued();
-            if (!string.IsNullOrEmpty(detailedPBS.acNo))
+            var detailedFP = queries_FP.RetrieveACNoAndDateIssued();
+            if (!string.IsNullOrEmpty(detailedFP.acNo))
             {
-                textBox_ACNo.Text = detailedPBS.acNo;
+                textBox_ACNo.Text = detailedFP.acNo;
             }
-            if (detailedPBS.dateIssued.HasValue)
+            if (detailedFP.dateIssued.HasValue)
             {
-                dateTimePicker_DateIssued.Value = detailedPBS.dateIssued.Value;
+                dateTimePicker_DateIssued.Value = detailedFP.dateIssued.Value;
             }
-
 
             Label label_PWDSignature = new Label
             {
@@ -207,7 +204,7 @@ namespace Custom_QBSI.Clients.PBS
 
             button_Save.Click += (sender, e) =>
             {
-                queries_PBS.UpdateACNoAndDateIssued(
+                queries_FP.UpdateACNoAndDateIssued(
                   textBox_ACNo.Text,
                   dateTimePicker_DateIssued.Value
                   );
@@ -569,7 +566,7 @@ namespace Custom_QBSI.Clients.PBS
                         //string signatoryCheckedBy = textBox_SignatoryCheckedBy.Text;
                         //string signatoryApprovedBy = textBox_SignatoryApprovedBy.Text;
 
-                        Queries_PBS accessQueries = new Queries_PBS();
+                        Queries_FP accessQueries = new Queries_FP();
                         List<InvoiceData> invoice = accessQueries.GetInvoiceData(refNumber);
 
                         if (invoice.Count == 0)
@@ -578,7 +575,7 @@ namespace Custom_QBSI.Clients.PBS
                             return;
                         }
 
-                        Layout_PBS layout_PBS = new Layout_PBS();
+                        Layout_FP layout_FP = new Layout_FP();
                         PaperSize paperSize = new PaperSize("Custom", 850, 1100);
 
                         printDocument = new PrintDocument();
@@ -588,7 +585,7 @@ namespace Custom_QBSI.Clients.PBS
                         {
                             //layout_NHC.PrintPage_NHC(s, ev, invoice, comboBox_Forms.SelectedIndex, note, businessStyle, pwdSignature, isEnableExpDateChecked);
                             //if (comboBox_Forms.SelectedIndex == 1)
-                            layout_PBS.Layout_SalesInvoice(ev, invoice, vatType, businessStyle, includeDateIssued, isLessEWTChecked, acNo, dateIssued, seriesNumberRef);
+                            layout_FP.Layout_SalesInvoice(ev, invoice, vatType, businessStyle, includeDateIssued, isLessEWTChecked, acNo, dateIssued, seriesNumberRef);
                             /*else if (comboBox_Forms.SelectedIndex == 2)
                                 layout_Enclosure.Layout_DeliveryReceipt(ev, invoice, note, businessStyle, pwdSignature, isEnableExpDateChecked, signatoryName);*/
                         };
@@ -612,7 +609,7 @@ namespace Custom_QBSI.Clients.PBS
 
         private FlowLayoutPanel Panel_Signatory()
         {
-            Queries_PBS queries_PBS = new Queries_PBS();
+            Queries_FP queries_FP = new Queries_FP();
 
             FlowLayoutPanel panel = new FlowLayoutPanel
             {
@@ -633,7 +630,7 @@ namespace Custom_QBSI.Clients.PBS
                 Font = font_Label,
             };
 
-            var signatory = queries_PBS.RetrieveSignatory();
+            var signatory = queries_FP.RetrieveSignatory();
 
             Label label_PreparedBy = new Label
             {
@@ -696,7 +693,7 @@ namespace Custom_QBSI.Clients.PBS
             };
             button_Save.Click += (sender, e) =>
             {
-                queries_PBS.UpdateSignatory(
+                queries_FP.UpdateSignatory(
                     textBox_SignatoryPreparedBy.Text,
                     textBox_SignatoryCheckedBy.Text,
                     textBox_SignatoryApprovedBy.Text
@@ -811,7 +808,7 @@ namespace Custom_QBSI.Clients.PBS
 
         private void TextBox_SeriesNumber_Leave(object sender, EventArgs e)
         {
-            string tableName = "PBS";
+            string tableName = "FP";
             AccessDatabase accessDatabase = new AccessDatabase();
             accessDatabase.UpdateManualSeriesNumber(tableName, seriesNumber);
         }
