@@ -44,7 +44,7 @@ namespace Custom_QBSI.Clients.FP
             int xStart = 50;
             int yStart = 40;
 
-            Image logo = Properties.Resources.logo_plan_b;
+            Image logo = Properties.Resources.future_perfect_logo2;
             e.Graphics.DrawImage(logo, new Rectangle(xStart - 5, 45, 150, 80));
 
             Font font_Details = font_Eight;
@@ -52,8 +52,8 @@ namespace Custom_QBSI.Clients.FP
             Font font_Data = font_Eight;
 
             Rectangle rectCompanyName = new Rectangle(xStart, yStart, maxWidth, 40);
-            Rectangle rectCompanyAddress = new Rectangle(xStart, yStart + 40 - 10, maxWidth, 40);
-            Rectangle rectCompanyTIN = new Rectangle(xStart, yStart + 65 - 10 + 32, maxWidth, 40);
+            Rectangle rectCompanyAddress = new Rectangle(xStart, yStart + 40 - 10, maxWidth, 50);
+            Rectangle rectCompanyTIN = new Rectangle(xStart, yStart + 65, maxWidth, 40);
 
             string companyName = "FP Philippines, Inc.";
             string companyAddress = "Unit 1407B, 88 Corporate Center, Sedeño cor. Valero St., Makati City, Philippines\n" + "(+632) 8856 9197\n" + "finance@futureperfect.com";
@@ -61,9 +61,9 @@ namespace Custom_QBSI.Clients.FP
             //string companyEmail = "finance@futureperfect.com";
             string companyTIN = "TIN #: 406 794 995 000";
 
-            e.Graphics.DrawRectangle(Pens.Black, rectCompanyName);
+            /*e.Graphics.DrawRectangle(Pens.Black, rectCompanyName);
             e.Graphics.DrawRectangle(Pens.Black, rectCompanyAddress);
-            e.Graphics.DrawRectangle(Pens.Black, rectCompanyTIN);
+            e.Graphics.DrawRectangle(Pens.Black, rectCompanyTIN);*/
 
             Color customColor = ColorTranslator.FromHtml("#00ade6");
 
@@ -73,7 +73,7 @@ namespace Custom_QBSI.Clients.FP
             }
 
             e.Graphics.DrawString(companyAddress, font_Ten, Brushes.Black, rectCompanyAddress, sfAlignCenter);
-            e.Graphics.DrawString(companyTIN, font_Ten, Brushes.Black, rectCompanyTIN, sfAlignCenter);
+            e.Graphics.DrawString(companyTIN, font_Eight, Brushes.Black, rectCompanyTIN, sfAlignCenter);
 
             e.Graphics.DrawString("INVOICE", font_ThirteenBold, Brushes.Black, new PointF(xStart, yStart + 100));
 
@@ -597,8 +597,8 @@ namespace Custom_QBSI.Clients.FP
             e.Graphics.DrawString("APPROVED BY:", font_Nine, Brushes.Black, rectCheckedByHeader, sfAlignLeftCenter); //CHECKED BY
             e.Graphics.DrawString("RECEIVED BY:", font_Nine, Brushes.Black, rectApprovedByHeader, sfAlignLeftCenter); //APPROVED BY
 
-            Queries_PBS queries_PBS = new Queries_PBS();
-            var signatories = queries_PBS.RetrieveSignatory();
+            Queries_FP queries_FP = new Queries_FP();
+            var signatories = queries_FP.RetrieveSignatory();
 
             e.Graphics.DrawString(signatories.preparedBy, font_Nine, Brushes.Black, rectPreparedByUnderline, sfAlignCenter);
             e.Graphics.DrawString(signatories.checkedBy, font_Nine, Brushes.Black, rectCheckedByUnderline, sfAlignCenter);
@@ -634,8 +634,8 @@ namespace Custom_QBSI.Clients.FP
 
             Font fontExtraFieldsFooter = font_Seven;
 
-            queries_PBS = new Queries_PBS();
-            var detailedPBS = queries_PBS.RetrieveACNoAndDateIssued();
+            queries_FP = new Queries_FP();
+            var detailedPBS = queries_FP.RetrieveACNoAndDateIssued();
 
             e.Graphics.DrawString("AC NO : _______________________", fontExtraFieldsFooter, Brushes.Black, rectACNo, sfAlignLeftCenter);
             e.Graphics.DrawString("Date Issued : ___________________", fontExtraFieldsFooter, Brushes.Black, rectDateIssued, sfAlignLeftCenter);
@@ -644,7 +644,7 @@ namespace Custom_QBSI.Clients.FP
             e.Graphics.DrawString(detailedPBS.acNo, fontExtraFieldsFooter, Brushes.Black, rectACNoData, sfAlignLeftCenter);
 
 
-            string formattedDate = detailedPBS.dateIssued.Value.ToString("MM/dd/yyyy");
+            string formattedDate = detailedPBS.dateIssued.HasValue? detailedPBS.dateIssued.Value.ToString("MM/dd/yyyy"): "";
 
             e.Graphics.DrawString(formattedDate, fontExtraFieldsFooter, Brushes.Black, rectDateIssuedData, sfAlignLeftCenter);
 
