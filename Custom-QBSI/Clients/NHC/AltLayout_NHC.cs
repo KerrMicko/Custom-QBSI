@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Printing;
 using System.IO;
@@ -7,6 +8,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using static Custom_QBSI.Clients.NHC.AltDataClass_NHC;
 
 namespace Custom_QBSI.Clients.NHC
@@ -490,7 +492,7 @@ namespace Custom_QBSI.Clients.NHC
 
         }
 
-        public void Layout_DeliveryReceipt(PrintPageEventArgs e, List<TransferInventoryData> transfers, string note, string businessStyle, string pwdSignature,string address,string terms, string storeCode, string poNumber, string tin, bool isEnableExpDateChecked, string signatoryName)
+        public void Layout_DeliveryReceipt(PrintPageEventArgs e, List<TransferInventoryData> transfers, string note, string businessStyle, string pwdSignature,string address,string terms, string storeCode, string poNumber, string tin, bool isEnableExpDateChecked, string signatoryName, DataGridView dataGridView = null)
         {
             /*Image image = Properties.Resources.NATURE_DR;
             e.Graphics.DrawImage(image, e.PageBounds);*/
@@ -502,13 +504,6 @@ namespace Custom_QBSI.Clients.NHC
             Rectangle rectBusinessStyle = new Rectangle(615, 138, 205, 20);
             Rectangle rectTIN = new Rectangle(125, 155, 285, 20);
             Rectangle rectBusinessAdd = new Rectangle(125, 175, 500, 25);
-
-            /*e.Graphics.DrawRectangle(Pens.Orange, rectDate);
-            e.Graphics.DrawRectangle(Pens.Orange, rectSoldTo);
-            e.Graphics.DrawRectangle(Pens.Orange, rectBusinessStyle);
-            e.Graphics.DrawRectangle(Pens.Blue, rectTIN);
-            e.Graphics.DrawRectangle(Pens.Green, rectBusinessAdd);*/
-
             string Date = transfers[0].TxnDate.ToString("MM/dd/yyyy");
             string invoiceTin = tin;
             string invoiceBusinessStyle = businessStyle;
@@ -577,41 +572,64 @@ namespace Custom_QBSI.Clients.NHC
             Rectangle rectItemDescription = new Rectangle(xStartItemDescription, tabYStart, widthItemDescription, tabDataHeight);
             Rectangle rectItemAmount = new Rectangle(xStartItemAmount, tabYStart, widthItemDescription, tabDataHeight);
 
-            /*e.Graphics.DrawRectangle(Pens.Black, rectItemQuantity);
-            e.Graphics.DrawRectangle(Pens.Red, rectItemUnit);
-            e.Graphics.DrawRectangle(Pens.Pink, rectItemDescription);
-            e.Graphics.DrawRectangle(Pens.Blue, rectItemAmount);*/
-
             int itemHeight = 0;
-            int counter = 1;
 
             foreach (var tran in transfers)
             {
+                int lineIndex = 0;
                 foreach (var lineItem in tran.Lines)
                 {
-                    // Calculate the height of the ItemDescription
-                    SizeF descSize = e.Graphics.MeasureString(lineItem.ItemDescription, font_Data, widthItemDescription);
-                    int lineHeight = (int)Math.Ceiling(descSize.Height);
-                    int rowHeight = Math.Max(tabDataHeight, lineHeight);
+                    string expDateEdited = null;
+                    string priceEdited = null;
 
-                    // Draw Quantity
-                    e.Graphics.DrawString(lineItem.QuantityTransfer.ToString("N2"),font_Data, Brushes.Black,new Rectangle(xStartItemQuantity, tabYStart + itemHeight, widthItemQuantity, rowHeight),sfAlignCenter);
-                    // Draw Unit
-                    e.Graphics.DrawString(lineItem.BaseUnitName,font_Data, Brushes.Black,new Rectangle(xStartItemUnit, tabYStart + itemHeight, widthItemUnit, rowHeight),sfAlignCenter);
-                    // Draw ItemDescription
-                    e.Graphics.DrawString(lineItem.ItemDescription, font_Data, Brushes.Black,new Rectangle(xStartItemDescription, tabYStart + itemHeight, widthItemDescription, rowHeight),sfAlignLeftCenter);
-                    // Draw Sales Price if enabled
-                    if (isEnableExpDateChecked)
+                    // 🔹 Try to get edited data from DataGridView if available
+                    if (dataGridView != null && dataGridView.Visible && lineIndex < dataGridView.Rows.Count)
                     {
-                        Rectangle rectItemAmount2 = new Rectangle(xStartItemAmount, tabYStart + itemHeight, widthItemDescription + 60, rowHeight);
-                        double lineAmount = lineItem.SalesPrice * lineItem.QuantityTransfer;
-
-                        e.Graphics.DrawString(lineItem.SalesPrice.ToString("N2"),
-                            font_Data, Brushes.Black, rectItemAmount2, sfAlignCenterRight);
+                        var row = dataGridView.Rows[lineIndex];
+                        if (!row.IsNewRow)
+                        {
+                            expDateEdited = row.Cells["ExpirationDate"]?.Value?.ToString();
+                            priceEdited = row.Cells["Price"]?.Value?.ToString();
+                        }
                     }
-                    // Increment itemHeight by the rowHeight, not fixed tabDataHeight
+
+                    // 🔹 Use default item description from QuickBooks
+                    string description = lineItem.ItemDescription;
+                    string finalDescription = description;
+
+                    // If expiration enabled → append from DataGridView (if exists)
+                    if (isEnableExpDateChecked && !string.IsNullOrWhiteSpace(expDateEdited))
+                        finalDescription += $" (EXP: {expDateEdited})";
+                    else if (isEnableExpDateChecked && !string.IsNullOrWhiteSpace(lineItem.ExpirationDate))
+                        finalDescription += $" (EXP: {lineItem.ExpirationDate})";
+
+                    SizeF descSize = e.Graphics.MeasureString(finalDescription, font_Data, widthItemDescription);
+                    int rowHeight = Math.Max(tabDataHeight, (int)Math.Ceiling(descSize.Height));
+
+                    // Quantity
+                    e.Graphics.DrawString(lineItem.QuantityTransfer.ToString("N2"), font_Data, Brushes.Black,
+                        new Rectangle(xStartItemQuantity, tabYStart + itemHeight, widthItemQuantity, rowHeight), sfAlignCenter);
+
+                    // Unit
+                    e.Graphics.DrawString(lineItem.BaseUnitName, font_Data, Brushes.Black,
+                        new Rectangle(xStartItemUnit, tabYStart + itemHeight, widthItemUnit, rowHeight), sfAlignCenter);
+
+                    // Description
+                    e.Graphics.DrawString(finalDescription, font_Data, Brushes.Black,
+                        new Rectangle(xStartItemDescription, tabYStart + itemHeight, widthItemDescription, rowHeight), sfAlignLeftCenter);
+
+                    string finalPrice;
+
+                    if (!string.IsNullOrWhiteSpace(priceEdited) && decimal.TryParse(priceEdited, out decimal parsedPrice))
+                        finalPrice = parsedPrice.ToString("N2");
+                    else
+                        finalPrice = lineItem.SalesPrice.ToString("N2");
+
+                    Rectangle rectItemAmount2 = new Rectangle(xStartItemAmount + widthItemDescription - 40, tabYStart + itemHeight, 100, rowHeight);
+                    e.Graphics.DrawString(finalPrice, font_Data, Brushes.Black, rectItemAmount2, sfAlignCenterRight);
+
                     itemHeight += rowHeight;
-                    counter++;
+                    lineIndex++;
                 }
             }
 
@@ -621,7 +639,6 @@ namespace Custom_QBSI.Clients.NHC
                 Rectangle rectNote = new Rectangle(50, tabYStart + itemHeight, widthItemDescription, tabDataHeight);
                 e.Graphics.DrawString("Note: " + note, font_EightBold, Brushes.Black, rectNote, sfAlignLeftCenter);
             }
-
 
 
             // Signatory
@@ -634,5 +651,6 @@ namespace Custom_QBSI.Clients.NHC
             e.Graphics.DrawString(Signatory, font_Data, Brushes.Black, rectAuthorized, sfAlignCenter);
 
         }
+
     }
 }

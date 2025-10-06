@@ -23,6 +23,8 @@ namespace Custom_QBSI.Clients.NHC
 
         private ComboBox comboBox_Forms;
         private DataGridView dataGridView_Lines;
+        private List<AltDataClass_NHC.TransferInventoryData> lastQueriedTransfers;
+
 
         // Details
         private CheckBox checkBox_EnableExpDate;
@@ -50,6 +52,7 @@ namespace Custom_QBSI.Clients.NHC
         private TextBox textBox_StoreCode;
 
         private Button button_SaveDetails;
+        private Button button_PrintNewData;
 
         // Signatory
         private TextBox textBox_SignatoryName;
@@ -268,27 +271,25 @@ namespace Custom_QBSI.Clients.NHC
                 Font = font_Label,
                 ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize,
                 ScrollBars = ScrollBars.Vertical,
-                Visible = false // hidden initially
+                Visible = false
             };
 
-            // Columns: ItemDescription, SalesPrice, ExpirationDate
             dataGridView_Lines.Columns.Clear();
+            dataGridView_Lines.Columns.Add("Description", "Description");
+            dataGridView_Lines.Columns.Add("Price", "Price");
+            dataGridView_Lines.Columns.Add("ExpirationDate", "Expiration Date");
 
-            dataGridView_Lines.Columns.Add(new DataGridViewTextBoxColumn
+            button_PrintNewData = new Button
             {
-                HeaderText = "Description",
-                Name = "Description"
-            });
-            dataGridView_Lines.Columns.Add(new DataGridViewTextBoxColumn
-            {
-                HeaderText = "Price",
-                Name = "Price"
-            });
-            dataGridView_Lines.Columns.Add(new DataGridViewTextBoxColumn
-            {
-                HeaderText = "Expiration Date",
-                Name = "ExpirationDate"
-            });
+                Parent = panel_Details,
+                Height = 26,
+                Width = componentWidth,
+                Text = "RE-GENERATE DOCUMENT",
+                BackColor = Color.Transparent,
+                Visible = false,
+            };
+
+            button_PrintNewData.Click += button_PrintEdited_Click;
 
             checkBox_LessEWT = new CheckBox
             {
@@ -602,7 +603,7 @@ namespace Custom_QBSI.Clients.NHC
 
                     LogMessage($"Searching invoice for RefNumber: {refNumber}");
 
-                    // 3️⃣ Create progress form (non-blocking)
+                    // 3️⃣ Create progress form
                     var progressForm = new Form
                     {
                         StartPosition = FormStartPosition.CenterScreen,
@@ -641,9 +642,9 @@ namespace Custom_QBSI.Clients.NHC
                     };
                     timer.Start();
 
-                    progressForm.Show(); // Non-blocking
+                    progressForm.Show();
 
-                    // 4️⃣ Run query asynchronously (no UI control access inside Task.Run)
+                    // 4️⃣ Run QuickBooks query asynchronously
                     var result = await Task.Run(() =>
                     {
                         List<Custom_QBSI.Clients.NHC.AltDataClass_NHC.InvoiceData> invoice = null;
@@ -657,13 +658,13 @@ namespace Custom_QBSI.Clients.NHC
                         return new { Invoice = invoice, Transfers = transfers };
                     });
 
-                    // 5️⃣ Stop progress and close form
+                    // 5️⃣ Stop progress
                     timer.Stop();
                     progressBar.Value = 100;
                     await Task.Delay(200);
                     progressForm.Close();
 
-                    // 6️⃣ Check results
+                    // 6️⃣ Check if data is found
                     if (selectedFormIndex == 1 && (result.Invoice == null || result.Invoice.Count == 0))
                     {
                         MessageBox.Show("No invoice found for the given reference number.", "Notice", MessageBoxButtons.OK);
@@ -678,7 +679,56 @@ namespace Custom_QBSI.Clients.NHC
                         return;
                     }
 
-                    // 7️⃣ Prepare print
+                    // ✅ Only ask if: (Form 2 selected) AND (Enable Expiration Date checkbox checked)
+                    if (selectedFormIndex == 2 && isEnableExpDateChecked)
+                    {
+                        DialogResult editChoice = MessageBox.Show(
+                            "Would you like to edit Price and Expiration Date before printing?",
+                            "Edit Mode",
+                            MessageBoxButtons.YesNo,
+                            MessageBoxIcon.Question
+                        );
+
+                        if (editChoice == DialogResult.Yes)
+                        {
+                            dataGridView_Lines.Rows.Clear();
+                            dataGridView_Lines.Visible = true;
+                            panel_Printing.Visible = false;
+
+                            // ✅ Show Re-generate button
+                            button_PrintNewData.Visible = true;
+
+                            // ✅ Save fetched transfer data globally
+                            lastQueriedTransfers = result.Transfers;
+
+                            // Make only Price and ExpirationDate editable
+                            foreach (DataGridViewColumn col in dataGridView_Lines.Columns)
+                                col.ReadOnly = true;
+                            dataGridView_Lines.Columns["Price"].ReadOnly = false;
+                            dataGridView_Lines.Columns["ExpirationDate"].ReadOnly = false;
+
+                            // Populate the DataGridView
+                            foreach (var tran in result.Transfers)
+                            {
+                                if (tran.Lines != null)
+                                {
+                                    foreach (var line in tran.Lines)
+                                    {
+                                        string desc = line.ItemDescription ?? "N/A";
+                                        string price = line.SalesPrice.ToString("0.00");
+                                        string expDate = ""; // leave empty for user to fill
+                                        dataGridView_Lines.Rows.Add(desc, price, expDate);
+                                    }
+                                }
+                            }
+
+                            MessageBox.Show("You can now edit Price and Expiration Date before printing.",
+                                            "Edit Mode", MessageBoxButtons.OK);
+                            return; // stop here — user will click Re-generate later
+                        }
+                    }
+
+                    // 7️⃣ Proceed to print if not editing
                     AltLayout_NHC altLayout_NHC = new AltLayout_NHC();
                     PaperSize paperSize = new PaperSize("Custom", 850, 1100);
 
@@ -697,6 +747,12 @@ namespace Custom_QBSI.Clients.NHC
                     printPreviewControl.Document = printDocument;
                     printPreviewControl.Visible = true;
                     panel_Printing.Visible = true;
+
+                    // After showing the preview:
+                    dataGridView_Lines.Visible = false;
+
+                    // ✅ Hide the re-generate button after regenerating
+                    button_PrintNewData.Visible = false;
                 }
                 catch (Exception ex)
                 {
@@ -708,9 +764,111 @@ namespace Custom_QBSI.Clients.NHC
 
 
 
-
             return panel_RefNumber;
         }
+
+        private void button_PrintEdited_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (dataGridView_Lines.Rows.Count == 0)
+                {
+                    MessageBox.Show("No data to print.", "Notice", MessageBoxButtons.OK);
+                    return;
+                }
+
+                if (lastQueriedTransfers == null || lastQueriedTransfers.Count == 0)
+                {
+                    MessageBox.Show("No transfer data available. Please search a reference number first.", "Notice", MessageBoxButtons.OK);
+                    return;
+                }
+
+                // ✅ Gather edited values from DataGridView
+                var editedLines = new List<(string Description, decimal Price, string ExpirationDate)>();
+                foreach (DataGridViewRow row in dataGridView_Lines.Rows)
+                {
+                    if (!row.IsNewRow)
+                    {
+                        string desc = row.Cells["Description"].Value?.ToString() ?? "";
+                        string priceText = row.Cells["Price"].Value?.ToString() ?? "0";
+                        decimal.TryParse(priceText, out decimal price);
+                        string expDate = row.Cells["ExpirationDate"].Value?.ToString() ?? "";
+                        editedLines.Add((desc, price, expDate));
+                    }
+                }
+
+                // ✅ Apply edited values to transfer lines
+                foreach (var tran in lastQueriedTransfers)
+                {
+                    foreach (var line in tran.Lines)
+                    {
+                        var edited = editedLines.FirstOrDefault(x => x.Description == line.ItemDescription);
+                        if (edited.Description != null)
+                        {
+                            line.SalesPrice = (double)edited.Price;
+                            line.ExpirationDate = edited.ExpirationDate;
+                        }
+                    }
+                }
+
+                // ✅ Recreate and refresh the print document
+                AltLayout_NHC altLayout_NHC = new AltLayout_NHC();
+                PaperSize paperSize = new PaperSize("Custom", 850, 1100);
+
+                if (printDocument != null)
+                {
+                    printDocument.PrintPage -= null;
+                    printDocument.Dispose();
+                }
+
+                printDocument = new PrintDocument();
+                printDocument.DefaultPageSettings.PaperSize = paperSize;
+                printDocument.PrinterSettings.DefaultPageSettings.PaperSize = paperSize;
+
+                printDocument.PrintPage += (pSender, ev) =>
+                {
+                    // 🟢 Use the latest updated data
+                    altLayout_NHC.Layout_DeliveryReceipt(
+                        ev,
+                        lastQueriedTransfers,
+                        textBox_Note.Text,
+                        textBox_BusinessStyle.Text,
+                        textBox_PWDSignature.Text,
+                        textBox_Address.Text,
+                        textBox_Terms.Text,
+                        textBox_StoreCode.Text,
+                        textBox_PONumber.Text,
+                        textBox_TIN.Text,
+                        checkBox_EnableExpDate.Checked,
+                        textBox_SignatoryName.Text,
+                        dataGridView_Lines
+                    );
+                };
+
+                // ✅ Keep DataGridView visible so user can edit again
+                dataGridView_Lines.Visible = true;
+                panel_Printing.Visible = true;
+                printPreviewControl.Visible = true;
+
+                // ✅ Force refresh of preview
+                printPreviewControl.Document = null;
+                printPreviewControl.Document = printDocument;
+                printPreviewControl.InvalidatePreview();
+                printPreviewControl.Refresh();
+
+                // 🟢 Keep Re-generate button visible for repeated edits
+                button_PrintNewData.Visible = true;
+
+                MessageBox.Show("Document regenerated with your latest edits.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error while regenerating document: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+
+
 
         private void LogMessage(string message)
         {
@@ -908,16 +1066,12 @@ namespace Custom_QBSI.Clients.NHC
                 label_TIN.Visible = true;
                 textBox_TIN.Visible = true;
                 panel_POTIN.Visible = true;
+                button_PrintNewData.Visible = true;
 
                 button_SaveDetails.Visible = true;
 
                 // Show DataGridView
                 dataGridView_Lines.Visible = true;
-
-                // Optional: populate DataGridView with sample or existing data
-                dataGridView_Lines.Rows.Clear();
-                dataGridView_Lines.Rows.Add("Sample Item 1", "100.00", "");
-                dataGridView_Lines.Rows.Add("Sample Item 2", "250.00", "");
 
                 Queries_NHC queries_NHC = new Queries_NHC();
                 var data = queries_NHC.RetrieveSignatory_DR();

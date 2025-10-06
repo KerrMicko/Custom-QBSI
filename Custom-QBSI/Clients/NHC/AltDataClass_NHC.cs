@@ -83,6 +83,7 @@ namespace Custom_QBSI.Clients.NHC
             public string SiteAddr3 { get; set; }
             public string SiteAddr4 { get; set; }
             public string SiteAddr5 { get; set; }
+            public string ExpirationDate { get; set; }
         }
 
         public class ItemData
