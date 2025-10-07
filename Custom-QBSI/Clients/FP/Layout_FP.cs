@@ -56,7 +56,7 @@ namespace Custom_QBSI.Clients.FP
             Rectangle rectCompanyTIN = new Rectangle(xStart, yStart + 65, maxWidth, 40);
 
             string companyName = "FP Philippines, Inc.";
-            string companyAddress = "Unit 1407B, 88 Corporate Center, Sedeño cor. Valero St., Makati City, Philippines\n" + "(+632) 8856 9197\n" + "finance@futureperfect.com";
+            string companyAddress = "Unit 1407B, 88 Corporate Center, Sedeño cor. Valero St., \n Makati City, Philippines\n" + "(+632) 8856 9197\n" + "finance@futureperfect.com";
             //string companyPhone = "(+632) 8856 9197";
             //string companyEmail = "finance@futureperfect.com";
             string companyTIN = "TIN #: 406 794 995 000";
