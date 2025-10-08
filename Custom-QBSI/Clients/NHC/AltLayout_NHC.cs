@@ -577,6 +577,8 @@ namespace Custom_QBSI.Clients.NHC
             foreach (var tran in transfers)
             {
                 int lineIndex = 0;
+                decimal totalAmount = 0m; // 🔹 Sum of all displayed amounts
+
                 foreach (var lineItem in tran.Lines)
                 {
                     string expDateEdited = null;
@@ -597,7 +599,7 @@ namespace Custom_QBSI.Clients.NHC
                     string description = lineItem.ItemDescription;
                     string finalDescription = description;
 
-                    // If expiration enabled → append from DataGridView (if exists)
+                    // 🔹 Append expiration date if enabled
                     if (isEnableExpDateChecked && !string.IsNullOrWhiteSpace(expDateEdited))
                         finalDescription += $" (EXP: {expDateEdited})";
                     else if (isEnableExpDateChecked && !string.IsNullOrWhiteSpace(lineItem.ExpirationDate))
@@ -618,20 +620,55 @@ namespace Custom_QBSI.Clients.NHC
                     e.Graphics.DrawString(finalDescription, font_Data, Brushes.Black,
                         new Rectangle(xStartItemDescription, tabYStart + itemHeight, widthItemDescription, rowHeight), sfAlignLeftCenter);
 
-                    string finalPrice;
+                    // 🔹 Only show and sum up the amount if expiration date feature is enabled
+                    if (isEnableExpDateChecked)
+                    {
+                        decimal itemPrice = (decimal)lineItem.SalesPrice;
 
-                    if (!string.IsNullOrWhiteSpace(priceEdited) && decimal.TryParse(priceEdited, out decimal parsedPrice))
-                        finalPrice = parsedPrice.ToString("N2");
-                    else
-                        finalPrice = lineItem.SalesPrice.ToString("N2");
+                        // Use edited price if available
+                        if (!string.IsNullOrWhiteSpace(priceEdited) && decimal.TryParse(priceEdited, out decimal parsedPrice))
+                            itemPrice = parsedPrice;
 
-                    Rectangle rectItemAmount2 = new Rectangle(xStartItemAmount + widthItemDescription - 40, tabYStart + itemHeight, 100, rowHeight);
-                    e.Graphics.DrawString(finalPrice, font_Data, Brushes.Black, rectItemAmount2, sfAlignCenterRight);
+                        string finalPrice = itemPrice.ToString("N2");
+
+                        // Draw amount (price)
+                        Rectangle rectItemAmount2 = new Rectangle(
+                            xStartItemAmount + widthItemDescription - 40,
+                            tabYStart + itemHeight,
+                            100,
+                            rowHeight
+                        );
+
+                        e.Graphics.DrawString(finalPrice, font_Data, Brushes.Black, rectItemAmount2, sfAlignCenterRight);
+
+                        // 🔹 Add to total — sum all amounts displayed
+                        totalAmount += itemPrice;
+                    }
 
                     itemHeight += rowHeight;
                     lineIndex++;
                 }
+
+                // 🔹 Draw total amount if expiration date enabled
+                if (isEnableExpDateChecked)
+                {
+                    int totalRowHeight = 25;
+                    int totalY = tabYStart + itemHeight + 10;
+
+                    Rectangle total = new Rectangle(xStartItemAmount + widthItemDescription - 140, totalY, 100, totalRowHeight);
+
+                    //e.Graphics.DrawRectangle(Pens.Black, total);
+
+                    // Label "TOTAL:"
+                    e.Graphics.DrawString("TOTAL:", font_EightBold, Brushes.Black, total , sfAlignCenterRight);
+
+                    // Total Amount Value
+                    e.Graphics.DrawString(totalAmount.ToString("N2"), font_EightBold, Brushes.Black,new Rectangle(xStartItemAmount + widthItemDescription - 40, totalY, 100, totalRowHeight),sfAlignCenterRight);
+
+                    itemHeight += totalRowHeight + 10;
+                }
             }
+
 
             // Draw Note
             if (!string.IsNullOrEmpty(note))
