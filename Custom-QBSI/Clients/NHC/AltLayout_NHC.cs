@@ -492,7 +492,7 @@ namespace Custom_QBSI.Clients.NHC
 
         }
 
-        public void Layout_DeliveryReceipt(PrintPageEventArgs e, List<TransferInventoryData> transfers, string note, string businessStyle, string pwdSignature,string address,string terms, string storeCode, string poNumber, string tin, bool isEnableExpDateChecked, string signatoryName, DataGridView dataGridView = null)
+        public void Layout_DeliveryReceipt(PrintPageEventArgs e,List<TransferInventoryData> transfers,string note,string businessStyle,string pwdSignature,string address,string terms,string storeCode,string poNumber,string tin,bool isEnableExpDateChecked,bool allowPriceEditing,string signatoryName,DataGridView dataGridView = null)
         {
             /*Image image = Properties.Resources.NATURE_DR;
             e.Graphics.DrawImage(image, e.PageBounds);*/
@@ -620,8 +620,8 @@ namespace Custom_QBSI.Clients.NHC
                     e.Graphics.DrawString(finalDescription, font_Data, Brushes.Black,
                         new Rectangle(xStartItemDescription, tabYStart + itemHeight, widthItemDescription, rowHeight), sfAlignLeftCenter);
 
-                    // 🔹 Only show and sum up the amount if expiration date feature is enabled
-                    if (isEnableExpDateChecked)
+                    // 🔹 Only show and sum up the amount if expiration date feature is enabled AND price editing is allowed
+                    if (isEnableExpDateChecked && allowPriceEditing)
                     {
                         decimal itemPrice = (decimal)lineItem.SalesPrice;
 
@@ -649,25 +649,30 @@ namespace Custom_QBSI.Clients.NHC
                     lineIndex++;
                 }
 
-                // 🔹 Draw total amount if expiration date enabled
-                if (isEnableExpDateChecked)
+                // 🔹 Draw total amount only if expiration and price editing are both enabled
+                if (isEnableExpDateChecked && allowPriceEditing)
                 {
                     int totalRowHeight = 25;
                     int totalY = tabYStart + itemHeight + 10;
 
                     Rectangle total = new Rectangle(xStartItemAmount + widthItemDescription - 140, totalY, 100, totalRowHeight);
 
-                    //e.Graphics.DrawRectangle(Pens.Black, total);
-
                     // Label "TOTAL:"
-                    e.Graphics.DrawString("TOTAL:", font_EightBold, Brushes.Black, total , sfAlignCenterRight);
+                    e.Graphics.DrawString("TOTAL:", font_EightBold, Brushes.Black, total, sfAlignCenterRight);
 
                     // Total Amount Value
-                    e.Graphics.DrawString(totalAmount.ToString("N2"), font_EightBold, Brushes.Black,new Rectangle(xStartItemAmount + widthItemDescription - 40, totalY, 100, totalRowHeight),sfAlignCenterRight);
+                    e.Graphics.DrawString(
+                        totalAmount.ToString("N2"),
+                        font_EightBold,
+                        Brushes.Black,
+                        new Rectangle(xStartItemAmount + widthItemDescription - 40, totalY, 100, totalRowHeight),
+                        sfAlignCenterRight
+                    );
 
                     itemHeight += totalRowHeight + 10;
                 }
             }
+
 
 
             // Draw Note

@@ -24,6 +24,7 @@ namespace Custom_QBSI.Clients.NHC
         private ComboBox comboBox_Forms;
         private DataGridView dataGridView_Lines;
         private List<AltDataClass_NHC.TransferInventoryData> lastQueriedTransfers;
+        private bool allowPriceEditing = true;
 
 
         // Details
@@ -566,6 +567,7 @@ namespace Custom_QBSI.Clients.NHC
                 Text = "SEARCH",
                 BackColor = Color.Transparent,
             };
+
             button_SearchRefNum.Click += async (sender, e) =>
             {
                 try
@@ -679,33 +681,48 @@ namespace Custom_QBSI.Clients.NHC
                         return;
                     }
 
-                    // ✅ Only ask if: (Form 2 selected) AND (Enable Expiration Date checkbox checked)
+                    // ✅ Ask if edit mode should be enabled when expiration is enabled
                     if (selectedFormIndex == 2 && isEnableExpDateChecked)
                     {
                         DialogResult editChoice = MessageBox.Show(
-                            "Would you like to edit Price and Expiration Date before printing?",
-                            "Edit Mode",
-                            MessageBoxButtons.YesNo,
+                            "How would you like to proceed?\n\n" +
+                            "Yes - Edit BOTH Price and Expiration Date\n" +
+                            "No - Edit ONLY Expiration Date (Price will remain hidden)\n" +
+                            "Cancel - Proceed to print without editing",
+                            "Edit Options",
+                            MessageBoxButtons.YesNoCancel,
                             MessageBoxIcon.Question
                         );
 
-                        if (editChoice == DialogResult.Yes)
+                        if (editChoice == DialogResult.Cancel)
+                        {
+                            // Proceed directly to printing (skip editing)
+                        }
+                        else
                         {
                             dataGridView_Lines.Rows.Clear();
                             dataGridView_Lines.Visible = true;
                             panel_Printing.Visible = false;
-
-                            // ✅ Show Re-generate button
                             button_PrintNewData.Visible = true;
 
                             // ✅ Save fetched transfer data globally
                             lastQueriedTransfers = result.Transfers;
 
-                            // Make only Price and ExpirationDate editable
+                            // Make all columns read-only initially
                             foreach (DataGridViewColumn col in dataGridView_Lines.Columns)
                                 col.ReadOnly = true;
-                            dataGridView_Lines.Columns["Price"].ReadOnly = false;
+
+                            // ✅ Determine what user wants to edit
+                            allowPriceEditing = (editChoice == DialogResult.Yes);
+
+                            // Always allow ExpirationDate editing
                             dataGridView_Lines.Columns["ExpirationDate"].ReadOnly = false;
+
+                            // Allow Price editing only if user chose "Yes"
+                            dataGridView_Lines.Columns["Price"].ReadOnly = !allowPriceEditing;
+
+                            // Optionally hide the Price column entirely when editing only Expiration Date
+                            dataGridView_Lines.Columns["Price"].Visible = allowPriceEditing;
 
                             // Populate the DataGridView
                             foreach (var tran in result.Transfers)
@@ -722,8 +739,15 @@ namespace Custom_QBSI.Clients.NHC
                                 }
                             }
 
-                            MessageBox.Show("You can now edit Price and Expiration Date before printing.",
-                                            "Edit Mode", MessageBoxButtons.OK);
+                            MessageBox.Show(
+                                allowPriceEditing
+                                    ? "You can now edit Price and Expiration Date before printing."
+                                    : "You can now edit Expiration Date only. Price will remain hidden in the re-generated document.",
+                                "Edit Mode",
+                                MessageBoxButtons.OK,
+                                MessageBoxIcon.Information
+                            );
+
                             return; // stop here — user will click Re-generate later
                         }
                     }
@@ -741,17 +765,16 @@ namespace Custom_QBSI.Clients.NHC
                         if (selectedFormIndex == 1)
                             altLayout_NHC.Layout_SalesInvoice(ev, result.Invoice, note, vatType, businessStyle, signatoryName, isEnableExpDateChecked, isLessEWTChecked);
                         else if (selectedFormIndex == 2)
-                            altLayout_NHC.Layout_DeliveryReceipt(ev, result.Transfers, note, businessStyle, pwdSignature, address, terms, storeCode, poNumber, tin, isEnableExpDateChecked, signatoryName);
+                            altLayout_NHC.Layout_DeliveryReceipt(ev,result.Transfers,note,businessStyle,pwdSignature,address,terms,storeCode,poNumber,tin,isEnableExpDateChecked,allowPriceEditing, signatoryName);
+
                     };
 
                     printPreviewControl.Document = printDocument;
                     printPreviewControl.Visible = true;
                     panel_Printing.Visible = true;
 
-                    // After showing the preview:
+                    // Hide editing controls
                     dataGridView_Lines.Visible = false;
-
-                    // ✅ Hide the re-generate button after regenerating
                     button_PrintNewData.Visible = false;
                 }
                 catch (Exception ex)
@@ -761,10 +784,7 @@ namespace Custom_QBSI.Clients.NHC
                 }
             };
 
-
-
-
-            return panel_RefNumber;
+          return panel_RefNumber;
         }
 
         private void button_PrintEdited_Click(object sender, EventArgs e)
@@ -829,20 +849,22 @@ namespace Custom_QBSI.Clients.NHC
                 {
                     // 🟢 Use the latest updated data
                     altLayout_NHC.Layout_DeliveryReceipt(
-                        ev,
-                        lastQueriedTransfers,
-                        textBox_Note.Text,
-                        textBox_BusinessStyle.Text,
-                        textBox_PWDSignature.Text,
-                        textBox_Address.Text,
-                        textBox_Terms.Text,
-                        textBox_StoreCode.Text,
-                        textBox_PONumber.Text,
-                        textBox_TIN.Text,
-                        checkBox_EnableExpDate.Checked,
-                        textBox_SignatoryName.Text,
-                        dataGridView_Lines
-                    );
+                    ev,
+                    lastQueriedTransfers,
+                    textBox_Note.Text,
+                    textBox_BusinessStyle.Text,
+                    textBox_PWDSignature.Text,
+                    textBox_Address.Text,
+                    textBox_Terms.Text,
+                    textBox_StoreCode.Text,
+                    textBox_PONumber.Text,
+                    textBox_TIN.Text,
+                    checkBox_EnableExpDate.Checked,
+                    allowPriceEditing,
+                    textBox_SignatoryName.Text,
+                    dataGridView_Lines
+                );
+
                 };
 
                 // ✅ Keep DataGridView visible so user can edit again
