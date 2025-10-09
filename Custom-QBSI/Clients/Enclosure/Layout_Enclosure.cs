@@ -124,7 +124,7 @@ namespace Custom_QBSI.Clients.Enclosure
             }
 
             e.Graphics.DrawString("Customer's Name:", font_Ten, Brushes.Black, rectCustomerName, sfAlignLeftCenter);
-            e.Graphics.DrawString(customerName, font_Eight, Brushes.Black, rectCustomerNameData, sfAlignLeftCenter);
+            e.Graphics.DrawString(customerName, font_Ten, Brushes.Black, rectCustomerNameData, sfAlignLeftCenter);
 
             e.Graphics.DrawString("Business Address:", font_Ten, Brushes.Black, rectBusinessAddress, sfAlignLeftCenter);
             e.Graphics.DrawString(indentedAddress, font_Ten, Brushes.Black, rectBusinessAddressData);
