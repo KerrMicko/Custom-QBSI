@@ -696,7 +696,7 @@ namespace Custom_QBSI.Clients.NHC
 
                         if (editChoice == DialogResult.Cancel)
                         {
-                            // Proceed directly to printing (skip editing)
+                            // Proceed directly to printing
                         }
                         else
                         {
@@ -724,18 +724,29 @@ namespace Custom_QBSI.Clients.NHC
                             // Optionally hide the Price column entirely when editing only Expiration Date
                             dataGridView_Lines.Columns["Price"].Visible = allowPriceEditing;
 
-                            // Populate the DataGridView
+                            // Populate the DataGridView + add TOTAL row
                             foreach (var tran in result.Transfers)
                             {
                                 if (tran.Lines != null)
                                 {
+                                    decimal totalAmount = 0m;
+
                                     foreach (var line in tran.Lines)
                                     {
                                         string desc = line.ItemDescription ?? "N/A";
                                         string price = line.SalesPrice.ToString("0.00");
                                         string expDate = ""; // leave empty for user to fill
                                         dataGridView_Lines.Rows.Add(desc, price, expDate);
+
+                                        totalAmount += (decimal)line.SalesPrice;
                                     }
+
+                                    // ✅ Add a TOTAL row (editable)
+                                    int totalRowIndex = dataGridView_Lines.Rows.Add("TOTAL", totalAmount.ToString("0.00"), "");
+                                    DataGridViewRow totalRow = dataGridView_Lines.Rows[totalRowIndex];
+                                    totalRow.DefaultCellStyle.Font = new Font(dataGridView_Lines.Font, FontStyle.Bold);
+                                    totalRow.DefaultCellStyle.BackColor = Color.LightYellow;
+                                    totalRow.ReadOnly = false; // allow editing of total if needed
                                 }
                             }
 
@@ -765,8 +776,7 @@ namespace Custom_QBSI.Clients.NHC
                         if (selectedFormIndex == 1)
                             altLayout_NHC.Layout_SalesInvoice(ev, result.Invoice, note, vatType, businessStyle, signatoryName, isEnableExpDateChecked, isLessEWTChecked);
                         else if (selectedFormIndex == 2)
-                            altLayout_NHC.Layout_DeliveryReceipt(ev,result.Transfers,note,businessStyle,pwdSignature,address,terms,storeCode,poNumber,tin,isEnableExpDateChecked,allowPriceEditing, signatoryName);
-
+                            altLayout_NHC.Layout_DeliveryReceipt(ev, result.Transfers, note, businessStyle, pwdSignature, address, terms, storeCode, poNumber, tin, isEnableExpDateChecked, allowPriceEditing, signatoryName, dataGridView_Lines);
                     };
 
                     printPreviewControl.Document = printDocument;
@@ -784,7 +794,8 @@ namespace Custom_QBSI.Clients.NHC
                 }
             };
 
-          return panel_RefNumber;
+
+            return panel_RefNumber;
         }
 
         private void button_PrintEdited_Click(object sender, EventArgs e)

@@ -595,11 +595,10 @@ namespace Custom_QBSI.Clients.NHC
                         }
                     }
 
-                    // 🔹 Use default item description from QuickBooks
-                    string description = lineItem.ItemDescription;
+                    // 🔹 Use description + expiration date
+                    string description = lineItem.ItemDescription ?? "";
                     string finalDescription = description;
 
-                    // 🔹 Append expiration date if enabled
                     if (isEnableExpDateChecked && !string.IsNullOrWhiteSpace(expDateEdited))
                         finalDescription += $" (EXP: {expDateEdited})";
                     else if (isEnableExpDateChecked && !string.IsNullOrWhiteSpace(lineItem.ExpirationDate))
@@ -608,30 +607,29 @@ namespace Custom_QBSI.Clients.NHC
                     SizeF descSize = e.Graphics.MeasureString(finalDescription, font_Data, widthItemDescription);
                     int rowHeight = Math.Max(tabDataHeight, (int)Math.Ceiling(descSize.Height));
 
-                    // Quantity
+                    // 🔹 Draw quantity
                     e.Graphics.DrawString(lineItem.QuantityTransfer.ToString("N2"), font_Data, Brushes.Black,
                         new Rectangle(xStartItemQuantity, tabYStart + itemHeight, widthItemQuantity, rowHeight), sfAlignCenter);
 
-                    // Unit
+                    // 🔹 Draw unit
                     e.Graphics.DrawString(lineItem.BaseUnitName, font_Data, Brushes.Black,
                         new Rectangle(xStartItemUnit, tabYStart + itemHeight, widthItemUnit, rowHeight), sfAlignCenter);
 
-                    // Description
+                    // 🔹 Draw description (with optional EXP date)
                     e.Graphics.DrawString(finalDescription, font_Data, Brushes.Black,
                         new Rectangle(xStartItemDescription, tabYStart + itemHeight, widthItemDescription, rowHeight), sfAlignLeftCenter);
 
-                    // 🔹 Only show and sum up the amount if expiration date feature is enabled AND price editing is allowed
-                    if (isEnableExpDateChecked && allowPriceEditing)
+                    // 🔹 Handle amount (price) – always show when ExpDate is checked
+                    if (isEnableExpDateChecked)
                     {
                         decimal itemPrice = (decimal)lineItem.SalesPrice;
 
-                        // Use edited price if available
-                        if (!string.IsNullOrWhiteSpace(priceEdited) && decimal.TryParse(priceEdited, out decimal parsedPrice))
+                        // Only apply edits if editing is allowed
+                        if (allowPriceEditing && !string.IsNullOrWhiteSpace(priceEdited) && decimal.TryParse(priceEdited, out decimal parsedPrice))
                             itemPrice = parsedPrice;
 
                         string finalPrice = itemPrice.ToString("N2");
 
-                        // Draw amount (price)
                         Rectangle rectItemAmount2 = new Rectangle(
                             xStartItemAmount + widthItemDescription - 40,
                             tabYStart + itemHeight,
@@ -641,7 +639,6 @@ namespace Custom_QBSI.Clients.NHC
 
                         e.Graphics.DrawString(finalPrice, font_Data, Brushes.Black, rectItemAmount2, sfAlignCenterRight);
 
-                        // 🔹 Add to total — sum all amounts displayed
                         totalAmount += itemPrice;
                     }
 
@@ -649,29 +646,53 @@ namespace Custom_QBSI.Clients.NHC
                     lineIndex++;
                 }
 
-                // 🔹 Draw total amount only if expiration and price editing are both enabled
-                if (isEnableExpDateChecked && allowPriceEditing)
+                // 🔹 Draw total line – always show when ExpDate is checked
+                if (isEnableExpDateChecked)
                 {
+                    decimal printedTotal = totalAmount; // default computed total
+
+                    // If editing is allowed, check for user-edited total
+                    if (allowPriceEditing && dataGridView != null && dataGridView.Visible)
+                    {
+                        foreach (DataGridViewRow row in dataGridView.Rows)
+                        {
+                            if (!row.IsNewRow && row.Cells["Description"]?.Value?.ToString() == "TOTAL")
+                            {
+                                string editedTotal = row.Cells["Price"]?.Value?.ToString();
+                                if (decimal.TryParse(editedTotal, out decimal parsedEditedTotal))
+                                {
+                                    printedTotal = parsedEditedTotal; // use edited total
+                                }
+                                break;
+                            }
+                        }
+                    }
+
+                    // 🔹 Draw total label and value
                     int totalRowHeight = 25;
                     int totalY = tabYStart + itemHeight + 10;
 
-                    Rectangle total = new Rectangle(xStartItemAmount + widthItemDescription - 140, totalY, 100, totalRowHeight);
-
-                    // Label "TOTAL:"
-                    e.Graphics.DrawString("TOTAL:", font_EightBold, Brushes.Black, total, sfAlignCenterRight);
-
-                    // Total Amount Value
-                    e.Graphics.DrawString(
-                        totalAmount.ToString("N2"),
-                        font_EightBold,
-                        Brushes.Black,
-                        new Rectangle(xStartItemAmount + widthItemDescription - 40, totalY, 100, totalRowHeight),
-                        sfAlignCenterRight
+                    Rectangle totalLabel = new Rectangle(
+                        xStartItemAmount + widthItemDescription - 140,
+                        totalY,
+                        100,
+                        totalRowHeight
                     );
+
+                    Rectangle totalValue = new Rectangle(
+                        xStartItemAmount + widthItemDescription - 40,
+                        totalY,
+                        100,
+                        totalRowHeight
+                    );
+
+                    e.Graphics.DrawString("TOTAL:", font_EightBold, Brushes.Black, totalLabel, sfAlignCenterRight);
+                    e.Graphics.DrawString(printedTotal.ToString("N2"), font_EightBold, Brushes.Black, totalValue, sfAlignCenterRight);
 
                     itemHeight += totalRowHeight + 10;
                 }
             }
+
 
 
 
