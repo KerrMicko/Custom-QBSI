@@ -76,7 +76,7 @@ namespace Custom_QBSI.Clients.Enclosure
             Rectangle rectBusinessAddress = new Rectangle(xStart, yStartDetails + rectHeight, leftWidth, rectHeight);
             Rectangle rectBusinessAddress2 = new Rectangle(xStart, yStartDetails + rectHeight * 2 + 5, leftWidth, rectHeight);
 
-            Rectangle rectCustomerNameData = new Rectangle(xStart + 140, yStartDetails, leftWidth - 140, rectHeight);
+            Rectangle rectCustomerNameData = new Rectangle(xStart + 120, yStartDetails - 5 , leftWidth - 140, rectHeight + 5);
             Rectangle rectBusinessAddressData = new Rectangle(xStart, yStartDetails + rectHeight + 5, leftWidth, rectHeight * 2);
             // RIGHT
             Rectangle rectDate = new Rectangle(xStart + leftWidth, yStartDetails, rightWidth, rectHeight);
@@ -101,53 +101,43 @@ namespace Custom_QBSI.Clients.Enclosure
             e.Graphics.DrawRectangle(Pens.Black, rectTermsData);*/
 
             string refNumber = invoiceData[0].RefNumber.ToString();
-            string customerName = invoiceData[0].CustomerName.ToString();
+            //string customerName = invoiceData[0].CustomerName.ToString();
             // ⬇️ build multi-line address with max 2 lines
-            string[] addrParts = new[]
-                        {
-                invoiceData[0].BillAddress1?.ToString(),
-                invoiceData[0].BillAddress2?.ToString(),
-                invoiceData[0].BillAddress3?.ToString(),
-                invoiceData[0].BillAddress4?.ToString(),
-                invoiceData[0].BillAddress5?.ToString()
-            };
+            string indentedAddress ="                                 "+ $"{invoiceData[0].BillAddress1} {invoiceData[0].BillAddress2} {invoiceData[0].BillAddress3} " +
+                         $"{invoiceData[0].BillAddress4} {invoiceData[0].BillAddress5}";
 
-            // keep only non-empty lines, max 2
-            var partsList = addrParts.Where(p => !string.IsNullOrWhiteSpace(p))
-                                     .Take(2)
-                                     .ToArray();
 
-            // join with single newline (you can use "\n\n" for extra spacing)
-            string indentedAddress = "                                        " + string.Join("\n\n", partsList);
+
 
             string date = invoiceData[0].TxnDate.ToString("MM/dd/yyyy");
             string tin = invoiceData[0].TINNO.ToString();
             string terms = invoiceData[0].Terms.ToString();
 
-            string invoiceBusinessStyle = "";
-            if (businessStyle == "")
+            string customerName = "";
+            if (string.IsNullOrEmpty(businessStyle))
             {
-                invoiceBusinessStyle = invoiceData[0].BusinessStyle.ToString();
+                customerName = invoiceData[0].CustomerName.ToString();
             }
             else
             {
-                invoiceBusinessStyle = businessStyle;
+                customerName = businessStyle;
             }
 
-            e.Graphics.DrawString("Customer's Name: ________________________________________________________", font_Ten, Brushes.Black, rectCustomerName, sfAlignLeftCenter);
-            e.Graphics.DrawString(customerName, font_Ten, Brushes.Black, rectCustomerNameData, sfAlignLeftCenter);
 
-            e.Graphics.DrawString("Business Address: ________________________________________________________", font_Ten, Brushes.Black, rectBusinessAddress, sfAlignLeftCenter);
+            e.Graphics.DrawString("Customer's Name:", font_Ten, Brushes.Black, rectCustomerName, sfAlignLeftCenter);
+            e.Graphics.DrawString(customerName, font_Eight, Brushes.Black, rectCustomerNameData, sfAlignLeftCenter);
+
+            e.Graphics.DrawString("Business Address:", font_Ten, Brushes.Black, rectBusinessAddress, sfAlignLeftCenter);
             e.Graphics.DrawString(indentedAddress, font_Ten, Brushes.Black, rectBusinessAddressData);
-            e.Graphics.DrawString(" _______________________________________________________________________", font_Ten, Brushes.Black, rectBusinessAddress2, sfAlignLeftCenter);
+            e.Graphics.DrawString("", font_Ten, Brushes.Black, rectBusinessAddress2, sfAlignLeftCenter);
 
-            e.Graphics.DrawString("Date: _________________", font_Ten, Brushes.Black, rectDate, sfAlignLeftCenter);
+            e.Graphics.DrawString("Date:", font_Ten, Brushes.Black, rectDate, sfAlignLeftCenter);
             e.Graphics.DrawString(date, font_Ten, Brushes.Black, rectDateData, sfAlignLeftCenter);
 
-            e.Graphics.DrawString("TIN: __________________", font_Ten, Brushes.Black, rectTIN, sfAlignLeftCenter);
+            e.Graphics.DrawString("TIN:", font_Ten, Brushes.Black, rectTIN, sfAlignLeftCenter);
             e.Graphics.DrawString(tin, font_Ten, Brushes.Black, rectTINData, sfAlignLeftCenter);
 
-            e.Graphics.DrawString("Terms :  _______________", font_Ten, Brushes.Black, rectTerms, sfAlignLeftCenter);
+            e.Graphics.DrawString("Terms :", font_Ten, Brushes.Black, rectTerms, sfAlignLeftCenter);
             e.Graphics.DrawString(terms, font_Ten, Brushes.Black, rectTermsData, sfAlignLeftCenter);
 
             // EXTRA FIELDS
@@ -167,9 +157,9 @@ namespace Custom_QBSI.Clients.Enclosure
             e.Graphics.DrawRectangle(Pens.Red, rectDR);
             e.Graphics.DrawRectangle(Pens.Red, rectPO);*/
 
-            e.Graphics.DrawString("S.O # : ________________", font_Ten, Brushes.Black, rectPO, sfAlignLeftCenter);//RECTSO
-            e.Graphics.DrawString("DR # :  _____________________", font_Ten, Brushes.Black, rectDR, sfAlignLeftCenter);
-            e.Graphics.DrawString("PO # :  _______________________", font_Ten, Brushes.Black, rectSO, sfAlignLeftCenter);//RECTPO
+            e.Graphics.DrawString("S.O # :", font_Ten, Brushes.Black, rectPO, sfAlignLeftCenter);//RECTSO
+            e.Graphics.DrawString("DR # :", font_Ten, Brushes.Black, rectDR, sfAlignLeftCenter);
+            e.Graphics.DrawString("PO # :", font_Ten, Brushes.Black, rectSO, sfAlignLeftCenter);//RECTPO
 
             string soNumber = invoiceData[0].SONumber;
             string drNumber = invoiceData[0].DrNo;
