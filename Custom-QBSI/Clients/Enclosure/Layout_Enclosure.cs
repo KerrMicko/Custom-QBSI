@@ -101,8 +101,8 @@ namespace Custom_QBSI.Clients.Enclosure
             e.Graphics.DrawRectangle(Pens.Black, rectTermsData);*/
 
             string refNumber = invoiceData[0].RefNumber.ToString();
-            string customerName = invoiceData[0].CustomerName.ToString();
-            // ⬇️ build multi-line address with max 2 lines
+            //string customerName = invoiceData[0].CustomerName.ToString();
+
             string indentedAddress ="                                 "+ $"{invoiceData[0].BillAddress1} {invoiceData[0].BillAddress2} {invoiceData[0].BillAddress3} " +
                          $"{invoiceData[0].BillAddress4} {invoiceData[0].BillAddress5}";
 
@@ -113,14 +113,14 @@ namespace Custom_QBSI.Clients.Enclosure
             string tin = invoiceData[0].TINNO.ToString();
             string terms = invoiceData[0].Terms.ToString();
 
-            string invoiceBusinessStyle = "";
-            if (businessStyle == "")
+            string customerName = "";
+            if (string.IsNullOrEmpty(businessStyle))
             {
-                invoiceBusinessStyle = invoiceData[0].BusinessStyle.ToString();
+                customerName = invoiceData[0].CustomerName.ToString();
             }
             else
             {
-                invoiceBusinessStyle = businessStyle;
+                customerName = businessStyle;
             }
 
             e.Graphics.DrawString("Customer's Name:", font_Ten, Brushes.Black, rectCustomerName, sfAlignLeftCenter);
