@@ -19,6 +19,7 @@ namespace Custom_QBSI.Clients.FP
             public string BusinessStyle { get; set; }
             public string StoreCode { get; set; }
             public string JobOrderNo { get; set; }
+            public string Attention { get; set; }
             public string BillAddress1 { get; set; }
             public string BillAddress2 { get; set; }
             public string BillAddress3 { get; set; }

@@ -22,7 +22,7 @@ namespace Custom_QBSI.Clients.FP
                 {
                     connection.Open();
 
-                    string invoiceQuery = "SELECT CustomFieldTIN, CustomFieldJOBORDERNO, CustomFieldPWDNO, CustomerRefFullName, CustomFieldBUSINESSSTYLE, CustomFieldSTORECODE, PONumber, " +
+                    string invoiceQuery = "SELECT CustomFieldTIN, CustomFieldJOBORDERNO, CustomFieldPWDNO, CustomerRefFullName, CustomFieldBUSINESSSTYLE, CustomFieldSTORECODE,CustomFieldATTENTION, PONumber, " +
                                             "BillAddressBlockAddr1, BillAddressBlockAddr2, BillAddressBlockAddr3, BillAddressBlockAddr4, BillAddressBlockAddr5, " +
                                             "TxnDate, TermsRefFullName, DueDate, SalesRepRefFullName, Refnumber, ShipAddressBlockAddr1 , ShipAddressBlockAddr2, ShipAddressBlockAddr3, ShipAddressBlockAddr4, ShipAddressBlockAddr5  " +
                                             "FROM Invoice WHERE RefNumber = ?";
@@ -44,6 +44,7 @@ namespace Custom_QBSI.Clients.FP
                                     //SONumber = reader["CustomFieldSONO"] != DBNull.Value ? reader["CustomFieldSONO"].ToString() : string.Empty,
                                     BusinessStyle = reader["CustomFieldBUSINESSSTYLE"] != DBNull.Value ? reader["CustomFieldBUSINESSSTYLE"].ToString() : string.Empty,
                                     StoreCode = reader["CustomFieldSTORECODE"] != DBNull.Value ? reader["CustomFieldSTORECODE"].ToString() : string.Empty,
+                                    Attention = reader["CustomFieldATTENTION"] != DBNull.Value ? reader["CustomFieldATTENTION"].ToString() : string.Empty,
                                     CustomerName = reader["CustomerRefFullName"] != DBNull.Value ? reader["CustomerRefFullName"].ToString() : string.Empty,
                                     PONumber = reader["PONumber"] != DBNull.Value ? reader["PONumber"].ToString() : string.Empty,
                                     BillAddress1 = reader["BillAddressBlockAddr1"] != DBNull.Value ? reader["BillAddressBlockAddr1"].ToString() : string.Empty,
