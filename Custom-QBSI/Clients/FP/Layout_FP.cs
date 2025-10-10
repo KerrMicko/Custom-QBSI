@@ -174,7 +174,7 @@ namespace Custom_QBSI.Clients.FP
             //Rectangle rectSOData = new Rectangle(xStart + xAdd, yStartExtraFields, widthExtraFields - xAdd, rectHeight);
             //Rectangle rectDRData = new Rectangle(xStart + widthExtraFields + xAdd - 5, yStartExtraFields, widthExtraFields - xAdd, rectHeight);
             Rectangle rectPOData = new Rectangle(xStart + widthExtraFields * 2 + xAdd + 72, yStartExtraFields, widthExtraFields - xAdd, rectHeight);
-            Rectangle rectAttentionData = new Rectangle(xStart + 250 , yStartExtraFields, widthExtraFields - xAdd + 110 , rectHeight);
+            Rectangle rectAttentionData = new Rectangle(xStart + 165 , yStartExtraFields, widthExtraFields - xAdd + 110 , rectHeight);
 
             /*e.Graphics.DrawRectangle(Pens.Red, rectSO);
             e.Graphics.DrawRectangle(Pens.Red, rectDR);
@@ -183,7 +183,7 @@ namespace Custom_QBSI.Clients.FP
             //e.Graphics.DrawString("S.O # : _______________________", font_Ten, Brushes.Black, rectSO, sfAlignLeftCenter);
             //e.Graphics.DrawString("DR # : ________________________", font_Ten, Brushes.Black, rectDR, sfAlignLeftCenter);
             e.Graphics.DrawString("PO # :  _________________", font_Ten, Brushes.Black, rectPO, sfAlignLeftCenter);
-            e.Graphics.DrawString("Please Include For the Kind Attention:_________________________________________", font_Ten, Brushes.Black, rectAttention, sfAlignLeftCenter);
+            e.Graphics.DrawString("For the Kind Attention: _____________________________________________________", font_Ten, Brushes.Black, rectAttention, sfAlignLeftCenter);
 
             //string soNumber = invoiceData[0].SONumber;
             //string drNumber = invoiceData[0].DrNo;
