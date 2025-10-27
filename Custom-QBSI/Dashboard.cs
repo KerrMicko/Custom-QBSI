@@ -1,5 +1,6 @@
 ﻿using Custom_QBSI.Clients.Enclosure;
 using Custom_QBSI.Clients.FP;
+using Custom_QBSI.Clients.IVP;
 using Custom_QBSI.Clients.NHC;
 using Custom_QBSI.Clients.PBS;
 using System;
@@ -22,10 +23,12 @@ namespace Custom_QBSI
          * FP
          * NHC
          * PBS
+         * IVP
          */
 
 
-        public static string client = "FP";
+        public static string client = "IVP";
+        public static bool isPrinting = false;
     }
     public partial class Dashboard : Form
     {
@@ -86,6 +89,17 @@ namespace Custom_QBSI
                 Panel panel_Main = dashboard_PBS.MainPanel();
                 Panel panel_Sidebar = dashboard_PBS.SidebarPanel();
                 Panel panel_Title = dashboard_PBS.TitlePanel();
+
+                panel.Controls.Add(panel_Sidebar);
+                panel.Controls.Add(panel_Title);
+                panel.Controls.Add(panel_Main);
+            }
+            else if (GlobalVariables.client == "IVP")
+            {
+                Dashboard_IVP dashboard_IVP = new Dashboard_IVP();
+                Panel panel_Main = dashboard_IVP.MainPanel();
+                Panel panel_Sidebar = dashboard_IVP.SidebarPanel();
+                Panel panel_Title = dashboard_IVP.TitlePanel();
 
                 panel.Controls.Add(panel_Sidebar);
                 panel.Controls.Add(panel_Title);

@@ -63,6 +63,10 @@
     <Compile Include="Clients\FP\DataClass_FP.cs" />
     <Compile Include="Clients\FP\Layout_FP.cs" />
     <Compile Include="Clients\FP\Queries_FP.cs" />
+    <Compile Include="Clients\IVP\Dashboard_IVP.cs" />
+    <Compile Include="Clients\IVP\DataClass_IVP.cs" />
+    <Compile Include="Clients\IVP\Layout_IVP.cs" />
+    <Compile Include="Clients\IVP\Queries_IVP.cs" />
     <Compile Include="Clients\NHC\AltDataClass_NHC.cs" />
     <Compile Include="Clients\NHC\AltLayout_NHC.cs" />
     <Compile Include="Clients\NHC\AltQBDataSync_NHC.cs" />
@@ -140,6 +144,8 @@
   <ItemGroup>
     <None Include="Resources\future-perfect-logo2.png" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="Resources\Collection_Receipt_page-0001.jpg" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

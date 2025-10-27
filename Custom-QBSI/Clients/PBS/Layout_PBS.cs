@@ -630,8 +630,8 @@ namespace Custom_QBSI.Clients.PBS
 
             e.Graphics.DrawString(detailedPBS.acNo, fontExtraFieldsFooter, Brushes.Black, rectACNoData, sfAlignLeftCenter);
 
-            
-            string formattedDate = detailedPBS.dateIssued.Value.ToString("MM/dd/yyyy");
+
+            string formattedDate = detailedPBS.dateIssued.HasValue ? detailedPBS.dateIssued.Value.ToString("MM/dd/yyyy") : "";
 
             e.Graphics.DrawString(formattedDate, fontExtraFieldsFooter, Brushes.Black, rectDateIssuedData, sfAlignLeftCenter);
             
