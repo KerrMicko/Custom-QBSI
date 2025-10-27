@@ -38,13 +38,13 @@ namespace Custom_QBSI.Clients.IVP
 
         public void Layout_CollectionReceipt(PrintPageEventArgs e, List<ReceivePaymentData> payments, string vatType, string businessStyle, bool includeDateIssued, bool isLessEWTChecked, string acNo, DateTime dateIssued, string seriesNumber)
         {
-            Image image = Properties.Resources.Collection_Receipt_page_0001;
-            e.Graphics.DrawImage(image, e.PageBounds);
+            /*Image image = Properties.Resources.Collection_Receipt_page_0001;
+            e.Graphics.DrawImage(image, e.PageBounds);*/
 
             string payee = payments[0].CustomerName;
-            double amount = payments[0].TotalAmount;
+            double TotalAmount = payments[0].TotalAmount;
 
-            string amountInWords = AmountToWordsConverter.Convert(amount);
+            string amountInWords = AmountToWordsConverter.Convert(TotalAmount);
             string Date = payments[0].TxnDate.ToString("MM/dd/yyyy");
 
 
@@ -91,41 +91,122 @@ namespace Custom_QBSI.Clients.IVP
                 e.Graphics.RotateTransform(-90);
                 e.Graphics.TranslateTransform(-e.MarginBounds.Height + 180, 0 - 70);
 
-                e.Graphics.DrawString(payee, font_Ten, Brushes.Black, new PointF(310, 320));
-                e.Graphics.DrawString(Date, font_Ten, Brushes.Black, new PointF(510, 280));
-                e.Graphics.DrawString(amount.ToString("N2"), font_Ten, Brushes.Black, new PointF(550, 395));
+                Rectangle rectpayee = new Rectangle(310, 320, 300, 20);
+                Rectangle rectdate = new Rectangle(490, 280, 130, 20);
+                Rectangle rectamount = new Rectangle(475, 395, 130, 20);
 
-                RectangleF amountRect = new RectangleF(230, 373, 370, 80);
-                e.Graphics.DrawString("              " + formattedAmountInWords, font_Nine, Brushes.Black, amountRect, stringFormat);
+                //e.Graphics.DrawRectangle(Pens.Red, rectamount);
+                //e.Graphics.DrawRectangle(Pens.Blue, rectdate);
+                //e.Graphics.DrawRectangle(Pens.Orange, rectpayee);
+
+                e.Graphics.DrawString(payee, font_EightBold, Brushes.Black, rectpayee, sfAlignLeftCenter);
+                e.Graphics.DrawString(Date, font_EightBold, Brushes.Black,rectdate , sfAlignCenter);
+                e.Graphics.DrawString(TotalAmount.ToString("N2"), font_EightBold, Brushes.Black,rectamount , sfAlignCenterRight);
+
+                int startY = 210;
+                int lineHeight = 20;
+
+                foreach (var payment in payments)
+                {
+                    foreach (var lineItem in payment.LineItems)
+                    {
+                        string appliedRef = lineItem.AppliedToTxnRefNumber;
+                        string appliedAmt = lineItem.AppliedToTxnAmount.ToString("N2");
+
+                        Rectangle rectRef = new Rectangle(30, startY, 90, lineHeight);
+                        Rectangle rectAmt = new Rectangle(105, startY, 90, lineHeight);
+
+                        //e.Graphics.DrawRectangle(Pens.Red, rectRef);
+                        //e.Graphics.DrawRectangle(Pens.Blue, rectAmt);
+
+                        e.Graphics.DrawString(appliedRef, font_SevenBold, Brushes.Black, rectRef, sfAlignCenter);
+                        e.Graphics.DrawString(appliedAmt, font_SevenBold, Brushes.Black, rectAmt, sfAlignCenterRight);
+
+                        // Move to next line
+                        startY += lineHeight;
+                    }
+                }
+                Rectangle recttotallineamount = new Rectangle(105, startY + 110, 90, lineHeight);
+
+                //e.Graphics.DrawRectangle(Pens.Blue, recttotallineamount);
+
+                e.Graphics.DrawString(TotalAmount.ToString("N2"), font_SevenBold, Brushes.Black, recttotallineamount, sfAlignCenterRight);
+
+                // Amount in words
+                Rectangle amountRect = new Rectangle(230, 373, 370, 40);
+
+                //e.Graphics.DrawRectangle(Pens.Blue, amountRect);
+
+                e.Graphics.DrawString("              " + formattedAmountInWords, font_EightBold, Brushes.Black, amountRect, stringFormat);
 
                 Queries_IVP queries_IVP = new Queries_IVP();
                 var signatories = queries_IVP.RetrieveSignatory();
 
-                RectangleF rectPreparedByUnderline = new RectangleF(230, 440, 615, 80);
+                // Prepared by (signature name)
+                Rectangle rectPreparedByUnderline = new Rectangle(460, 470, 150, 20);
 
-                e.Graphics.DrawString(signatories.preparedBy, font_Nine, Brushes.Black, rectPreparedByUnderline, sfAlignCenter);
+                //e.Graphics.DrawRectangle(Pens.Blue, rectPreparedByUnderline);
 
+                e.Graphics.DrawString(signatories.preparedBy, font_EightBold, Brushes.Black, rectPreparedByUnderline, sfAlignCenter);
             }
             else
             {
                 int offsetX = 20;
                 int offsetY = 25;
 
-                e.Graphics.DrawString(payee, font_Ten, Brushes.Black, new PointF(310 - offsetX, 320 - offsetY));
-                e.Graphics.DrawString(Date, font_Ten, Brushes.Black, new PointF(510 - offsetX, 280 - offsetY));
-                e.Graphics.DrawString(amount.ToString("N2"), font_Ten, Brushes.Black, new PointF(550 - offsetX, 395 - offsetY));
+                // Define rectangles matching the printed layout with offsets
+                Rectangle rectPayee = new Rectangle(310 - offsetX, 320 - offsetY, 300, 20);
+                Rectangle rectDate = new Rectangle(490 - offsetX, 280 - offsetY, 130, 20);
+                Rectangle rectAmount = new Rectangle(475 - offsetX, 395 - offsetY, 130, 20);
 
-                RectangleF amountRect = new RectangleF(230 - offsetX, 375 - offsetY, 370, 80);
-                e.Graphics.DrawString("              " + formattedAmountInWords, font_Nine, Brushes.Black, amountRect, stringFormat);
+                // Optional debug rectangles
+                // e.Graphics.DrawRectangle(Pens.Orange, rectPayee);
+                // e.Graphics.DrawRectangle(Pens.Blue, rectDate);
+                // e.Graphics.DrawRectangle(Pens.Red, rectAmount);
+
+                e.Graphics.DrawString(payee, font_EightBold, Brushes.Black, rectPayee, sfAlignLeftCenter);
+                e.Graphics.DrawString(Date, font_EightBold, Brushes.Black, rectDate, sfAlignCenter);
+                e.Graphics.DrawString(TotalAmount.ToString("N2"), font_EightBold, Brushes.Black, rectAmount, sfAlignCenterRight);
+
+                // Line items table
+                int startY = 210 - offsetY;
+                int lineHeight = 20;
+
+                foreach (var payment in payments)
+                {
+                    foreach (var lineItem in payment.LineItems)
+                    {
+                        string appliedRef = lineItem.AppliedToTxnRefNumber;
+                        string appliedAmt = lineItem.AppliedToTxnAmount.ToString("N2");
+
+                        Rectangle rectRef = new Rectangle(30 - offsetX, startY, 90, lineHeight);
+                        Rectangle rectAmt = new Rectangle(105 - offsetX, startY, 90, lineHeight);
+
+                        // Optional debug
+                        // e.Graphics.DrawRectangle(Pens.Red, rectRef);
+                        // e.Graphics.DrawRectangle(Pens.Blue, rectAmt);
+
+                        e.Graphics.DrawString(appliedRef, font_SevenBold, Brushes.Black, rectRef, sfAlignCenter);
+                        e.Graphics.DrawString(appliedAmt, font_SevenBold, Brushes.Black, rectAmt, sfAlignCenterRight);
+
+                        startY += lineHeight;
+                    }
+                }
+
+                // Total line amount
+                Rectangle rectTotalLineAmount = new Rectangle(105 - offsetX, startY + 110, 90, lineHeight);
+                e.Graphics.DrawString(TotalAmount.ToString("N2"), font_SevenBold, Brushes.Black, rectTotalLineAmount, sfAlignCenterRight);
+
+                // Amount in words
+                Rectangle amountRect = new Rectangle(230 - offsetX, 373 - offsetY, 370, 40);
+                e.Graphics.DrawString("              " + formattedAmountInWords, font_EightBold, Brushes.Black, amountRect, stringFormat);
 
                 Queries_IVP queries_IVP = new Queries_IVP();
                 var signatories = queries_IVP.RetrieveSignatory();
 
-                RectangleF rectPreparedByUnderline = new RectangleF(230, 440, 615, 80);
-
-                e.Graphics.DrawString(signatories.preparedBy, font_Nine, Brushes.Black, rectPreparedByUnderline, sfAlignCenter);
-
-
+                // Prepared by (signature name)
+                Rectangle rectPreparedByUnderline = new Rectangle(460 - offsetX, 470 - offsetY, 150, 20);
+                e.Graphics.DrawString(signatories.preparedBy, font_EightBold, Brushes.Black, rectPreparedByUnderline, sfAlignCenter);
             }
 
         }

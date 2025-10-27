@@ -97,7 +97,7 @@ namespace Custom_QBSI.Clients.IVP
                 Padding = new Padding(5),
                 BackColor = Color.LightGray,
                 BorderStyle = BorderStyle.FixedSingle,
-                Visible = true,
+                Visible = false,
             };
 
             Label label_NoteText = new Label
@@ -590,7 +590,7 @@ namespace Custom_QBSI.Clients.IVP
                         Layout_IVP layout_IVP = new Layout_IVP();
                         PaperSize paperSize = new PaperSize("Custom", 850, 1100);
 
-                        GlobalVariables.isPrinting = true;
+                        GlobalVariables.isPrinting = false;
                         printDocument = new PrintDocument();
                         printDocument.DefaultPageSettings.PaperSize = paperSize;
                         printDocument.PrinterSettings.DefaultPageSettings.PaperSize = paperSize;
