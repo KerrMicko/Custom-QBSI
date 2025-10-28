@@ -294,6 +294,7 @@ namespace Custom_QBSI.Clients.IVP
                 Width = 90,
                 Height = 32,
                 BackColor = Color.White,
+                Visible = false,
             };
             button_SyncData.Click += async (sender, e) =>
             {
