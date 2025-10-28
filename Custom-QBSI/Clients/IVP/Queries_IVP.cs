@@ -1,6 +1,8 @@
-﻿using System;
+﻿using QBFC16Lib;
+using System;
 using System.Collections.Generic;
 using System.Data.OleDb;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -129,84 +131,98 @@ namespace Custom_QBSI.Clients.IVP
             return invoices;
         }
 
-        public List<ReceivePaymentData> GetReceivePaymentData(string refNumber)
+        public static List<ReceivePaymentData> GetReceivePaymentData(string refNumber)
         {
+            QBSessionManager sessionManager = new QBSessionManager();
             List<ReceivePaymentData> payments = new List<ReceivePaymentData>();
-            string accessConnectionString = AccessDatabase.GetAccessConnectionString();
 
             try
             {
-                using (OleDbConnection connection = new OleDbConnection(accessConnectionString))
+                string AppName = "QBRP";
+                LogDataSync($"Opening QuickBooks session for ReceivePayment RefNumber: {refNumber}");
+
+                // Start QuickBooks session
+                sessionManager.OpenConnection("", AppName);
+                sessionManager.BeginSession("", ENOpenMode.omDontCare);
+
+                // Create request message
+                IMsgSetRequest requestMsgSet = sessionManager.CreateMsgSetRequest("US", 13, 0);
+                requestMsgSet.Attributes.OnError = ENRqOnError.roeStop;
+
+                // Build ReceivePaymentQuery request
+                IReceivePaymentQuery paymentQuery = requestMsgSet.AppendReceivePaymentQueryRq();
+                paymentQuery.IncludeLineItems.SetValue(true);
+
+
+                paymentQuery.ORTxnQuery.TxnFilter.ORRefNumberFilter.RefNumberFilter.RefNumber.SetValue(refNumber);
+                paymentQuery.ORTxnQuery.TxnFilter.ORRefNumberFilter.RefNumberFilter.MatchCriterion.SetValue(ENMatchCriterion.mcStartsWith);
+
+
+
+                LogDataSync("Sending ReceivePaymentQuery request...");
+                IMsgSetResponse responseMsgSet = sessionManager.DoRequests(requestMsgSet);
+                IResponse response = responseMsgSet.ResponseList.GetAt(0);
+                IReceivePaymentRetList paymentList = response.Detail as IReceivePaymentRetList;
+
+                if (paymentList != null && paymentList.Count > 0)
                 {
-                    connection.Open();
+                    LogDataSync($"Found {paymentList.Count} ReceivePayment record(s) for RefNumber: {refNumber}");
 
-                    string paymentQuery = @"
-                                            SELECT 
-                                                CustomerRefFullName, 
-                                                RefNumber, 
-                                                TxnDate, 
-                                                TotalAmount
-                                            FROM ReceivePayment
-                                            WHERE RefNumber = ?";
-
-                    using (OleDbCommand command = new OleDbCommand(paymentQuery, connection))
+                    for (int i = 0; i < paymentList.Count; i++)
                     {
-                        command.Parameters.AddWithValue("?", refNumber);
+                        IReceivePaymentRet qbPayment = paymentList.GetAt(i);
 
-                        using (OleDbDataReader reader = command.ExecuteReader())
+                        ReceivePaymentData payment = new ReceivePaymentData
                         {
-                            while (reader.Read())
+                            CustomerName = qbPayment?.CustomerRef?.FullName?.GetValue() ?? string.Empty,
+                            RefNumber = qbPayment?.RefNumber?.GetValue() ?? string.Empty,
+                            TxnDate = qbPayment?.TxnDate?.GetValue() ?? DateTime.MinValue,
+                            TotalAmount = qbPayment?.TotalAmount?.GetValue() ?? 0,
+                            LineItems = new List<ReceivePaymentLineItem>()
+                        };
+
+                        if (qbPayment.AppliedToTxnRetList != null)
+                        {
+                            for (int j = 0; j < qbPayment.AppliedToTxnRetList.Count; j++)
                             {
-                                ReceivePaymentData payment = new ReceivePaymentData
+                                IAppliedToTxnRet applyPayment = qbPayment.AppliedToTxnRetList.GetAt(j);
+
+                                ReceivePaymentLineItem lineItem = new ReceivePaymentLineItem
                                 {
-                                    CustomerName = reader["CustomerRefFullName"] != DBNull.Value ? reader["CustomerRefFullName"].ToString() : string.Empty,
-                                    RefNumber = reader["RefNumber"] != DBNull.Value ? reader["RefNumber"].ToString() : string.Empty,
-                                    TxnDate = reader["TxnDate"] != DBNull.Value ? Convert.ToDateTime(reader["TxnDate"]).Date : DateTime.MinValue,
-                                    TotalAmount = reader["TotalAmount"] != DBNull.Value ? Convert.ToDouble(reader["TotalAmount"]) : 0,
-                                    LineItems = new List<ReceivePaymentLineItem>()
+                                    AppliedToTxnRefNumber = applyPayment?.RefNumber?.GetValue() ?? string.Empty,
+                                    AppliedToTxnAmount = applyPayment?.Amount?.GetValue() != null ? (decimal)applyPayment.Amount.GetValue() : 0
                                 };
 
-                                // Fetch only the needed line items
-                                string lineItemQuery = @"
-                                                        SELECT 
-                                                            AppliedToTxnRefNumber, 
-                                                            AppliedToTxnAmount
-                                                        FROM ReceivePaymentLine
-                                                        WHERE RefNumber = ?";
-
-                                using (OleDbCommand lineCommand = new OleDbCommand(lineItemQuery, connection))
-                                {
-                                    lineCommand.Parameters.AddWithValue("?", refNumber);
-
-                                    using (OleDbDataReader lineReader = lineCommand.ExecuteReader())
-                                    {
-                                        while (lineReader.Read())
-                                        {
-                                            ReceivePaymentLineItem lineItem = new ReceivePaymentLineItem
-                                            {
-                                                AppliedToTxnRefNumber = lineReader["AppliedToTxnRefNumber"] != DBNull.Value ? lineReader["AppliedToTxnRefNumber"].ToString(): string.Empty,
-
-                                                AppliedToTxnAmount = lineReader["AppliedToTxnAmount"] != DBNull.Value? Convert.ToDecimal(lineReader["AppliedToTxnAmount"]): 0
-                                            };
-
-                                            payment.LineItems.Add(lineItem);
-                                        }
-                                    }
-                                }
-
-                                payments.Add(payment);
+                                payment.LineItems.Add(lineItem);
                             }
                         }
+
+
+                        payments.Add(payment);
                     }
                 }
+                else
+                {
+                    LogDataSync($"No ReceivePayment found for RefNumber: {refNumber}");
+                }
+
+                sessionManager.EndSession();
+                sessionManager.CloseConnection();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error retrieving data from Access database: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                LogDataSync($"ERROR while getting ReceivePayment {refNumber}: {ex}");
+                try
+                {
+                    sessionManager.EndSession();
+                    sessionManager.CloseConnection();
+                }
+                catch { }
             }
 
             return payments;
         }
+
 
 
 
@@ -336,6 +352,21 @@ namespace Custom_QBSI.Clients.IVP
                         return (string.Empty, string.Empty, string.Empty);
                     }
                 }
+            }
+        }
+
+        private static void LogDataSync(string message)
+        {
+            string logFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "datasync_log.txt");
+            string logEntry = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} - {message}";
+
+            try
+            {
+                File.AppendAllText(logFilePath, logEntry + Environment.NewLine);
+            }
+            catch
+            {
+                // Fail silently if logging fails
             }
         }
     }

@@ -556,13 +556,11 @@ namespace Custom_QBSI.Clients.IVP
                     {
                         MessageBox.Show("Please select a form.", "Notice", MessageBoxButtons.OK);
                     }
-                    else if (comboBox_Forms.SelectedIndex != 0 && textBox_ReferenceNumber.Text != "")
+                    else if (comboBox_Forms.SelectedIndex != 0 && !string.IsNullOrWhiteSpace(textBox_ReferenceNumber.Text))
                     {
-                        string refNumber = textBox_ReferenceNumber.Text;
+                        string refNumber = textBox_ReferenceNumber.Text.Trim();
 
                         string vatType = radioButton_VATInclusive.Checked ? "Inclusive" : "Exclusive";
-                        //bool vatType = radioButton_VATInclusive.Checked ? true : false;
-
                         string note = textBox_Note.Text;
                         string businessStyle = textBox_BusinessStyle.Text;
                         string pwdSignature = textBox_PWDSignature.Text;
@@ -571,22 +569,17 @@ namespace Custom_QBSI.Clients.IVP
                         bool includeDateIssued = checkBox_IncludeDateIssued.Checked;
                         bool isEnableExpDateChecked = checkBox_EnableExpDate.Checked;
                         bool isLessEWTChecked = checkBox_LessEWT.Checked;
-
                         string seriesNumberRef = textBox_SeriesNumber.Text;
 
-                        //string signatoryPreparedBy = textBox_SignatoryPreparedBy.Text;
-                        //string signatoryCheckedBy = textBox_SignatoryCheckedBy.Text;
-                        //string signatoryApprovedBy = textBox_SignatoryApprovedBy.Text;
-
-                        Queries_IVP accessQueries = new Queries_IVP();
-                        List<ReceivePaymentData> payments = accessQueries.GetReceivePaymentData(refNumber);
+                        // ✅ Call static method directly
+                        List<ReceivePaymentData> payments = Queries_IVP.GetReceivePaymentData(refNumber);
 
                         if (payments.Count == 0)
                         {
-                            MessageBox.Show("No invoice found for the given reference number.", "Notice", MessageBoxButtons.OK);
+                            MessageBox.Show("No ReceivePayment found for the given reference number.", "Notice", MessageBoxButtons.OK);
                             return;
                         }
-                       
+
                         Layout_IVP layout_IVP = new Layout_IVP();
                         PaperSize paperSize = new PaperSize("Custom", 850, 1100);
 
@@ -596,8 +589,19 @@ namespace Custom_QBSI.Clients.IVP
                         printDocument.PrinterSettings.DefaultPageSettings.PaperSize = paperSize;
                         printDocument.PrintPage += (s, ev) =>
                         {
-                            layout_IVP.Layout_CollectionReceipt(ev, payments, vatType, businessStyle, includeDateIssued, isLessEWTChecked, acNo, dateIssued, seriesNumberRef);
+                            layout_IVP.Layout_CollectionReceipt(
+                                ev,
+                                payments,
+                                vatType,
+                                businessStyle,
+                                includeDateIssued,
+                                isLessEWTChecked,
+                                acNo,
+                                dateIssued,
+                                seriesNumberRef
+                            );
                         };
+
                         printPreviewControl.Document = printDocument;
                         printPreviewControl.Visible = true;
                         panel_Printing.Visible = true;

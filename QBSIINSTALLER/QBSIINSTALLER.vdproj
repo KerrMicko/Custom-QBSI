@@ -16,18 +16,18 @@
         "Entry"
         {
         "MsmKey" = "8:_1315A280485AE3CAA2409165B07D3E85"
-        "OwnerKey" = "8:_A86980AD379647DDB08751226FDB9152"
+        "OwnerKey" = "8:_A4F8029513A644A7ACD107A0F2A14306"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_5096C49C89F5415A9819DBA4D17A88D1"
+        "MsmKey" = "8:_99C10FE967574021BDF079EEEE972741"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_A86980AD379647DDB08751226FDB9152"
+        "MsmKey" = "8:_A4F8029513A644A7ACD107A0F2A14306"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -40,13 +40,13 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_A86980AD379647DDB08751226FDB9152"
+        "OwnerKey" = "8:_1315A280485AE3CAA2409165B07D3E85"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_1315A280485AE3CAA2409165B07D3E85"
+        "OwnerKey" = "8:_A4F8029513A644A7ACD107A0F2A14306"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -175,7 +175,7 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_5096C49C89F5415A9819DBA4D17A88D1"
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_99C10FE967574021BDF079EEEE972741"
             {
             "SourcePath" = "8:..\\Custom-QBSI\\bin\\x64\\Release\\CustomQBSIDatabase.accdb"
             "TargetName" = "8:CustomQBSIDatabase.accdb"
@@ -392,30 +392,30 @@
         }
         "Shortcut"
         {
-            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_02AD10C7FE124D55AE33D25F82E98587"
+            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_A906BCA188744FC191F380326203E2A0"
             {
-            "Name" = "8:QuickBooks Sales Invoice"
+            "Name" = "8:QuickBooks Collection Receipt - IVP"
             "Arguments" = "8:"
             "Description" = "8:"
             "ShowCmd" = "3:1"
             "IconIndex" = "3:0"
             "Transitive" = "11:FALSE"
-            "Target" = "8:_A86980AD379647DDB08751226FDB9152"
-            "Folder" = "8:_A1022835632E4D8D8CF14F6E4AE24EB7"
+            "Target" = "8:_A4F8029513A644A7ACD107A0F2A14306"
+            "Folder" = "8:_9093A0FDC21C41A58C857100B82B258F"
             "WorkingFolder" = "8:_12FF615587324FEC93CE6F4D94F5F2CB"
             "Icon" = "8:_EBF3BEF6A13A4924B464091172C068A3"
             "Feature" = "8:"
             }
-            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_779B053BC870476CBC3FEE7423526DC3"
+            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_FDF595ECC67A417094429FFCD1FA70C9"
             {
-            "Name" = "8:QuickBooks Sales Invoice"
+            "Name" = "8:QuickBooks Collection Receipt - IVP"
             "Arguments" = "8:"
             "Description" = "8:"
             "ShowCmd" = "3:1"
             "IconIndex" = "3:0"
             "Transitive" = "11:FALSE"
-            "Target" = "8:_A86980AD379647DDB08751226FDB9152"
-            "Folder" = "8:_9093A0FDC21C41A58C857100B82B258F"
+            "Target" = "8:_A4F8029513A644A7ACD107A0F2A14306"
+            "Folder" = "8:_A1022835632E4D8D8CF14F6E4AE24EB7"
             "WorkingFolder" = "8:_12FF615587324FEC93CE6F4D94F5F2CB"
             "Icon" = "8:_EBF3BEF6A13A4924B464091172C068A3"
             "Feature" = "8:"
@@ -819,7 +819,7 @@
         }
         "ProjectOutput"
         {
-            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_A86980AD379647DDB08751226FDB9152"
+            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_A4F8029513A644A7ACD107A0F2A14306"
             {
             "SourcePath" = "8:..\\Custom-QBSI\\obj\\x64\\Release\\Custom-QBSI.exe"
             "TargetName" = "8:"
