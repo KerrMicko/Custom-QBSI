@@ -17,6 +17,7 @@ namespace Custom_QBSI.Clients.IVP
             public string PwdNo { get; set; }
             //public string SONumber { get; set; }
             public string BusinessStyle { get; set; }
+            public double TotalAmount { get; set; }
             public string StoreCode { get; set; }
             public string JobOrderNo { get; set; }
             public string BillAddress1 { get; set; }

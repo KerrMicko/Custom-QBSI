@@ -36,16 +36,16 @@ namespace Custom_QBSI.Clients.IVP
         StringFormat sfAlignLeftCenter = new StringFormat { Alignment = StringAlignment.Near, LineAlignment = StringAlignment.Center };
         StringFormat sfAlignLeftBottom = new StringFormat { Alignment = StringAlignment.Near, LineAlignment = StringAlignment.Far };
 
-        public void Layout_CollectionReceipt(PrintPageEventArgs e, List<ReceivePaymentData> payments, string vatType, string businessStyle, bool includeDateIssued, bool isLessEWTChecked, string acNo, DateTime dateIssued, string seriesNumber)
+        public void Layout_CollectionReceipt(PrintPageEventArgs e, List<InvoiceData> invoices, string vatType, string businessStyle, bool includeDateIssued, bool isLessEWTChecked, string acNo, DateTime dateIssued, string seriesNumber)
         {
             /*Image image = Properties.Resources.Collection_Receipt_page_0001;
             e.Graphics.DrawImage(image, e.PageBounds);*/
 
-            string payee = payments[0].CustomerName;
-            double TotalAmount = payments[0].TotalAmount;
+            string payee = invoices[0].CustomerName;
+            double TotalAmount = invoices[0].TotalAmount;
 
             string amountInWords = AmountToWordsConverter.Convert(TotalAmount);
-            string Date = payments[0].TxnDate.ToString("MM/dd/yyyy");
+            string Date = invoices[0].TxnDate.ToString("MM/dd/yyyy");
 
 
             // 1️⃣ Updated StringFormat
@@ -106,26 +106,19 @@ namespace Custom_QBSI.Clients.IVP
                 int startY = 210;
                 int lineHeight = 20;
 
-                foreach (var payment in payments)
-                {
-                    foreach (var lineItem in payment.LineItems)
-                    {
-                        string appliedRef = lineItem.AppliedToTxnRefNumber;
-                        string appliedAmt = lineItem.AppliedToTxnAmount.ToString("N2");
+                string appliedRef = invoices[0].RefNumber;
+                string appliedAmt = invoices[0].TotalAmount.ToString("N2");
 
-                        Rectangle rectRef = new Rectangle(30, startY, 90, lineHeight);
-                        Rectangle rectAmt = new Rectangle(105, startY, 90, lineHeight);
+                Rectangle rectRef = new Rectangle(30, startY, 90, lineHeight);
+                Rectangle rectAmt = new Rectangle(105, startY, 90, lineHeight);
 
-                        //e.Graphics.DrawRectangle(Pens.Red, rectRef);
-                        //e.Graphics.DrawRectangle(Pens.Blue, rectAmt);
+                //e.Graphics.DrawRectangle(Pens.Red, rectRef);
+                //e.Graphics.DrawRectangle(Pens.Blue, rectAmt);
 
-                        e.Graphics.DrawString(appliedRef, font_SevenBold, Brushes.Black, rectRef, sfAlignCenter);
-                        e.Graphics.DrawString(appliedAmt, font_SevenBold, Brushes.Black, rectAmt, sfAlignCenterRight);
+                e.Graphics.DrawString(appliedRef, font_SevenBold, Brushes.Black, rectRef, sfAlignCenter);
+                e.Graphics.DrawString(appliedAmt, font_SevenBold, Brushes.Black, rectAmt, sfAlignCenterRight);
 
-                        // Move to next line
-                        startY += lineHeight;
-                    }
-                }
+                        
                 Rectangle recttotallineamount = new Rectangle(105, startY + 110, 90, lineHeight);
 
                 //e.Graphics.DrawRectangle(Pens.Blue, recttotallineamount);
@@ -172,26 +165,18 @@ namespace Custom_QBSI.Clients.IVP
                 int startY = 210 - offsetY;
                 int lineHeight = 20;
 
-                foreach (var payment in payments)
-                {
-                    foreach (var lineItem in payment.LineItems)
-                    {
-                        string appliedRef = lineItem.AppliedToTxnRefNumber;
-                        string appliedAmt = lineItem.AppliedToTxnAmount.ToString("N2");
+                string appliedRef = invoices[0].RefNumber;
+                string appliedAmt = invoices[0].TotalAmount.ToString("N2");
 
-                        Rectangle rectRef = new Rectangle(30 - offsetX, startY, 90, lineHeight);
-                        Rectangle rectAmt = new Rectangle(105 - offsetX, startY, 90, lineHeight);
+                Rectangle rectRef = new Rectangle(30 - offsetX, startY, 90, lineHeight);
+                Rectangle rectAmt = new Rectangle(105 - offsetX, startY, 90, lineHeight);
 
-                        // Optional debug
-                        // e.Graphics.DrawRectangle(Pens.Red, rectRef);
-                        // e.Graphics.DrawRectangle(Pens.Blue, rectAmt);
+                // Optional debug
+                // e.Graphics.DrawRectangle(Pens.Red, rectRef);
+                // e.Graphics.DrawRectangle(Pens.Blue, rectAmt);
 
-                        e.Graphics.DrawString(appliedRef, font_SevenBold, Brushes.Black, rectRef, sfAlignCenter);
-                        e.Graphics.DrawString(appliedAmt, font_SevenBold, Brushes.Black, rectAmt, sfAlignCenterRight);
-
-                        startY += lineHeight;
-                    }
-                }
+                e.Graphics.DrawString(appliedRef, font_SevenBold, Brushes.Black, rectRef, sfAlignCenter);
+                e.Graphics.DrawString(appliedAmt, font_SevenBold, Brushes.Black, rectAmt, sfAlignCenterRight);
 
                 // Total line amount
                 Rectangle rectTotalLineAmount = new Rectangle(105 - offsetX, startY + 110, 90, lineHeight);

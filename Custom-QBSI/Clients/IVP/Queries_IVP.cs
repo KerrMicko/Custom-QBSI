@@ -14,7 +14,7 @@ namespace Custom_QBSI.Clients.IVP
     public class Queries_IVP
     {
 
-        public List<InvoiceData> GetInvoiceData(string refNumber)
+        /*public List<InvoiceData> GetInvoiceData(string refNumber)
         {
             List<InvoiceData> invoices = new List<InvoiceData>();
             string accessConnectionString = AccessDatabase.GetAccessConnectionString();
@@ -129,17 +129,17 @@ namespace Custom_QBSI.Clients.IVP
             }
 
             return invoices;
-        }
+        }*/
 
-        public static List<ReceivePaymentData> GetReceivePaymentData(string refNumber)
+        public static List<InvoiceData> GetInvoiceData(string refNumber)
         {
             QBSessionManager sessionManager = new QBSessionManager();
-            List<ReceivePaymentData> payments = new List<ReceivePaymentData>();
+            List<InvoiceData> invoices = new List<InvoiceData>();
 
             try
             {
-                string AppName = "QBRP";
-                LogDataSync($"Opening QuickBooks session for ReceivePayment RefNumber: {refNumber}");
+                string AppName = "QBINV";
+                LogDataSync($"Opening QuickBooks session for Invoice RefNumber: {refNumber}");
 
                 // Start QuickBooks session
                 sessionManager.OpenConnection("", AppName);
@@ -149,61 +149,43 @@ namespace Custom_QBSI.Clients.IVP
                 IMsgSetRequest requestMsgSet = sessionManager.CreateMsgSetRequest("US", 13, 0);
                 requestMsgSet.Attributes.OnError = ENRqOnError.roeStop;
 
-                // Build ReceivePaymentQuery request
-                IReceivePaymentQuery paymentQuery = requestMsgSet.AppendReceivePaymentQueryRq();
-                paymentQuery.IncludeLineItems.SetValue(true);
+                // Build InvoiceQuery request
+                IInvoiceQuery invoiceQuery = requestMsgSet.AppendInvoiceQueryRq();
+                invoiceQuery.IncludeLineItems.SetValue(true);
+
+                // ✅ Correct way to filter by RefNumber for Invoices
+                invoiceQuery.ORInvoiceQuery.InvoiceFilter.ORRefNumberFilter.RefNumberFilter.MatchCriterion.SetValue(ENMatchCriterion.mcStartsWith);
+                invoiceQuery.ORInvoiceQuery.InvoiceFilter.ORRefNumberFilter.RefNumberFilter.RefNumber.SetValue(refNumber);
 
 
-                paymentQuery.ORTxnQuery.TxnFilter.ORRefNumberFilter.RefNumberFilter.RefNumber.SetValue(refNumber);
-                paymentQuery.ORTxnQuery.TxnFilter.ORRefNumberFilter.RefNumberFilter.MatchCriterion.SetValue(ENMatchCriterion.mcStartsWith);
-
-
-
-                LogDataSync("Sending ReceivePaymentQuery request...");
+                LogDataSync("Sending InvoiceQuery request...");
                 IMsgSetResponse responseMsgSet = sessionManager.DoRequests(requestMsgSet);
                 IResponse response = responseMsgSet.ResponseList.GetAt(0);
-                IReceivePaymentRetList paymentList = response.Detail as IReceivePaymentRetList;
+                IInvoiceRetList invoiceList = response.Detail as IInvoiceRetList;
 
-                if (paymentList != null && paymentList.Count > 0)
+                if (invoiceList != null && invoiceList.Count > 0)
                 {
-                    LogDataSync($"Found {paymentList.Count} ReceivePayment record(s) for RefNumber: {refNumber}");
+                    LogDataSync($"Found {invoiceList.Count} Invoice record(s) for RefNumber: {refNumber}");
 
-                    for (int i = 0; i < paymentList.Count; i++)
+                    for (int i = 0; i < invoiceList.Count; i++)
                     {
-                        IReceivePaymentRet qbPayment = paymentList.GetAt(i);
+                        IInvoiceRet qbInvoice = invoiceList.GetAt(i);
 
-                        ReceivePaymentData payment = new ReceivePaymentData
+                        InvoiceData invoice = new InvoiceData
                         {
-                            CustomerName = qbPayment?.CustomerRef?.FullName?.GetValue() ?? string.Empty,
-                            RefNumber = qbPayment?.RefNumber?.GetValue() ?? string.Empty,
-                            TxnDate = qbPayment?.TxnDate?.GetValue() ?? DateTime.MinValue,
-                            TotalAmount = qbPayment?.TotalAmount?.GetValue() ?? 0,
-                            LineItems = new List<ReceivePaymentLineItem>()
+                            CustomerName = qbInvoice?.CustomerRef?.FullName?.GetValue() ?? string.Empty,
+                            RefNumber = qbInvoice?.RefNumber?.GetValue() ?? string.Empty,
+                            TxnDate = qbInvoice?.TxnDate?.GetValue() ?? DateTime.MinValue,
+                            TotalAmount = (qbInvoice?.Subtotal?.GetValue() ?? 0) + (qbInvoice?.SalesTaxTotal?.GetValue() ?? 0),
+                            LineItems = new List<InvoiceLineItem>()
                         };
 
-                        if (qbPayment.AppliedToTxnRetList != null)
-                        {
-                            for (int j = 0; j < qbPayment.AppliedToTxnRetList.Count; j++)
-                            {
-                                IAppliedToTxnRet applyPayment = qbPayment.AppliedToTxnRetList.GetAt(j);
-
-                                ReceivePaymentLineItem lineItem = new ReceivePaymentLineItem
-                                {
-                                    AppliedToTxnRefNumber = applyPayment?.RefNumber?.GetValue() ?? string.Empty,
-                                    AppliedToTxnAmount = applyPayment?.Amount?.GetValue() != null ? (decimal)applyPayment.Amount.GetValue() : 0
-                                };
-
-                                payment.LineItems.Add(lineItem);
-                            }
-                        }
-
-
-                        payments.Add(payment);
+                        invoices.Add(invoice);
                     }
                 }
                 else
                 {
-                    LogDataSync($"No ReceivePayment found for RefNumber: {refNumber}");
+                    LogDataSync($"No Invoice found for RefNumber: {refNumber}");
                 }
 
                 sessionManager.EndSession();
@@ -211,7 +193,7 @@ namespace Custom_QBSI.Clients.IVP
             }
             catch (Exception ex)
             {
-                LogDataSync($"ERROR while getting ReceivePayment {refNumber}: {ex}");
+                LogDataSync($"ERROR while getting Invoice {refNumber}: {ex}");
                 try
                 {
                     sessionManager.EndSession();
@@ -220,8 +202,9 @@ namespace Custom_QBSI.Clients.IVP
                 catch { }
             }
 
-            return payments;
+            return invoices;
         }
+
 
 
 

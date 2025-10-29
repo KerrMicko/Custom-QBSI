@@ -573,9 +573,9 @@ namespace Custom_QBSI.Clients.IVP
                         string seriesNumberRef = textBox_SeriesNumber.Text;
 
                         // ✅ Call static method directly
-                        List<ReceivePaymentData> payments = Queries_IVP.GetReceivePaymentData(refNumber);
+                        List<InvoiceData> invoices = Queries_IVP.GetInvoiceData(refNumber);
 
-                        if (payments.Count == 0)
+                        if (invoices.Count == 0)
                         {
                             MessageBox.Show("No ReceivePayment found for the given reference number.", "Notice", MessageBoxButtons.OK);
                             return;
@@ -592,7 +592,7 @@ namespace Custom_QBSI.Clients.IVP
                         {
                             layout_IVP.Layout_CollectionReceipt(
                                 ev,
-                                payments,
+                                invoices,
                                 vatType,
                                 businessStyle,
                                 includeDateIssued,
@@ -783,7 +783,7 @@ namespace Custom_QBSI.Clients.IVP
 
                     if (printDialog.ShowDialog() == DialogResult.OK)
                     {
-                        GlobalVariables.isPrinting = true;
+                        GlobalVariables.isPrinting = false;
                         printDialog.Document.Print();
                         printPreviewControl.Visible = false;
                         printPreviewControl.Zoom = 1;
