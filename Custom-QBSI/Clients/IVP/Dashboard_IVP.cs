@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using static Custom_QBSI.Clients.IVP.DataClass_IVP;
+using QBFC16Lib;
 
 namespace Custom_QBSI.Clients.IVP
 {
@@ -18,6 +18,8 @@ namespace Custom_QBSI.Clients.IVP
             "ReceivePayment", "ReceivePaymentLine", "ReceivePaymentLineLinkedTxn" };
 
         readonly string tableName = "IVP";
+
+        public static string AppName = "Quickbooks Collection Receipt";
 
         private PrintDocument printDocument;
         private PrintPreviewControl printPreviewControl;
@@ -285,6 +287,22 @@ namespace Custom_QBSI.Clients.IVP
                 Width = 750,
                 Padding = new Padding(2),
             };
+
+            Button button_Permission = new Button
+            {
+                Parent = panel_Left,
+                Text = "Permission Reset",
+                Font = new Font("Microsoft Sans Serif", 8),
+                Width = 120,
+                Height = 32,
+                BackColor = Color.White,
+                TextAlign = ContentAlignment.MiddleCenter,
+                Visible = true,
+            };
+
+            button_Permission.Click += (sender, e) => button_Reauthorize_Click(sender, e);
+
+
 
             Button button_SyncData = new Button
             {
@@ -572,15 +590,17 @@ namespace Custom_QBSI.Clients.IVP
                         bool isLessEWTChecked = checkBox_LessEWT.Checked;
                         string seriesNumberRef = textBox_SeriesNumber.Text;
 
-                        // ✅ Call static method directly
-                        List<InvoiceData> invoices = Queries_IVP.GetInvoiceData(refNumber);
+                        // ✅ Call your QuickBooks query method here
+                        List<Custom_QBSI.Clients.IVP.DataClass_IVP.InvoiceData> invoices = Custom_QBSI.Clients.IVP.Queries_IVP.GetInvoiceByRefNumber(refNumber);
 
-                        if (invoices.Count == 0)
+                        // ✅ Check if invoices were found
+                        if (invoices == null || invoices.Count == 0)
                         {
-                            MessageBox.Show("No ReceivePayment found for the given reference number.", "Notice", MessageBoxButtons.OK);
+                            MessageBox.Show("No Invoice found for the given reference number.", "Notice", MessageBoxButtons.OK);
                             return;
                         }
 
+                        // ✅ Setup layout and print preview
                         Layout_IVP layout_IVP = new Layout_IVP();
                         PaperSize paperSize = new PaperSize("Custom", 850, 1100);
 
@@ -588,6 +608,7 @@ namespace Custom_QBSI.Clients.IVP
                         printDocument = new PrintDocument();
                         printDocument.DefaultPageSettings.PaperSize = paperSize;
                         printDocument.PrinterSettings.DefaultPageSettings.PaperSize = paperSize;
+
                         printDocument.PrintPage += (s, ev) =>
                         {
                             layout_IVP.Layout_CollectionReceipt(
@@ -617,6 +638,7 @@ namespace Custom_QBSI.Clients.IVP
                     MessageBox.Show($"An error occurred: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             };
+
 
             return panel_RefNumber;
         }
@@ -845,5 +867,32 @@ namespace Custom_QBSI.Clients.IVP
 
             return $"{seriesNumber:000000}";
         }
+
+        private void button_Reauthorize_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                // Change the app name each time to force a new QuickBooks permission popup
+                Dashboard_IVP.AppName = $"Quickbooks Collection Receipt {DateTime.Now.Ticks}";
+
+                QBSessionManager sessionManager = new QBSessionManager();
+                sessionManager.OpenConnection2("", Dashboard_IVP.AppName, ENConnectionType.ctLocalQBD);
+                sessionManager.BeginSession("", ENOpenMode.omSingleUser);
+
+                MessageBox.Show(
+                    "If no popup appeared, remove the app manually in QuickBooks → Preferences → Integrated Applications.",
+                    "QuickBooks Reauthorization",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information
+                );
+
+                sessionManager.EndSession();
+                sessionManager.CloseConnection();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Reauthorization Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
     }
 }

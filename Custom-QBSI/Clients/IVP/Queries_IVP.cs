@@ -131,32 +131,31 @@ namespace Custom_QBSI.Clients.IVP
             return invoices;
         }*/
 
-        public static List<InvoiceData> GetInvoiceData(string refNumber)
+        public static List<InvoiceData> GetInvoiceByRefNumber(string refNumber)
         {
             QBSessionManager sessionManager = new QBSessionManager();
             List<InvoiceData> invoices = new List<InvoiceData>();
 
             try
             {
-                string AppName = "QBINV";
-                LogDataSync($"Opening QuickBooks session for Invoice RefNumber: {refNumber}");
+                //string AppName = "Quickbooks Collection Receipt v2";
+                LogDataSync($"Opening QuickBooks session for RefNumber: {refNumber}");
 
                 // Start QuickBooks session
-                sessionManager.OpenConnection("", AppName);
+                sessionManager.OpenConnection("", Dashboard_IVP.AppName);
                 sessionManager.BeginSession("", ENOpenMode.omDontCare);
 
-                // Create request message
+                // Create request message set
                 IMsgSetRequest requestMsgSet = sessionManager.CreateMsgSetRequest("US", 13, 0);
                 requestMsgSet.Attributes.OnError = ENRqOnError.roeStop;
 
                 // Build InvoiceQuery request
                 IInvoiceQuery invoiceQuery = requestMsgSet.AppendInvoiceQueryRq();
                 invoiceQuery.IncludeLineItems.SetValue(true);
+                invoiceQuery.IncludeLinkedTxns.SetValue(true);
 
-                // ✅ Correct way to filter by RefNumber for Invoices
                 invoiceQuery.ORInvoiceQuery.InvoiceFilter.ORRefNumberFilter.RefNumberFilter.MatchCriterion.SetValue(ENMatchCriterion.mcStartsWith);
                 invoiceQuery.ORInvoiceQuery.InvoiceFilter.ORRefNumberFilter.RefNumberFilter.RefNumber.SetValue(refNumber);
-
 
                 LogDataSync("Sending InvoiceQuery request...");
                 IMsgSetResponse responseMsgSet = sessionManager.DoRequests(requestMsgSet);
@@ -165,27 +164,26 @@ namespace Custom_QBSI.Clients.IVP
 
                 if (invoiceList != null && invoiceList.Count > 0)
                 {
-                    LogDataSync($"Found {invoiceList.Count} Invoice record(s) for RefNumber: {refNumber}");
-
+                    LogDataSync($"Found {invoiceList.Count} invoice(s) for RefNumber: {refNumber}");
                     for (int i = 0; i < invoiceList.Count; i++)
                     {
                         IInvoiceRet qbInvoice = invoiceList.GetAt(i);
 
-                        InvoiceData invoice = new InvoiceData
+                        InvoiceData invoiceData = new InvoiceData
                         {
-                            CustomerName = qbInvoice?.CustomerRef?.FullName?.GetValue() ?? string.Empty,
                             RefNumber = qbInvoice?.RefNumber?.GetValue() ?? string.Empty,
                             TxnDate = qbInvoice?.TxnDate?.GetValue() ?? DateTime.MinValue,
+                            CustomerName = qbInvoice?.CustomerRef?.FullName?.GetValue() ?? string.Empty,
                             TotalAmount = (qbInvoice?.Subtotal?.GetValue() ?? 0) + (qbInvoice?.SalesTaxTotal?.GetValue() ?? 0),
-                            LineItems = new List<InvoiceLineItem>()
                         };
 
-                        invoices.Add(invoice);
+
+                        invoices.Add(invoiceData);
                     }
                 }
                 else
                 {
-                    LogDataSync($"No Invoice found for RefNumber: {refNumber}");
+                    LogDataSync($"No invoices found for RefNumber: {refNumber}");
                 }
 
                 sessionManager.EndSession();
@@ -193,7 +191,7 @@ namespace Custom_QBSI.Clients.IVP
             }
             catch (Exception ex)
             {
-                LogDataSync($"ERROR while getting Invoice {refNumber}: {ex}");
+                LogDataSync($"ERROR while getting invoice {refNumber}: {ex}");
                 try
                 {
                     sessionManager.EndSession();

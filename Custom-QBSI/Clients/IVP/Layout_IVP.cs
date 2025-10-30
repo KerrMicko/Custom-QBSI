@@ -144,13 +144,13 @@ namespace Custom_QBSI.Clients.IVP
             }
             else
             {
-                int offsetX = 20;
-                int offsetY = 25;
+                int offsetX = 0;
+                int offsetY = 105;
 
                 // Define rectangles matching the printed layout with offsets
-                Rectangle rectPayee = new Rectangle(310 - offsetX, 320 - offsetY, 300, 20);
-                Rectangle rectDate = new Rectangle(490 - offsetX, 280 - offsetY, 130, 20);
-                Rectangle rectAmount = new Rectangle(475 - offsetX, 395 - offsetY, 130, 20);
+                Rectangle rectPayee = new Rectangle(310 - offsetX + 60, 320 - offsetY - 50, 300, 20);
+                Rectangle rectDate = new Rectangle(490 - offsetX + 100, 280 - offsetY - 50, 130, 20);
+                Rectangle rectAmount = new Rectangle(475 - offsetX + 100 , 395 - offsetY - 40, 130, 20);
 
                 // Optional debug rectangles
                 // e.Graphics.DrawRectangle(Pens.Orange, rectPayee);
@@ -183,14 +183,14 @@ namespace Custom_QBSI.Clients.IVP
                 e.Graphics.DrawString(TotalAmount.ToString("N2"), font_SevenBold, Brushes.Black, rectTotalLineAmount, sfAlignCenterRight);
 
                 // Amount in words
-                Rectangle amountRect = new Rectangle(230 - offsetX, 373 - offsetY, 370, 40);
+                Rectangle amountRect = new Rectangle(230 - offsetX + 50, 373 - offsetY - 45, 370, 40);
                 e.Graphics.DrawString("              " + formattedAmountInWords, font_EightBold, Brushes.Black, amountRect, stringFormat);
 
                 Queries_IVP queries_IVP = new Queries_IVP();
                 var signatories = queries_IVP.RetrieveSignatory();
 
                 // Prepared by (signature name)
-                Rectangle rectPreparedByUnderline = new Rectangle(460 - offsetX, 470 - offsetY, 150, 20);
+                Rectangle rectPreparedByUnderline = new Rectangle(460 - offsetX + 90, 470 - offsetY - 50, 150, 20);
                 e.Graphics.DrawString(signatories.preparedBy, font_EightBold, Brushes.Black, rectPreparedByUnderline, sfAlignCenter);
             }
 
