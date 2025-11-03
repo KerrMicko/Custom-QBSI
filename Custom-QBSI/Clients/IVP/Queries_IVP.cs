@@ -138,12 +138,12 @@ namespace Custom_QBSI.Clients.IVP
 
             try
             {
-                //string AppName = "Quickbooks Collection Receipt v2";
+                string AppName = "Quickbooks Collection Receipt v3";
                 LogDataSync($"Opening QuickBooks session for RefNumber: {refNumber}");
 
                 // Start QuickBooks session
-                sessionManager.OpenConnection("", Dashboard_IVP.AppName);
-                sessionManager.BeginSession("", ENOpenMode.omDontCare);
+                sessionManager.OpenConnection2("", AppName, ENConnectionType.ctLocalQBD);
+                sessionManager.BeginSession("", ENOpenMode.omDontCare); // Safe mode for any open file state
 
                 // Create request message set
                 IMsgSetRequest requestMsgSet = sessionManager.CreateMsgSetRequest("US", 13, 0);
@@ -154,8 +154,10 @@ namespace Custom_QBSI.Clients.IVP
                 invoiceQuery.IncludeLineItems.SetValue(true);
                 invoiceQuery.IncludeLinkedTxns.SetValue(true);
 
-                invoiceQuery.ORInvoiceQuery.InvoiceFilter.ORRefNumberFilter.RefNumberFilter.MatchCriterion.SetValue(ENMatchCriterion.mcStartsWith);
-                invoiceQuery.ORInvoiceQuery.InvoiceFilter.ORRefNumberFilter.RefNumberFilter.RefNumber.SetValue(refNumber);
+                invoiceQuery.ORInvoiceQuery.InvoiceFilter.ORRefNumberFilter.RefNumberFilter.MatchCriterion
+                    .SetValue(ENMatchCriterion.mcStartsWith);
+                invoiceQuery.ORInvoiceQuery.InvoiceFilter.ORRefNumberFilter.RefNumberFilter.RefNumber
+                    .SetValue(refNumber);
 
                 LogDataSync("Sending InvoiceQuery request...");
                 IMsgSetResponse responseMsgSet = sessionManager.DoRequests(requestMsgSet);
@@ -177,7 +179,6 @@ namespace Custom_QBSI.Clients.IVP
                             TotalAmount = (qbInvoice?.Subtotal?.GetValue() ?? 0) + (qbInvoice?.SalesTaxTotal?.GetValue() ?? 0),
                         };
 
-
                         invoices.Add(invoiceData);
                     }
                 }
@@ -185,13 +186,14 @@ namespace Custom_QBSI.Clients.IVP
                 {
                     LogDataSync($"No invoices found for RefNumber: {refNumber}");
                 }
-
-                sessionManager.EndSession();
-                sessionManager.CloseConnection();
             }
             catch (Exception ex)
             {
                 LogDataSync($"ERROR while getting invoice {refNumber}: {ex}");
+            }
+            finally
+            {
+                // Always ensure QuickBooks session is closed
                 try
                 {
                     sessionManager.EndSession();
@@ -202,6 +204,7 @@ namespace Custom_QBSI.Clients.IVP
 
             return invoices;
         }
+
 
 
 

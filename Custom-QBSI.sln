@@ -27,6 +27,7 @@ Global
 		{C3D0A0F6-F304-4EE8-9B90-5071C598BC2C}.Debug|x64.ActiveCfg = Debug
 		{C3D0A0F6-F304-4EE8-9B90-5071C598BC2C}.Release|Any CPU.ActiveCfg = Release
 		{C3D0A0F6-F304-4EE8-9B90-5071C598BC2C}.Release|x64.ActiveCfg = Release
+		{C3D0A0F6-F304-4EE8-9B90-5071C598BC2C}.Release|x64.Build.0 = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

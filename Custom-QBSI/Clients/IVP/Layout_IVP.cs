@@ -100,7 +100,7 @@ namespace Custom_QBSI.Clients.IVP
                 //e.Graphics.DrawRectangle(Pens.Orange, rectpayee);
 
                 e.Graphics.DrawString(payee, font_EightBold, Brushes.Black, rectpayee, sfAlignLeftCenter);
-                e.Graphics.DrawString(Date, font_EightBold, Brushes.Black,rectdate , sfAlignCenter);
+               // e.Graphics.DrawString(Date, font_EightBold, Brushes.Black,rectdate , sfAlignCenter);
                 e.Graphics.DrawString(TotalAmount.ToString("N2"), font_EightBold, Brushes.Black,rectamount , sfAlignCenterRight);
 
                 int startY = 210;
@@ -158,7 +158,7 @@ namespace Custom_QBSI.Clients.IVP
                 // e.Graphics.DrawRectangle(Pens.Red, rectAmount);
 
                 e.Graphics.DrawString(payee, font_EightBold, Brushes.Black, rectPayee, sfAlignLeftCenter);
-                e.Graphics.DrawString(Date, font_EightBold, Brushes.Black, rectDate, sfAlignCenter);
+                //e.Graphics.DrawString(Date, font_EightBold, Brushes.Black, rectDate, sfAlignCenter);
                 e.Graphics.DrawString(TotalAmount.ToString("N2"), font_EightBold, Brushes.Black, rectAmount, sfAlignCenterRight);
 
                 // Line items table
