@@ -625,7 +625,7 @@ namespace Custom_QBSI.Clients.FP
             Rectangle rectDateIssued = new Rectangle(xStart, yStartFooterExtraFields - 10 + rectHeight, 300, rectHeight);
             Rectangle rectSeriesRange = new Rectangle(xStart, yStartFooterExtraFields - 20 + rectHeight * 2, 350, rectHeight);
 
-            Rectangle rectACNoData = new Rectangle(xStart + 58 - 20, yStartFooterExtraFields, 250 - 58, rectHeight);
+            Rectangle rectACNoData = new Rectangle(xStart + 70, yStartFooterExtraFields, 250 - 58, rectHeight);
             Rectangle rectDateIssuedData = new Rectangle(xStart + 92 - 18, yStartFooterExtraFields - 10 + rectHeight, 300 - 92, rectHeight);
             Rectangle rectSeriesRangeData = new Rectangle(xStart + 94 - 15, yStartFooterExtraFields - 20 + rectHeight * 2, 350 - 94, rectHeight);
 
@@ -642,8 +642,8 @@ namespace Custom_QBSI.Clients.FP
             queries_FP = new Queries_FP();
             var detailedPBS = queries_FP.RetrieveACNoAndDateIssued();
 
-            e.Graphics.DrawString("AC NO : _______________________", fontExtraFieldsFooter, Brushes.Black, rectACNo, sfAlignLeftCenter);
-            e.Graphics.DrawString("Date Issued : ___________________", fontExtraFieldsFooter, Brushes.Black, rectDateIssued, sfAlignLeftCenter);
+            e.Graphics.DrawString("BIR Permit No:", fontExtraFieldsFooter, Brushes.Black, rectACNo, sfAlignLeftCenter);
+            e.Graphics.DrawString("Date Issued :", fontExtraFieldsFooter, Brushes.Black, rectDateIssued, sfAlignLeftCenter);
             e.Graphics.DrawString("Series Range :", fontExtraFieldsFooter, Brushes.Black, rectSeriesRange, sfAlignLeftCenter);
 
             e.Graphics.DrawString(detailedPBS.acNo, fontExtraFieldsFooter, Brushes.Black, rectACNoData, sfAlignLeftCenter);

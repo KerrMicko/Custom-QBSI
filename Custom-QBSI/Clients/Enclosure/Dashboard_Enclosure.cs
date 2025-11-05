@@ -133,7 +133,7 @@ namespace Custom_QBSI.Clients.Enclosure
             {
                 Parent = panel_Details,
                 Width = componentWidth / 2 ,
-                Text = "AC NO:",
+                Text = "BIR Permit No:",
                 TextAlign = ContentAlignment.MiddleLeft,
                 Font = font_Label,
             };

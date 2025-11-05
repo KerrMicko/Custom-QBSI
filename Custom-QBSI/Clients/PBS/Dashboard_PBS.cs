@@ -137,7 +137,7 @@ namespace Custom_QBSI.Clients.PBS
             {
                 Parent = panel_Details,
                 Width = componentWidth / 2,
-                Text = "AC NO:",
+                Text = "BIR Per No:",
                 TextAlign = ContentAlignment.MiddleLeft,
                 Font = font_Label,
             };
