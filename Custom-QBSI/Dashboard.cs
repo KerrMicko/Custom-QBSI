@@ -27,7 +27,7 @@ namespace Custom_QBSI
          */
 
 
-        public static string client = "FP";
+        public static string client = "IVP";
         public static bool isPrinting = false;
     }
     public partial class Dashboard : Form

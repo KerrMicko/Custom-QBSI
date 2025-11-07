@@ -58,33 +58,6 @@ namespace Custom_QBSI.Clients.IVP
             stringFormat.FormatFlags = StringFormatFlags.LineLimit;
             stringFormat.FormatFlags &= ~StringFormatFlags.NoWrap;
 
-            string WrapTextToWidth(Graphics g, string text, Font font, float maxWidth)
-            {
-                var words = text.Split(' ');
-                var sb = new StringBuilder();
-                string currentLine = "";
-
-                foreach (var word in words)
-                {
-                    string testLine = (currentLine.Length == 0) ? word : currentLine + " " + word;
-                    var size = g.MeasureString(testLine, font);
-
-                    if (size.Width > (maxWidth - 50))
-                    {
-                        sb.AppendLine(currentLine + "\n");
-                        currentLine = word;
-                    }
-                    else
-                    {
-                        currentLine = testLine;
-                    }
-                }
-
-                sb.Append(currentLine);
-                return sb.ToString();
-            }
-
-            string formattedAmountInWords = WrapTextToWidth(e.Graphics, amountInWords, font_Nine, 370);
 
             if (GlobalVariables.isPrinting)
             {
@@ -130,7 +103,7 @@ namespace Custom_QBSI.Clients.IVP
 
                 //e.Graphics.DrawRectangle(Pens.Blue, amountRect);
 
-                e.Graphics.DrawString("              " + formattedAmountInWords, font_TenBold, Brushes.Black, amountRect, stringFormat);
+                e.Graphics.DrawString("              " + amountInWords, font_TenBold, Brushes.Black, amountRect, stringFormat);
 
                 Queries_IVP queries_IVP = new Queries_IVP();
                 var signatories = queries_IVP.RetrieveSignatory();
@@ -183,8 +156,10 @@ namespace Custom_QBSI.Clients.IVP
                 e.Graphics.DrawString(TotalAmount.ToString("N2"), font_SevenBold, Brushes.Black, rectTotalLineAmount, sfAlignCenterRight);
 
                 // Amount in words
+                
                 Rectangle amountRect = new Rectangle(230 - offsetX + 50, 373 - offsetY - 25, 370, 40);
-                e.Graphics.DrawString("              " + formattedAmountInWords, font_TenBold, Brushes.Black, amountRect, stringFormat);
+                e.Graphics.DrawString("              " + amountInWords, font_TenBold, Brushes.Black, amountRect, stringFormat);
+
 
                 Queries_IVP queries_IVP = new Queries_IVP();
                 var signatories = queries_IVP.RetrieveSignatory();
