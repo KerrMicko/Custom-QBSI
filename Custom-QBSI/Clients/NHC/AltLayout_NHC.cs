@@ -54,7 +54,12 @@ namespace Custom_QBSI.Clients.NHC
 
             string refNumber = invoiceData[0].RefNumber.ToString();
             string date = invoiceData[0].TxnDate.ToString("MM/dd/yyyy");
-            string invoiceSoldTo = invoiceData[0].CustomerName.ToString();
+            string invoiceSoldTo = invoiceData[0].CustomerName;
+            if (invoiceSoldTo.Contains(":"))
+            {
+                invoiceSoldTo = invoiceSoldTo.Split(':')[0].Trim();
+            }
+
 
             string invoiceTin = "";
             string invoiceBusinessStyle = "";
@@ -71,7 +76,8 @@ namespace Custom_QBSI.Clients.NHC
                 {
                     invoiceBusinessStyle = businessStyle;
                 }
-                invoiceStoreCode = inv.GetCustomField("Store Code");
+
+                invoiceStoreCode = inv.GetCustomField("STORE CODE");
             }
 
             string invoiceBusinessAdd = invoiceData[0].ShipAddress1.ToString() + invoiceData[0].ShipAddress2.ToString() + invoiceData[0].ShipAddress3.ToString() + invoiceData[0].ShipAddress4.ToString() + invoiceData[0].ShipAddress5.ToString();
@@ -152,9 +158,11 @@ namespace Custom_QBSI.Clients.NHC
                                               || item.Rate.ToString().Contains("%");
 
                         // Adjusted amount (VAT only if not discount)
-                        decimal adjustedAmount = isDiscountLine ? item.Amount : (isTaxable ? item.Amount * 1.12m : item.Amount);
+                        decimal adjustedAmount = isTaxable ? item.Amount * 1.12m : item.Amount;
                         decimal rateAdjustment = isTaxable ? item.Rate * 0.12m : 0m;
-                        decimal unitRateToDraw = isDiscountLine ? item.Rate : item.Rate + rateAdjustment;
+                        decimal unitRateToDraw = item.Rate + rateAdjustment;
+
+
 
                         // Base description with expiry
                         string descText = item.Description;
@@ -342,7 +350,7 @@ namespace Custom_QBSI.Clients.NHC
             // LEFT TABLE
             int dataHeight = 18;
             int xStart = 230;
-            int yStart = 765 + 17 * 3; // 770
+            int yStart = 765 + 12 * 3; // 770
             int width = 170 - 20;
 
             Rectangle rectVATableSales = new Rectangle(xStart, yStart, width, dataHeight);
@@ -397,16 +405,16 @@ namespace Custom_QBSI.Clients.NHC
             // RIGHT TABLE RECTANGLES
             int tab2RightDataHeight = 17;
             int tab2RightXStart = 580;
-            int tab2RightYStart = 765 + tab2RightDataHeight * 3;
+            int tab2RightYStart = 765 + tab2RightDataHeight  * 3;
             int tab2RightWidth = 210 - 30;
 
-            Rectangle rectR1TotalSales = new Rectangle(tab2RightXStart, tab2RightYStart + tab2RightDataHeight * 0, tab2RightWidth, tab2RightDataHeight);
-            Rectangle rectR2LessVAT = new Rectangle(tab2RightXStart, tab2RightYStart + tab2RightDataHeight * 1, tab2RightWidth, tab2RightDataHeight);
-            Rectangle rectR3AmountNetofVAT = new Rectangle(tab2RightXStart, tab2RightYStart + tab2RightDataHeight * 2, tab2RightWidth, tab2RightDataHeight);
-            Rectangle rectR4LessDiscount = new Rectangle(tab2RightXStart, tab2RightYStart + tab2RightDataHeight * 3, tab2RightWidth, tab2RightDataHeight);
-            Rectangle rectR5AddVAT = new Rectangle(tab2RightXStart, tab2RightYStart + tab2RightDataHeight * 4, tab2RightWidth, tab2RightDataHeight);
-            Rectangle rectR6LessWithholdingTax = new Rectangle(tab2RightXStart, tab2RightYStart + tab2RightDataHeight * 5, tab2RightWidth, tab2RightDataHeight);
-            Rectangle rectR7TotalAmountDue = new Rectangle(tab2RightXStart, tab2RightYStart + tab2RightDataHeight * 6, tab2RightWidth, tab2RightDataHeight);
+            Rectangle rectR1TotalSales = new Rectangle(tab2RightXStart, tab2RightYStart - 12 + tab2RightDataHeight * 0, tab2RightWidth, tab2RightDataHeight);
+            Rectangle rectR2LessVAT = new Rectangle(tab2RightXStart, tab2RightYStart - 12 + tab2RightDataHeight * 1, tab2RightWidth, tab2RightDataHeight);
+            Rectangle rectR3AmountNetofVAT = new Rectangle(tab2RightXStart, tab2RightYStart - 12 + tab2RightDataHeight * 2, tab2RightWidth, tab2RightDataHeight);
+            Rectangle rectR4LessDiscount = new Rectangle(tab2RightXStart, tab2RightYStart- 12 + tab2RightDataHeight * 3, tab2RightWidth, tab2RightDataHeight);
+            Rectangle rectR5AddVAT = new Rectangle(tab2RightXStart, tab2RightYStart - 12 + tab2RightDataHeight * 4, tab2RightWidth, tab2RightDataHeight);
+            Rectangle rectR6LessWithholdingTax = new Rectangle(tab2RightXStart, tab2RightYStart - 12 + tab2RightDataHeight * 5, tab2RightWidth, tab2RightDataHeight);
+            Rectangle rectR7TotalAmountDue = new Rectangle(tab2RightXStart, tab2RightYStart - 12 + tab2RightDataHeight * 6, tab2RightWidth, tab2RightDataHeight);
 
             /*e.Graphics.DrawRectangle(Pens.Red, rectR1TotalSales);
             e.Graphics.DrawRectangle(Pens.Orange, rectR2LessVAT);
@@ -448,10 +456,11 @@ namespace Custom_QBSI.Clients.NHC
             {
                 if (totalSales > 0)
                     e.Graphics.DrawString(totalSales.ToString("N2"), font_Data, Brushes.Black, rectR1TotalSales, sfAlignCenterRight);
-                if (totalVAT2 > 0)
-                    e.Graphics.DrawString(totalVAT2.ToString("N2"), font_Data, Brushes.Black, rectR2LessVAT, sfAlignCenterRight);
             }
-            
+
+            if (totalVAT2 > 0)
+                e.Graphics.DrawString(totalVAT2.ToString("N2"), font_Data, Brushes.Black, rectR2LessVAT, sfAlignCenterRight);
+
 
             // -------------------- R3 Amount Net of VAT --------------------
             if (amountNetVat2 > 0)
