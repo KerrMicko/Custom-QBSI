@@ -682,7 +682,6 @@ namespace Custom_QBSI.Clients.NHC
                         return;
                     }
 
-                    // ✅ Ask if edit mode should be enabled when expiration is enabled
                     if (selectedFormIndex == 2 && isEnableExpDateChecked)
                     {
                         DialogResult editChoice = MessageBox.Show(
@@ -697,7 +696,7 @@ namespace Custom_QBSI.Clients.NHC
 
                         if (editChoice == DialogResult.Cancel)
                         {
-                            // Proceed directly to printing
+                            // Proceed normally to printing (no editing)
                         }
                         else
                         {
@@ -706,26 +705,17 @@ namespace Custom_QBSI.Clients.NHC
                             panel_Printing.Visible = false;
                             button_PrintNewData.Visible = true;
 
-                            // ✅ Save fetched transfer data globally
                             lastQueriedTransfers = result.Transfers;
 
-                            // Make all columns read-only initially
                             foreach (DataGridViewColumn col in dataGridView_Lines.Columns)
                                 col.ReadOnly = true;
 
-                            // ✅ Determine what user wants to edit
                             allowPriceEditing = (editChoice == DialogResult.Yes);
 
-                            // Always allow ExpirationDate editing
                             dataGridView_Lines.Columns["ExpirationDate"].ReadOnly = false;
-
-                            // Allow Price editing only if user chose "Yes"
                             dataGridView_Lines.Columns["Price"].ReadOnly = !allowPriceEditing;
-
-                            // Optionally hide the Price column entirely when editing only Expiration Date
                             dataGridView_Lines.Columns["Price"].Visible = allowPriceEditing;
 
-                            // Populate the DataGridView + add TOTAL row
                             foreach (var tran in result.Transfers)
                             {
                                 if (tran.Lines != null)
@@ -735,19 +725,26 @@ namespace Custom_QBSI.Clients.NHC
                                     foreach (var line in tran.Lines)
                                     {
                                         string desc = line.ItemDescription ?? "N/A";
-                                        string price = line.SalesPrice.ToString("0.00");
-                                        string expDate = ""; // leave empty for user to fill
+                                        string expDate = ""; // allow user to set
+                                        string price = line.AverageCost.ToString("0.00");
+
+                                        // Add row
                                         dataGridView_Lines.Rows.Add(desc, price, expDate);
 
-                                        totalAmount += (decimal)line.SalesPrice;
+                                        // FIX: Correct total = Quantity × Price
+                                        decimal lineTotal = (decimal)line.AverageCost * (decimal)line.QuantityTransfer;
+                                        totalAmount += lineTotal;
+
                                     }
 
-                                    // ✅ Add a TOTAL row (editable)
                                     int totalRowIndex = dataGridView_Lines.Rows.Add("TOTAL", totalAmount.ToString("0.00"), "");
                                     DataGridViewRow totalRow = dataGridView_Lines.Rows[totalRowIndex];
+
                                     totalRow.DefaultCellStyle.Font = new Font(dataGridView_Lines.Font, FontStyle.Bold);
                                     totalRow.DefaultCellStyle.BackColor = Color.LightYellow;
-                                    totalRow.ReadOnly = false; // allow editing of total if needed
+
+                                    // TOTAL row can be edited (if price editing enabled)
+                                    totalRow.ReadOnly = !allowPriceEditing;
                                 }
                             }
 
@@ -760,11 +757,10 @@ namespace Custom_QBSI.Clients.NHC
                                 MessageBoxIcon.Information
                             );
 
-                            return; // stop here — user will click Re-generate later
+                            return; // stop — user will re-generate
                         }
                     }
 
-                    // 7️⃣ Proceed to print if not editing
                     AltLayout_NHC altLayout_NHC = new AltLayout_NHC();
                     PaperSize paperSize = new PaperSize("Custom", 850, 1100);
 

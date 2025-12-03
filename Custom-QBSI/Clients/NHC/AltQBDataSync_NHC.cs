@@ -251,10 +251,14 @@ namespace Custom_QBSI.Clients.NHC
             {
                 IItemInventoryQuery invQuery = requestMsgSet.AppendItemInventoryQueryRq();
                 invQuery.ORListQueryWithOwnerIDAndClass.ListIDList.Add(id);
+
                 invQuery.IncludeRetElementList.Add("ListID");
                 invQuery.IncludeRetElementList.Add("UnitOfMeasureSetRef");
                 invQuery.IncludeRetElementList.Add("SalesPrice");
                 invQuery.IncludeRetElementList.Add("SalesDesc");
+
+                // NEW — REQUIRED TO GET AMOUNT
+                invQuery.IncludeRetElementList.Add("AverageCost");
             }
 
             var responseMsgSet = sessionManager.DoRequests(requestMsgSet);
@@ -267,18 +271,23 @@ namespace Custom_QBSI.Clients.NHC
                     var invList = response.Detail as IItemInventoryRetList;
                     if (invList != null)
                     {
-                        LogDataSync($"[ItemsByListIDs] Found {invList.Count} item(s).");
                         for (int j = 0; j < invList.Count; j++)
                         {
                             var invItem = invList.GetAt(j);
+
                             items[invItem.ListID?.GetValue()] = new ItemData
                             {
                                 ListID = invItem.ListID?.GetValue(),
                                 UnitOfMeasureListID = invItem.UnitOfMeasureSetRef?.ListID?.GetValue(),
                                 SalesPrice = invItem.SalesPrice?.GetValue() ?? 0,
-                                SalesDesc = invItem.SalesDesc?.GetValue()
+                                SalesDesc = invItem.SalesDesc?.GetValue(),
+
+                                // NEW FIELD
+                                AverageCost = invItem.AverageCost?.GetValue() ?? 0
                             };
-                            LogDataSync($"[ItemsByListIDs] Item Loaded: {invItem.ListID?.GetValue()} - {invItem.SalesDesc?.GetValue()}");
+
+                            LogDataSync($"[ItemsByListIDs] Item Loaded: {invItem.ListID?.GetValue()} " +
+                                        $"- AvgCost={invItem.AverageCost?.GetValue()}");
                         }
                     }
                 }
@@ -286,6 +295,7 @@ namespace Custom_QBSI.Clients.NHC
 
             return items;
         }
+
 
 
 
@@ -413,9 +423,9 @@ namespace Custom_QBSI.Clients.NHC
 
 
         public static void MapTransferLineDetails(List<TransferInventoryData> transfers,
-                                          Dictionary<string, ItemData> items,
-                                          Dictionary<string, string> uoms,
-                                          Dictionary<string, InventorySiteData> sites)
+                                  Dictionary<string, ItemData> items,
+                                  Dictionary<string, string> uoms,
+                                  Dictionary<string, InventorySiteData> sites)
         {
             LogDataSync("[MapTransferLineDetails] Mapping transfer line details...");
 
@@ -427,20 +437,23 @@ namespace Custom_QBSI.Clients.NHC
                     {
                         line.SalesPrice = item.SalesPrice;
                         line.ItemDescription = item.SalesDesc;
+                        line.AverageCost = item.AverageCost;
 
                         if (!string.IsNullOrEmpty(item.UnitOfMeasureListID) &&
                             uoms.TryGetValue(item.UnitOfMeasureListID, out var baseUnit))
                         {
                             line.BaseUnitName = baseUnit;
                         }
+
+                        // NEW — Compute the exact transfer amount
+                        line.Amount = line.QuantityTransfer * item.AverageCost;
                     }
 
-                    if (!string.IsNullOrEmpty(line.SiteListID) &&sites.TryGetValue(line.SiteListID, out var siteData))
+                    if (!string.IsNullOrEmpty(line.SiteListID) && sites.TryGetValue(line.SiteListID, out var siteData))
                     {
                         line.SiteName = siteData.Name;
                         line.SiteDescription = siteData.Description;
 
-                        // Map the full address
                         line.SiteAddr1 = siteData.SiteAddressBlockAddr1;
                         line.SiteAddr2 = siteData.SiteAddressBlockAddr2;
                         line.SiteAddr3 = siteData.SiteAddressBlockAddr3;
@@ -448,11 +461,12 @@ namespace Custom_QBSI.Clients.NHC
                         line.SiteAddr5 = siteData.SiteAddressBlockAddr5;
                     }
 
-
-                    LogDataSync($"[MapTransferLineDetails] Line mapped: Item={line.ItemRefListID}, Desc={line.ItemDescription}, Price={line.SalesPrice}, UOM={line.BaseUnitName}, Site={line.SiteName}");
+                    LogDataSync($"[MapTransferLineDetails] Line mapped: Item={line.ItemRefListID}, " +
+                                $"Qty={line.QuantityTransfer}, AvgCost={line.AverageCost}, Amount={line.Amount}");
                 }
             }
         }
+
 
 
 

@@ -76,6 +76,9 @@ namespace Custom_QBSI.Clients.NHC
 
             public string BaseUnitName { get; set; }
 
+            public double AverageCost { get; set; }
+            public double Amount { get; set; }
+
             public string SiteListID { get; set; }
             public string SiteName { get; set; }
             public string SiteDescription { get; set; }
@@ -93,6 +96,8 @@ namespace Custom_QBSI.Clients.NHC
             public string UnitOfMeasureListID { get; set; }
             public double SalesPrice { get; set; }
             public string SalesDesc { get; set; }
+
+            public double AverageCost { get; set; }
         }
 
         public class InventorySiteData
