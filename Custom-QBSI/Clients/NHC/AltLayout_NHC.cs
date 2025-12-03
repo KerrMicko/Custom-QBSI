@@ -77,7 +77,7 @@ namespace Custom_QBSI.Clients.NHC
                     invoiceBusinessStyle = businessStyle;
                 }
 
-                invoiceStoreCode = inv.GetCustomField("STORE CODE");
+                invoiceStoreCode = inv.GetCustomField("Store Code");
             }
 
             string invoiceBusinessAdd = invoiceData[0].ShipAddress1.ToString() + invoiceData[0].ShipAddress2.ToString() + invoiceData[0].ShipAddress3.ToString() + invoiceData[0].ShipAddress4.ToString() + invoiceData[0].ShipAddress5.ToString();
@@ -452,11 +452,8 @@ namespace Custom_QBSI.Clients.NHC
 
             Console.WriteLine($" Total Sales: {totalSales}, Total VATable Amount 2: {totalVATableAmount2}");
 
-            if(vatType == "Inclusive")
-            {
-                if (totalSales > 0)
-                    e.Graphics.DrawString(totalSales.ToString("N2"), font_Data, Brushes.Black, rectR1TotalSales, sfAlignCenterRight);
-            }
+            if (totalSales > 0)
+                e.Graphics.DrawString(totalSales.ToString("N2"), font_Data, Brushes.Black, rectR1TotalSales, sfAlignCenterRight);
 
             if (totalVAT2 > 0)
                 e.Graphics.DrawString(totalVAT2.ToString("N2"), font_Data, Brushes.Black, rectR2LessVAT, sfAlignCenterRight);

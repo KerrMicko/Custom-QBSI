@@ -528,6 +528,7 @@ namespace Custom_QBSI.Clients.NHC
             comboBox_Forms.SelectedIndex = 1;
             comboBox_Forms.SelectedIndexChanged += ComboBox_Forms_SelectedIndexChanged;
 
+
             return panel_Forms;
         }
 
@@ -1109,11 +1110,16 @@ namespace Custom_QBSI.Clients.NHC
                 Queries_NHC queries_NHC = new Queries_NHC();
                 var data = queries_NHC.RetrieveSignatory_DR();
 
-                textBox_Address.Text = data[0];
-                textBox_Terms.Text = data[1];
-                textBox_StoreCode.Text = data[2];
-                textBox_PONumber.Text = data[3];
-                textBox_TIN.Text = data[4];
+                string GetSafe(string[] arr, int index)
+                {
+                    return arr != null && index < arr.Length ? arr[index] : "";
+                }
+
+                textBox_Address.Text = GetSafe(data, 0);
+                textBox_Terms.Text = GetSafe(data, 1);
+                textBox_StoreCode.Text = GetSafe(data, 2);
+                textBox_PONumber.Text = GetSafe(data, 3);
+                textBox_TIN.Text = GetSafe(data, 4);
             }
             else
             {

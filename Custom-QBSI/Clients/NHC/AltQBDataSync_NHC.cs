@@ -35,6 +35,10 @@ namespace Custom_QBSI.Clients.NHC
                 invoiceQuery.IncludeLineItems.SetValue(true);
                 invoiceQuery.IncludeLinkedTxns.SetValue(true);
 
+                // --- IMPORTANT: REQUIRED to get Transaction-level Custom Fields ---
+                invoiceQuery.OwnerIDList.Add("0");
+                // -----------------------------------------------------------------
+
                 invoiceQuery.ORInvoiceQuery.InvoiceFilter.ORRefNumberFilter.RefNumberFilter.MatchCriterion.SetValue(ENMatchCriterion.mcStartsWith);
                 invoiceQuery.ORInvoiceQuery.InvoiceFilter.ORRefNumberFilter.RefNumberFilter.RefNumber.SetValue(refNumber);
 
@@ -70,11 +74,37 @@ namespace Custom_QBSI.Clients.NHC
                             ShipAddress5 = qbInvoice?.ShipAddressBlock?.Addr5?.GetValue() ?? string.Empty,
                         };
 
+                        // --- 1. Get Default Customer Custom Fields (Existing Logic) ---
                         var customerListID = qbInvoice.CustomerRef?.ListID?.GetValue();
                         if (!string.IsNullOrEmpty(customerListID))
                         {
+                            // This fetches the "default" values from the Customer list
                             invoiceData.CustomerCustomFields = GetCustomerCustomFields(sessionManager, customerListID);
                             LogDataSync($"Fetched custom fields for customer {customerListID}");
+                        }
+
+                        // Ensure the dictionary is initialized so we don't crash on the next step
+                        if (invoiceData.CustomerCustomFields == null)
+                        {
+                            invoiceData.CustomerCustomFields = new Dictionary<string, string>();
+                        }
+
+                        // --- 2. Get INVOICE SPECIFIC Custom Fields (The Fix) ---
+                        if (qbInvoice.DataExtRetList != null)
+                        {
+                            for (int k = 0; k < qbInvoice.DataExtRetList.Count; k++)
+                            {
+                                IDataExtRet dataExt = qbInvoice.DataExtRetList.GetAt(k);
+                                string fieldName = dataExt.DataExtName.GetValue();
+                                string fieldValue = dataExt.DataExtValue.GetValue();
+
+                                // Using Dictionary syntax:
+                                // If "STORE CODE" exists, this overwrites it. 
+                                // If it doesn't exist, this adds it.
+                                invoiceData.CustomerCustomFields[fieldName] = fieldValue;
+
+                                LogDataSync($"Processed Invoice Custom Field: {fieldName} = {fieldValue}");
+                            }
                         }
 
                         // --- Line Items ---
@@ -99,9 +129,8 @@ namespace Custom_QBSI.Clients.NHC
                                         SkuCode = line.Other2?.GetValue() ?? string.Empty,
                                         Tax = line.SalesTaxCodeRef?.FullName?.GetValue() ?? string.Empty,
                                         SalesTaxTotal = (decimal?)(line.TaxAmount?.GetValue()) ?? 0m,
-                                        ServiceDate = line.ServiceDate != null? line.ServiceDate.GetValue().ToShortDateString():string.Empty
+                                        ServiceDate = line.ServiceDate != null ? line.ServiceDate.GetValue().ToShortDateString() : string.Empty
                                     };
-
 
                                     invoiceData.Lines.Add(lineData);
                                 }

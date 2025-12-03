@@ -25,6 +25,7 @@ namespace Custom_QBSI.Clients.NHC
             public string ShipAddress3 { get; set; }
             public string ShipAddress4 { get; set; }
             public string ShipAddress5 { get; set; }
+            public string CustomFieldStorecode { get; set; }
 
             public List<InvoiceLineData> Lines { get; set; } = new List<InvoiceLineData>();
             public Dictionary<string, string> CustomerCustomFields { get; set; } = new Dictionary<string, string>();
