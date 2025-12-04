@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static Custom_QBSI.Clients.NHC.Dataclass_NHC;
 //using static Custom_QBSI.Clients.NHC.Dataclass_NHC;
 
 namespace Custom_QBSI.Clients.NHC
@@ -25,6 +26,8 @@ namespace Custom_QBSI.Clients.NHC
         private DataGridView dataGridView_Lines;
         private List<AltDataClass_NHC.TransferInventoryData> lastQueriedTransfers;
         private bool allowPriceEditing = true;
+
+        public TextBox textBox_ReferenceNumber;
 
 
         // Details
@@ -52,8 +55,12 @@ namespace Custom_QBSI.Clients.NHC
         private Label label_StoreCode;
         private TextBox textBox_StoreCode;
 
+        private Label label_CustomerName;
+        private TextBox textBox_CustomerName;
+
         private Button button_SaveDetails;
         private Button button_PrintNewData;
+
 
         // Signatory
         private TextBox textBox_SignatoryName;
@@ -138,6 +145,24 @@ namespace Custom_QBSI.Clients.NHC
                 Parent = panel_Details,
                 Width = componentWidth,
                 Font = font_Label,
+            };
+
+            label_CustomerName = new Label
+            {
+                Text = "Customer Name:",
+                Parent = panel_Details,
+                Width = componentWidth,
+                TextAlign = ContentAlignment.MiddleLeft,
+                Font = font_Label,
+                Visible = false,
+            };
+
+            // Define the TextBox
+            textBox_CustomerName = new TextBox
+            {
+                Parent = panel_Details,
+                Width = componentWidth,
+                Visible = false,
             };
 
             Label label_PWDSignature = new Label
@@ -310,17 +335,48 @@ namespace Custom_QBSI.Clients.NHC
                 BackColor = Color.Transparent,
                 Visible = false,
             };
+
             button_SaveDetails.Click += (sender, e) =>
             {
-                string address = textBox_Address.Text;
-                string terms = textBox_Terms.Text;
-                string storeCode = textBox_StoreCode.Text;
-                string poNumber = textBox_PONumber.Text;
-                string tin = textBox_TIN.Text;
+                if (textBox_ReferenceNumber == null) return;
 
-                Queries_NHC queries_NHC = new Queries_NHC();
-                queries_NHC.UpdateSignatory_DR(address, terms, storeCode, poNumber, tin);
+                string refNumber = textBox_ReferenceNumber.Text?.Trim() ?? "";
+
+                if (string.IsNullOrWhiteSpace(refNumber))
+                {
+                    MessageBox.Show("Please enter a Reference Number before saving.", "Notice", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                // Read existing fields
+                string address = textBox_Address?.Text ?? "";
+                string terms = textBox_Terms?.Text ?? "";
+                string storeCode = textBox_StoreCode?.Text ?? "";
+                string poNumber = textBox_PONumber?.Text ?? "";
+                string tin = textBox_TIN?.Text ?? "";
+                string businessStyle = textBox_BusinessStyle?.Text ?? "";
+                string note = textBox_Note?.Text ?? "";
+
+                // 🆕 Read the new Customer Name
+                // Ensure you have this TextBox created in your UI!
+                string customerName = textBox_CustomerName?.Text ?? "";
+
+                try
+                {
+                    Queries_NHC queries_NHC = new Queries_NHC();
+
+                    // Pass the new customerName at the end
+                    queries_NHC.SaveOrUpdateHistoryDR(refNumber, address, terms, storeCode, poNumber, tin, businessStyle, note, customerName);
+
+                    MessageBox.Show("Details saved successfully.", "Saved", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Failed to save: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             };
+
+
 
             radioButton_VATInclusive = new RadioButton
             {
@@ -553,12 +609,13 @@ namespace Custom_QBSI.Clients.NHC
                 Font = font_Label,
             };
 
-            TextBox textBox_ReferenceNumber = new TextBox
+            textBox_ReferenceNumber = new TextBox
             {
                 Parent = panel_RefNumber,
-                Width = sideBarWidth - 30, // 190
+                Width = sideBarWidth - 30,
                 Font = font_Label,
             };
+
 
             Button button_SearchRefNum = new Button
             {
@@ -573,23 +630,16 @@ namespace Custom_QBSI.Clients.NHC
             {
                 try
                 {
-                    // 1️⃣ Read all UI control values BEFORE Task.Run
+                    // 1️⃣ Read BASIC control values needed for Validation and Querying
                     int selectedFormIndex = comboBox_Forms.SelectedIndex;
                     string refNumber = textBox_ReferenceNumber.Text.Trim();
+
+                    // Settings (Checkboxes/Radios) can be read here
                     string vatType = radioButton_VATInclusive.Checked ? "Inclusive" : "Exclusive";
-                    string note = textBox_Note.Text;
-                    string businessStyle = textBox_BusinessStyle.Text;
-                    string pwdSignature = textBox_PWDSignature.Text;
                     bool isEnableExpDateChecked = checkBox_EnableExpDate.Checked;
                     bool isLessEWTChecked = checkBox_LessEWT.Checked;
-                    string signatoryName = textBox_SignatoryName.Text;
-                    string address = textBox_Address.Text;
-                    string terms = textBox_Terms.Text;
-                    string storeCode = textBox_StoreCode.Text;
-                    string poNumber = textBox_PONumber.Text;
-                    string tin = textBox_TIN.Text;
 
-                    // 2️⃣ Validate inputs
+                    // 2️⃣ Validate input
                     if (selectedFormIndex == 0)
                     {
                         MessageBox.Show("Please select a form.", "Notice", MessageBoxButtons.OK);
@@ -606,7 +656,46 @@ namespace Custom_QBSI.Clients.NHC
 
                     LogMessage($"Searching invoice for RefNumber: {refNumber}");
 
-                    // 3️⃣ Create progress form
+                    // 3️⃣ Clear all DR detail fields before loading new data
+                    textBox_Address.Text = "";
+                    textBox_StoreCode.Text = "";
+                    textBox_PONumber.Text = "";
+                    textBox_TIN.Text = "";
+                    textBox_BusinessStyle.Text = "";
+                    textBox_Note.Text = "";
+                    textBox_Terms.Text = "";
+                    textBox_PWDSignature.Text = "";
+                    textBox_CustomerName.Text = "";
+                    dataGridView_Lines.Rows.Clear();
+                    dataGridView_Lines.Visible = false;
+                    button_PrintNewData.Visible = false;
+
+                    // 4️⃣ Load saved DR history ONLY if Delivery Receipt is selected
+                    if (selectedFormIndex == 2)
+                    {
+                        Queries_NHC q = new Queries_NHC();
+                        HistoryDRDetails savedDetails = q.GetHistoryDRDetails(refNumber);
+
+                        if (savedDetails != null)
+                        {
+                            textBox_Address.Text = savedDetails.Address ?? "";
+                            textBox_StoreCode.Text = savedDetails.StoreCode ?? "";
+                            textBox_PONumber.Text = savedDetails.PONumber ?? "";
+                            textBox_TIN.Text = savedDetails.TIN ?? "";
+                            textBox_BusinessStyle.Text = savedDetails.BusinessStyle ?? "";
+                            textBox_Note.Text = savedDetails.Note ?? "";
+                            textBox_Terms.Text = savedDetails.Terms ?? "";
+                            textBox_CustomerName.Text = savedDetails.Cname ?? ""; // Ensure this matches your class property
+
+                            LogMessage("Loaded saved DR details from HistoryDRDetails.");
+                        }
+                        else
+                        {
+                            LogMessage("No saved DR details found for this RefNumber.");
+                        }
+                    }
+
+                    // 5️⃣ Create progress form
                     var progressForm = new Form
                     {
                         StartPosition = FormStartPosition.CenterScreen,
@@ -647,7 +736,7 @@ namespace Custom_QBSI.Clients.NHC
 
                     progressForm.Show();
 
-                    // 4️⃣ Run QuickBooks query asynchronously
+                    // 6️⃣ Run QuickBooks query asynchronously
                     var result = await Task.Run(() =>
                     {
                         List<Custom_QBSI.Clients.NHC.AltDataClass_NHC.InvoiceData> invoice = null;
@@ -661,13 +750,13 @@ namespace Custom_QBSI.Clients.NHC
                         return new { Invoice = invoice, Transfers = transfers };
                     });
 
-                    // 5️⃣ Stop progress
+                    // Stop progress
                     timer.Stop();
                     progressBar.Value = 100;
                     await Task.Delay(200);
                     progressForm.Close();
 
-                    // 6️⃣ Check if data is found
+                    // Check if data is found
                     if (selectedFormIndex == 1 && (result.Invoice == null || result.Invoice.Count == 0))
                     {
                         MessageBox.Show("No invoice found for the given reference number.", "Notice", MessageBoxButtons.OK);
@@ -682,6 +771,7 @@ namespace Custom_QBSI.Clients.NHC
                         return;
                     }
 
+                    // Handle Edit Mode (Expiration Dates)
                     if (selectedFormIndex == 2 && isEnableExpDateChecked)
                     {
                         DialogResult editChoice = MessageBox.Show(
@@ -694,12 +784,9 @@ namespace Custom_QBSI.Clients.NHC
                             MessageBoxIcon.Question
                         );
 
-                        if (editChoice == DialogResult.Cancel)
+                        if (editChoice != DialogResult.Cancel)
                         {
-                            // Proceed normally to printing (no editing)
-                        }
-                        else
-                        {
+                            // Logic to enable editing grid
                             dataGridView_Lines.Rows.Clear();
                             dataGridView_Lines.Visible = true;
                             panel_Printing.Visible = false;
@@ -721,20 +808,16 @@ namespace Custom_QBSI.Clients.NHC
                                 if (tran.Lines != null)
                                 {
                                     decimal totalAmount = 0m;
-
                                     foreach (var line in tran.Lines)
                                     {
                                         string desc = line.ItemDescription ?? "N/A";
-                                        string expDate = ""; // allow user to set
+                                        string expDate = "";
                                         string price = line.AverageCost.ToString("0.00");
 
-                                        // Add row
                                         dataGridView_Lines.Rows.Add(desc, price, expDate);
 
-                                        // FIX: Correct total = Quantity × Price
                                         decimal lineTotal = (decimal)line.AverageCost * (decimal)line.QuantityTransfer;
                                         totalAmount += lineTotal;
-
                                     }
 
                                     int totalRowIndex = dataGridView_Lines.Rows.Add("TOTAL", totalAmount.ToString("0.00"), "");
@@ -742,8 +825,6 @@ namespace Custom_QBSI.Clients.NHC
 
                                     totalRow.DefaultCellStyle.Font = new Font(dataGridView_Lines.Font, FontStyle.Bold);
                                     totalRow.DefaultCellStyle.BackColor = Color.LightYellow;
-
-                                    // TOTAL row can be edited (if price editing enabled)
                                     totalRow.ReadOnly = !allowPriceEditing;
                                 }
                             }
@@ -757,10 +838,25 @@ namespace Custom_QBSI.Clients.NHC
                                 MessageBoxIcon.Information
                             );
 
-                            return; // stop — user will re-generate
+                            return; // Stop here so user can edit. They will click "Print" later.
                         }
                     }
 
+                    // 7️⃣ CRITICAL FIX: RE-READ VARIABLES FROM UI HERE
+                    // We read these NOW because the History loading (Step 4) might have updated the TextBoxes.
+                    // If we read them at the very top, we would be sending empty strings to the printer.
+                    string currentNote = textBox_Note.Text;
+                    string currentBusinessStyle = textBox_BusinessStyle.Text;
+                    string currentPwdSignature = textBox_PWDSignature.Text;
+                    string currentSignatoryName = textBox_SignatoryName.Text;
+                    string currentAddress = textBox_Address.Text;
+                    string currentTerms = textBox_Terms.Text;
+                    string currentStoreCode = textBox_StoreCode.Text;
+                    string currentPoNumber = textBox_PONumber.Text;
+                    string currentTin = textBox_TIN.Text;
+                    string currentCustomerName = textBox_CustomerName != null ? textBox_CustomerName.Text : "";
+
+                    // 8️⃣ Generate Print Document
                     AltLayout_NHC altLayout_NHC = new AltLayout_NHC();
                     PaperSize paperSize = new PaperSize("Custom", 850, 1100);
 
@@ -771,16 +867,45 @@ namespace Custom_QBSI.Clients.NHC
                     printDocument.PrintPage += (pSender, ev) =>
                     {
                         if (selectedFormIndex == 1)
-                            altLayout_NHC.Layout_SalesInvoice(ev, result.Invoice, note, vatType, businessStyle, signatoryName, isEnableExpDateChecked, isLessEWTChecked);
+                        {
+                            altLayout_NHC.Layout_SalesInvoice(
+                                ev,
+                                result.Invoice,
+                                currentNote,
+                                vatType,
+                                currentBusinessStyle,
+                                currentSignatoryName,
+                                isEnableExpDateChecked,
+                                isLessEWTChecked
+                            );
+                        }
                         else if (selectedFormIndex == 2)
-                            altLayout_NHC.Layout_DeliveryReceipt(ev, result.Transfers, note, businessStyle, pwdSignature, address, terms, storeCode, poNumber, tin, isEnableExpDateChecked, allowPriceEditing, signatoryName, dataGridView_Lines);
+                        {
+                            altLayout_NHC.Layout_DeliveryReceipt(
+                            ev,
+                            result.Transfers,
+                            currentNote,
+                            currentBusinessStyle,
+                            currentPwdSignature,
+                            currentAddress,
+                            currentTerms,
+                            currentStoreCode,
+                            currentPoNumber,
+                            currentTin,
+                            isEnableExpDateChecked,
+                            allowPriceEditing,
+                            currentCustomerName,  
+                            currentSignatoryName, 
+                            dataGridView_Lines
+                            );
+                        }
                     };
 
                     printPreviewControl.Document = printDocument;
                     printPreviewControl.Visible = true;
                     panel_Printing.Visible = true;
 
-                    // Hide editing controls
+                    // Hide editing controls (since we are in standard print mode)
                     dataGridView_Lines.Visible = false;
                     button_PrintNewData.Visible = false;
                 }
@@ -853,26 +978,26 @@ namespace Custom_QBSI.Clients.NHC
                 printDocument.DefaultPageSettings.PaperSize = paperSize;
                 printDocument.PrinterSettings.DefaultPageSettings.PaperSize = paperSize;
 
+                // Inside button_PrintEdited_Click
                 printDocument.PrintPage += (pSender, ev) =>
                 {
-                    // 🟢 Use the latest updated data
                     altLayout_NHC.Layout_DeliveryReceipt(
-                    ev,
-                    lastQueriedTransfers,
-                    textBox_Note.Text,
-                    textBox_BusinessStyle.Text,
-                    textBox_PWDSignature.Text,
-                    textBox_Address.Text,
-                    textBox_Terms.Text,
-                    textBox_StoreCode.Text,
-                    textBox_PONumber.Text,
-                    textBox_TIN.Text,
-                    checkBox_EnableExpDate.Checked,
-                    allowPriceEditing,
-                    textBox_SignatoryName.Text,
-                    dataGridView_Lines
-                );
-
+                        ev,
+                        lastQueriedTransfers,
+                        textBox_Note.Text,
+                        textBox_BusinessStyle.Text,
+                        textBox_PWDSignature.Text,
+                        textBox_Address.Text,
+                        textBox_Terms.Text,
+                        textBox_StoreCode.Text,
+                        textBox_PONumber.Text,
+                        textBox_TIN.Text,
+                        checkBox_EnableExpDate.Checked,
+                        allowPriceEditing,
+                        textBox_CustomerName.Text,
+                        textBox_SignatoryName.Text,
+                        dataGridView_Lines
+                    );
                 };
 
                 // ✅ Keep DataGridView visible so user can edit again
@@ -1059,6 +1184,9 @@ namespace Custom_QBSI.Clients.NHC
                 radioButton_VATInclusive.Visible = true;
                 radioButton_VATExclusive.Visible = true;
 
+                label_CustomerName.Visible = false;
+                textBox_CustomerName.Visible = false;
+
                 // Hide all textboxes
                 label_Address.Visible = false;
                 textBox_Address.Visible = false;
@@ -1071,6 +1199,7 @@ namespace Custom_QBSI.Clients.NHC
                 label_TIN.Visible = false;
                 textBox_TIN.Visible = false;
                 panel_POTIN.Visible = false;
+                
 
                 button_SaveDetails.Visible = false;
 
@@ -1085,6 +1214,9 @@ namespace Custom_QBSI.Clients.NHC
                 radioButton_VATInclusive.Visible = false;
                 radioButton_VATExclusive.Visible = false;
 
+                label_CustomerName.Visible = true;
+                textBox_CustomerName.Visible = true;
+
                 label_Address.Visible = true;
                 textBox_Address.Visible = true;
                 label_Terms.Visible = true;
@@ -1097,6 +1229,8 @@ namespace Custom_QBSI.Clients.NHC
                 textBox_TIN.Visible = true;
                 panel_POTIN.Visible = true;
                 button_PrintNewData.Visible = true;
+                
+
 
                 button_SaveDetails.Visible = true;
 
@@ -1116,6 +1250,7 @@ namespace Custom_QBSI.Clients.NHC
                 textBox_StoreCode.Text = GetSafe(data, 2);
                 textBox_PONumber.Text = GetSafe(data, 3);
                 textBox_TIN.Text = GetSafe(data, 4);
+                textBox_CustomerName.Text = GetSafe(data, 5);
             }
             else
             {
@@ -1124,6 +1259,8 @@ namespace Custom_QBSI.Clients.NHC
                 radioButton_VATInclusive.Visible = false;
                 radioButton_VATExclusive.Visible = false;
 
+                label_CustomerName.Visible = false;
+                textBox_CustomerName.Visible = false;
                 label_Address.Visible = false;
                 textBox_Address.Visible = false;
                 label_Terms.Visible = false;
@@ -1134,7 +1271,9 @@ namespace Custom_QBSI.Clients.NHC
                 textBox_PONumber.Visible = false;
                 label_TIN.Visible = false;
                 textBox_TIN.Visible = false;
+                
                 panel_POTIN.Visible = false;
+                
 
                 button_SaveDetails.Visible = false;
 

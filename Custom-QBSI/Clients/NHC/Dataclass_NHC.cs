@@ -57,5 +57,17 @@ namespace Custom_QBSI.Clients.NHC
             public decimal SalesTaxTotal { get; set; }
 
         }
+
+        public class HistoryDRDetails
+        {
+            public string Address { get; set; }
+            public string Terms { get; set; }
+            public string StoreCode { get; set; }
+            public string PONumber { get; set; }
+            public string TIN { get; set; }
+            public string BusinessStyle { get; set; }
+            public string Note { get; set; }
+            public string Cname { get; set; }
+        }
     }
 }

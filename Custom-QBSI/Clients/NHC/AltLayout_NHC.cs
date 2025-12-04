@@ -500,7 +500,7 @@ namespace Custom_QBSI.Clients.NHC
 
         }
 
-        public void Layout_DeliveryReceipt(PrintPageEventArgs e,List<TransferInventoryData> transfers,string note,string businessStyle,string pwdSignature,string address,string terms,string storeCode,string poNumber,string tin,bool isEnableExpDateChecked,bool allowPriceEditing,string signatoryName,DataGridView dataGridView = null)
+        public void Layout_DeliveryReceipt(PrintPageEventArgs e,List<TransferInventoryData> transfers,string note,string businessStyle,string pwdSignature,string address,string terms,string storeCode,string poNumber,string tin,bool isEnableExpDateChecked,bool allowPriceEditing, string customerName,string signatoryName,DataGridView dataGridView = null)
         {
             /*Image image = Properties.Resources.NATURE_DR;
             e.Graphics.DrawImage(image, e.PageBounds);*/
@@ -532,8 +532,21 @@ namespace Custom_QBSI.Clients.NHC
                 }.Where(s => !string.IsNullOrEmpty(s)));
             }
 
+            // 🟢 FIXED LOGIC: 
+            string invoiceSoldTo = "";
 
-            string invoiceSoldTo = transfers[0].Lines.FirstOrDefault()?.SiteDescription ?? "";
+            // Check if the User provided a specific name in the TextBox
+            if (!string.IsNullOrWhiteSpace(customerName))
+            {
+                // Priority 1: Use the manual entry
+                invoiceSoldTo = customerName;
+            }
+            else
+            {
+                // Priority 2: Fallback to QuickBooks data (SiteDescription)
+                invoiceSoldTo = transfers[0].Lines.FirstOrDefault()?.SiteDescription ?? "";
+            }
+
 
 
             e.Graphics.DrawString(invoiceSoldTo, font_Data, Brushes.Black, rectSoldTo);

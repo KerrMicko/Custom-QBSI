@@ -15,14 +15,14 @@
     {
         "Entry"
         {
-        "MsmKey" = "8:_0C7E1ACD80554DBC8F26CFE0DCCB1733"
-        "OwnerKey" = "8:_UNDEFINED"
+        "MsmKey" = "8:_1315A280485AE3CAA2409165B07D3E85"
+        "OwnerKey" = "8:_F87C06E3AA524994924BF6BE107E8E85"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_1315A280485AE3CAA2409165B07D3E85"
-        "OwnerKey" = "8:_F87C06E3AA524994924BF6BE107E8E85"
+        "MsmKey" = "8:_A0A2F4E4B9544822A58836B65A016690"
+        "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -144,26 +144,6 @@
         }
         "File"
         {
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_0C7E1ACD80554DBC8F26CFE0DCCB1733"
-            {
-            "SourcePath" = "8:..\\Custom-QBSI\\bin\\x64\\Release\\CustomQBSIDatabase.accdb"
-            "TargetName" = "8:CustomQBSIDatabase.accdb"
-            "Tag" = "8:"
-            "Folder" = "8:_12FF615587324FEC93CE6F4D94F5F2CB"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_1315A280485AE3CAA2409165B07D3E85"
             {
             "AssemblyRegister" = "3:1"
@@ -193,6 +173,26 @@
             "Register" = "3:1"
             "Exclude" = "11:FALSE"
             "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_A0A2F4E4B9544822A58836B65A016690"
+            {
+            "SourcePath" = "8:..\\Custom-QBSI\\bin\\x64\\Release\\CustomQBSIDatabase.accdb"
+            "TargetName" = "8:CustomQBSIDatabase.accdb"
+            "Tag" = "8:"
+            "Folder" = "8:_12FF615587324FEC93CE6F4D94F5F2CB"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_EBF3BEF6A13A4924B464091172C068A3"
@@ -272,7 +272,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:QUICKBOOKS PROGRAM"
         "ProductCode" = "8:{C5E77C6D-5642-4FE4-99AA-4EE204CC17D0}"
-        "PackageCode" = "8:{CFF8D88F-471F-4269-9FDD-0090D8088589}"
+        "PackageCode" = "8:{885D38A6-0C85-4141-AC15-0288711D2E8F}"
         "UpgradeCode" = "8:{97A6F377-A2BE-467E-8046-ED0307F20637}"
         "AspNetVersion" = "8:2.0.50727.0"
         "RestartWWWService" = "11:FALSE"

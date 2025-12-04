@@ -183,7 +183,7 @@ namespace Custom_QBSI.Clients.NHC
             }
         }
 
-        public void UpdateSignatory_DR(string address, string terms, string storeCode, string po, string tin)
+        /*public void UpdateSignatory_DR(string address, string terms, string storeCode, string po, string tin)
         {
             string accessConnectionString = AccessDatabase.GetAccessConnectionString();
 
@@ -221,7 +221,132 @@ namespace Custom_QBSI.Clients.NHC
             {
                 MessageBox.Show($"Error saving name to database: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }*/
+
+        public void SaveOrUpdateHistoryDR(string refNumber, string address, string terms, string storeCode, string poNumber, string tin, string businessStyle, string note, string customerName)
+        {
+            string connString = AccessDatabase.GetAccessConnectionString();
+
+            using (OleDbConnection conn = new OleDbConnection(connString))
+            {
+                conn.Open();
+
+                object CheckNull(string value)
+                {
+                    if (string.IsNullOrWhiteSpace(value)) return DBNull.Value;
+                    return value;
+                }
+
+                string checkQuery = "SELECT COUNT(*) FROM HistoryDRDetails WHERE [RefNumber] = ?";
+                using (OleDbCommand checkCmd = new OleDbCommand(checkQuery, conn))
+                {
+                    checkCmd.Parameters.AddWithValue("@RefNumber", refNumber);
+                    int count = (int)checkCmd.ExecuteScalar();
+
+                    if (count > 0)
+                    {
+                        // UPDATE Query - Added [CustomerName]
+                        string updateQuery = @"UPDATE HistoryDRDetails 
+                                       SET [Address] = ?, 
+                                           [Terms] = ?, 
+                                           [StoreCode] = ?, 
+                                           [PONumber] = ?, 
+                                           [TIN] = ?, 
+                                           [BusinessStyle] = ?, 
+                                           [Note] = ?,
+                                           [CustomerName] = ?
+                                       WHERE [RefNumber] = ?";
+
+                        using (OleDbCommand updateCmd = new OleDbCommand(updateQuery, conn))
+                        {
+                            updateCmd.Parameters.AddWithValue("@Address", CheckNull(address));
+                            updateCmd.Parameters.AddWithValue("@Terms", CheckNull(terms));
+                            updateCmd.Parameters.AddWithValue("@StoreCode", CheckNull(storeCode));
+                            updateCmd.Parameters.AddWithValue("@PONumber", CheckNull(poNumber));
+                            updateCmd.Parameters.AddWithValue("@TIN", CheckNull(tin));
+                            updateCmd.Parameters.AddWithValue("@BusinessStyle", CheckNull(businessStyle));
+                            updateCmd.Parameters.AddWithValue("@Note", CheckNull(note));
+
+                            // New Parameter
+                            updateCmd.Parameters.AddWithValue("@CustomerName", CheckNull(customerName));
+
+                            // WHERE clause
+                            updateCmd.Parameters.AddWithValue("@RefNumber", refNumber);
+
+                            updateCmd.ExecuteNonQuery();
+                        }
+                    }
+                    else
+                    {
+                        // INSERT Query - Added [CustomerName]
+                        string insertQuery = @"INSERT INTO HistoryDRDetails 
+                                      ([RefNumber], [Address], [Terms], [StoreCode], [PONumber], [TIN], [BusinessStyle], [Note], [CustomerName]) 
+                                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+                        using (OleDbCommand insertCmd = new OleDbCommand(insertQuery, conn))
+                        {
+                            insertCmd.Parameters.AddWithValue("@RefNumber", refNumber);
+                            insertCmd.Parameters.AddWithValue("@Address", CheckNull(address));
+                            insertCmd.Parameters.AddWithValue("@Terms", CheckNull(terms));
+                            insertCmd.Parameters.AddWithValue("@StoreCode", CheckNull(storeCode));
+                            insertCmd.Parameters.AddWithValue("@PONumber", CheckNull(poNumber));
+                            insertCmd.Parameters.AddWithValue("@TIN", CheckNull(tin));
+                            insertCmd.Parameters.AddWithValue("@BusinessStyle", CheckNull(businessStyle));
+                            insertCmd.Parameters.AddWithValue("@Note", CheckNull(note));
+
+                            // New Parameter
+                            insertCmd.Parameters.AddWithValue("@CustomerName", CheckNull(customerName));
+
+                            insertCmd.ExecuteNonQuery();
+                        }
+                    }
+                }
+            }
         }
+
+        public HistoryDRDetails GetHistoryDRDetails(string refNumber)
+        {
+            string connectionString = AccessDatabase.GetAccessConnectionString();
+
+            if (string.IsNullOrWhiteSpace(refNumber))
+                return null;
+
+            HistoryDRDetails details = null;
+
+            using (OleDbConnection conn = new OleDbConnection(connectionString))
+            {
+                conn.Open();
+                string query = @"SELECT Address, Terms, StoreCode, PONumber, TIN, BusinessStyle, Note, CustomerName 
+                             FROM HistoryDRDetails
+                             WHERE RefNumber = @RefNumber";
+
+                using (OleDbCommand cmd = new OleDbCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@RefNumber", refNumber);
+
+                    using (OleDbDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            details = new HistoryDRDetails
+                            {
+                                Address = reader["Address"]?.ToString(),
+                                Terms = reader["Terms"]?.ToString(),
+                                StoreCode = reader["StoreCode"]?.ToString(),
+                                PONumber = reader["PONumber"]?.ToString(),
+                                TIN = reader["TIN"]?.ToString(),
+                                BusinessStyle = reader["BusinessStyle"]?.ToString(),
+                                Note = reader["Note"]?.ToString(),
+                                Cname = reader["CustomerName"]?.ToString()
+                            };
+                        }
+                    }
+                }
+            }
+
+            return details;
+        }
+
 
         public string[] RetrieveSignatory_DR()
         {
