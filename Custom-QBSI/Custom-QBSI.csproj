@@ -67,6 +67,11 @@
     <Compile Include="Clients\IVP\DataClass_IVP.cs" />
     <Compile Include="Clients\IVP\Layout_IVP.cs" />
     <Compile Include="Clients\IVP\Queries_IVP.cs" />
+    <Compile Include="Clients\MET\Dashboard_MET.cs" />
+    <Compile Include="Clients\MET\Dataclass_MET.cs" />
+    <Compile Include="Clients\MET\Layout_MET.cs" />
+    <Compile Include="Clients\MET\QBDataSync_MET.cs" />
+    <Compile Include="Clients\MET\Queries_MET.cs" />
     <Compile Include="Clients\NHC\AltDataClass_NHC.cs" />
     <Compile Include="Clients\NHC\AltLayout_NHC.cs" />
     <Compile Include="Clients\NHC\AltQBDataSync_NHC.cs" />
@@ -149,6 +154,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\viber_image_2025-10-30_15-47-03-208.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\MET Invoice.jpg" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

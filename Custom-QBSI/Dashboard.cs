@@ -1,6 +1,7 @@
 ﻿using Custom_QBSI.Clients.Enclosure;
 using Custom_QBSI.Clients.FP;
 using Custom_QBSI.Clients.IVP;
+using Custom_QBSI.Clients.MET;
 using Custom_QBSI.Clients.NHC;
 using Custom_QBSI.Clients.PBS;
 using System;
@@ -24,10 +25,11 @@ namespace Custom_QBSI
          * NHC
          * PBS
          * IVP
+         * MET
          */
 
 
-        public static string client = "NHC";
+        public static string client = "MET";
         public static bool isPrinting = false;
     }
     public partial class Dashboard : Form
@@ -78,6 +80,17 @@ namespace Custom_QBSI
                 Panel panel_Main = dashboard_NHC.MainPanel();
                 Panel panel_Sidebar = dashboard_NHC.SidebarPanel();
                 Panel panel_Title = dashboard_NHC.TitlePanel();
+
+                panel.Controls.Add(panel_Sidebar);
+                panel.Controls.Add(panel_Title);
+                panel.Controls.Add(panel_Main);
+            }
+            else if (GlobalVariables.client == "MET")
+            {
+                Dashboard_MET dashboard_MET = new Dashboard_MET();
+                Panel panel_Main = dashboard_MET.MainPanel();
+                Panel panel_Sidebar = dashboard_MET.SidebarPanel();
+                Panel panel_Title = dashboard_MET.TitlePanel();
 
                 panel.Controls.Add(panel_Sidebar);
                 panel.Controls.Add(panel_Title);
