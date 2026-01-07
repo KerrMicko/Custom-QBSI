@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static Custom_QBSI.Clients.MET.Dataclass_MET;
 
 namespace Custom_QBSI.Clients.MET
 {
@@ -645,7 +646,7 @@ namespace Custom_QBSI.Clients.MET
                     // 6️⃣ Run QuickBooks query asynchronously
                     var result = await Task.Run(() =>
                     {
-                        List<Custom_QBSI.Clients.MET.Dataclass_MET.InvoiceData> invoice = null;
+                        List<Custom_QBSI.Clients.MET.AltDataclass.InvoiceData> invoice = null;
 
                         if (selectedFormIndex == 1)
                             invoice = QBDataSync_MET.GetInvoiceByRefNumber(refNumber);

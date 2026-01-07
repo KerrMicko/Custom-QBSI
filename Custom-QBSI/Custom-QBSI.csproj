@@ -67,6 +67,7 @@
     <Compile Include="Clients\IVP\DataClass_IVP.cs" />
     <Compile Include="Clients\IVP\Layout_IVP.cs" />
     <Compile Include="Clients\IVP\Queries_IVP.cs" />
+    <Compile Include="Clients\MET\AltDataclass.cs" />
     <Compile Include="Clients\MET\Dashboard_MET.cs" />
     <Compile Include="Clients\MET\Dataclass_MET.cs" />
     <Compile Include="Clients\MET\Layout_MET.cs" />
