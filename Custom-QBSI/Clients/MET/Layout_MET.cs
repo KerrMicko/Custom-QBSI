@@ -509,6 +509,15 @@ namespace Custom_QBSI.Clients.MET
                 e.Graphics.DrawString(totalAmountDue.ToString("N2"), font_EightBold, Brushes.Black, rectR7TotalAmountDue, sfAlignCenterRight);
 
 
+            // Signatory
+            string Signatory = signatoryName;
+
+            Rectangle rectAuthorized = new Rectangle(340, 740 + 40, 230, 18);
+
+            //e.Graphics.DrawRectangle(Pens.Black, rectAuthorized);
+
+            e.Graphics.DrawString(Signatory, font_Data, Brushes.Black, rectAuthorized, sfAlignCenter);
+
 
         }
 
