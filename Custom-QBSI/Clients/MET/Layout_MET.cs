@@ -292,12 +292,21 @@ namespace Custom_QBSI.Clients.MET
 
                 decimal totalAmountDueEWT = totalVATableAmount2;
 
-                decimal vatExemptSalesTotal2 = totalAmountDueEWT + ewtAmount;
+                if (isLessEWTChecked)
+                {
+                    decimal vatExemptSalesTotal2 = totalAmountDueEWT + ewtAmount;
 
+                    if (amountNetVat > 0)
+                        e.Graphics.DrawString(vatExemptSalesTotal2.ToString("N2"), font_Data, Brushes.Black, rectVATExemptSales, sfAlignCenterRight);
+                }
+                else
+                {
+                    decimal vatExemptSalesTotal2 = totalAmountDueEWT;
 
-
-                if (amountNetVat > 0)
-                    e.Graphics.DrawString(vatExemptSalesTotal2.ToString("N2"), font_Data, Brushes.Black, rectVATExemptSales, sfAlignCenterRight);
+                    if (amountNetVat > 0)
+                        e.Graphics.DrawString(vatExemptSalesTotal2.ToString("N2"), font_Data, Brushes.Black, rectVATExemptSales, sfAlignCenterRight);
+                }
+                
             }
 
 
