@@ -430,7 +430,7 @@ namespace Custom_QBSI.Clients.MET
             else if (vatType == "Exclusive")
             {
 
-                decimal ewtAmount = amountNetVat * 0.01m;
+                decimal ewtAmount = totalVATableAmount2 * 0.01m;
                 if (isLessEWTChecked)
                     totalVATableAmount2 -= ewtAmount;
 
@@ -525,12 +525,12 @@ namespace Custom_QBSI.Clients.MET
                 decimal ewtAmount = 0;
                 if (isLessEWTChecked)
                 {
-                    ewtAmount = amountNetVat2 * 0.01m;
+                    ewtAmount = totalSales * 0.01m;
                     e.Graphics.DrawString(ewtAmount.ToString("N2"), font_Data, Brushes.Black, rectR6LessWithholdingTax, sfAlignCenterRight);
                 }
 
                 // -------------------- R7 Total Amount Due --------------------
-                decimal totalAmountDue = totalSales2;
+                decimal totalAmountDue = totalSales;
                 if (isLessEWTChecked)
                     totalAmountDue -= ewtAmount;
 
