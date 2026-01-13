@@ -37,8 +37,8 @@ namespace Custom_QBSI.Clients.MET
         public void Layout_SalesInvoice(PrintPageEventArgs e, List<InvoiceData> invoiceData, string note, string vatType, string businessStyle, string signatoryName, bool isEnableExpDateChecked, bool isLessEWTChecked)
         {
 
-            Image image = Properties.Resources.MET_Invoice;
-            e.Graphics.DrawImage(image, e.PageBounds);
+            /*Image image = Properties.Resources.MET_Invoice;
+            e.Graphics.DrawImage(image, e.PageBounds);*/
 
             Font font_Data = font_Eight;
 
