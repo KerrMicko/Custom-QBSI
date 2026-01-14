@@ -159,5 +159,8 @@
   <ItemGroup>
     <None Include="Resources\MET Invoice.jpg" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\viber_image_2026-01-14_13-36-47-109.jpg" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

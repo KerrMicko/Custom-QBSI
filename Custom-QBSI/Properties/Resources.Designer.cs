@@ -139,5 +139,15 @@ namespace Custom_QBSI.Properties {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap viber_image_2026_01_14_13_36_47_109 {
+            get {
+                object obj = ResourceManager.GetObject("viber_image_2026-01-14_13-36-47-109", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
     }
 }

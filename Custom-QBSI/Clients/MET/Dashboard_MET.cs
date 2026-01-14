@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using static Custom_QBSI.Clients.MET.Dataclass_MET;
+using Custom_QBSI.Clients.NHC;
 
 namespace Custom_QBSI.Clients.MET
 {
@@ -279,7 +280,7 @@ namespace Custom_QBSI.Clients.MET
                 Text = "Enable Amount | Item Code | Exp. Date",
                 Width = componentWidth,
                 Font = font_Label,
-                Checked = true,
+                Checked = false,
                 Visible = true,
             };
 
@@ -513,6 +514,7 @@ namespace Custom_QBSI.Clients.MET
             {
                 "",
                 "Sales Invoice",
+                "Delivery Receipt",
             });
             comboBox_Forms.SelectedIndex = 1;
             comboBox_Forms.SelectedIndexChanged += ComboBox_Forms_SelectedIndexChanged;
@@ -648,10 +650,11 @@ namespace Custom_QBSI.Clients.MET
                     {
                         List<Custom_QBSI.Clients.MET.AltDataclass.InvoiceData> invoice = null;
 
-                        if (selectedFormIndex == 1)
+                        // Use >= 1 or specifically check for 1 and 2
+                        if (selectedFormIndex == 1 || selectedFormIndex == 2)
                             invoice = QBDataSync_MET.GetInvoiceByRefNumber(refNumber);
 
-                        return new { Invoice = invoice, };
+                        return new { Invoice = invoice };
                     });
 
                     // Stop progress
@@ -660,11 +663,16 @@ namespace Custom_QBSI.Clients.MET
                     await Task.Delay(200);
                     progressForm.Close();
 
-                    // Check if data is found
-                    if (selectedFormIndex == 1 && (result.Invoice == null || result.Invoice.Count == 0))
+                    // 6.1️⃣ Validate that the result contains data for the selected form
+                    if (result.Invoice == null || result.Invoice.Count == 0)
                     {
-                        MessageBox.Show("No invoice found for the given reference number.", "Notice", MessageBoxButtons.OK);
-                        LogMessage($"No invoice found for RefNumber: {refNumber}");
+                        string formName = selectedFormIndex == 1 ? "Sales Invoice" : "Delivery Receipt";
+                        MessageBox.Show($"No data found for the {formName} with Ref Number: {refNumber}", "Data Not Found", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        LogMessage($"Search failed: No data returned for {formName} ({refNumber})");
+
+                        // Reset the UI so the user doesn't see old preview data
+                        printPreviewControl.Visible = false;
+                        panel_Printing.Visible = false;
                         return;
                     }
 
@@ -704,6 +712,26 @@ namespace Custom_QBSI.Clients.MET
                                 currentSignatoryName,
                                 isEnableExpDateChecked,
                                 isLessEWTChecked
+                            );
+                        }
+                        else if (selectedFormIndex == 2)
+                        {
+                            Layout_MET.Layout_DeliveryReceipt(
+                            ev,
+                            result.Invoice,
+                            currentNote,
+                            currentBusinessStyle,
+                            currentPwdSignature,
+                            currentAddress,
+                            currentTerms,
+                            currentStoreCode,
+                            currentPoNumber,
+                            currentTin,
+                            isEnableExpDateChecked,
+                            allowPriceEditing,
+                            currentCustomerName,
+                            currentSignatoryName,
+                            dataGridView_Lines
                             );
                         }
                     };
@@ -879,61 +907,13 @@ namespace Custom_QBSI.Clients.MET
 
         private void ComboBox_Forms_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (comboBox_Forms.SelectedIndex == 1)
-            {
-                checkBox_EnableExpDate.Visible = true;
-                checkBox_LessEWT.Visible = true;
+            bool isSalesInvoice = comboBox_Forms.SelectedIndex == 1;
+            bool isDeliveryReceipt = comboBox_Forms.SelectedIndex == 2;
 
-                radioButton_VATInclusive.Visible = true;
-                radioButton_VATExclusive.Visible = true;
-
-                label_CustomerName.Visible = false;
-                textBox_CustomerName.Visible = false;
-
-                // Hide all textboxes
-                label_Address.Visible = false;
-                textBox_Address.Visible = false;
-                label_Terms.Visible = false;
-                textBox_Terms.Visible = false;
-                label_StoreCode.Visible = false;
-                textBox_StoreCode.Visible = false;
-                label_PONumber.Visible = false;
-                textBox_PONumber.Visible = false;
-                label_TIN.Visible = false;
-                textBox_TIN.Visible = false;
-                panel_POTIN.Visible = false;
-
-
-                // Hide DataGridView
-                dataGridView_Lines.Visible = false;
-            }
-            else
-            {
-                checkBox_EnableExpDate.Visible = false;
-                checkBox_LessEWT.Visible = false;
-                radioButton_VATInclusive.Visible = false;
-                radioButton_VATExclusive.Visible = false;
-
-                label_CustomerName.Visible = false;
-                textBox_CustomerName.Visible = false;
-                label_Address.Visible = false;
-                textBox_Address.Visible = false;
-                label_Terms.Visible = false;
-                textBox_Terms.Visible = false;
-                label_StoreCode.Visible = false;
-                textBox_StoreCode.Visible = false;
-                label_PONumber.Visible = false;
-                textBox_PONumber.Visible = false;
-                label_TIN.Visible = false;
-                textBox_TIN.Visible = false;
-
-                panel_POTIN.Visible = false;
-
-
-
-                // Hide DataGridView
-                dataGridView_Lines.Visible = false;
-            }
+            // Sales Invoice specific
+            checkBox_LessEWT.Visible = isSalesInvoice;
+            radioButton_VATInclusive.Visible = isSalesInvoice;
+            radioButton_VATExclusive.Visible = isSalesInvoice;
         }
     }
 }

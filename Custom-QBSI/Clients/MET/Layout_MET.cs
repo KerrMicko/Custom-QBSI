@@ -190,7 +190,7 @@ namespace Custom_QBSI.Clients.MET
                             int rowHeight2 = Math.Max((int)Math.Ceiling(descSize2.Height), tab1DataHeight);
 
                             e.Graphics.DrawString(desc, font_Data, Brushes.Black, new Rectangle(rectItemDescription.X + 45, rectItemDescription.Y - 30 + itemHeight, rectItemDescription.Width, rowHeight2), sfAlignLeftCenter);
-                            e.Graphics.DrawString(item.Quantity.ToString("N2"), font_Data, Brushes.Black, new Rectangle(rectItemQuantity.X + 45, rectItemQuantity.Y - 30 + itemHeight, rectItemQuantity.Width, rowHeight2), sfAlignCenter);
+                            e.Graphics.DrawString(item.Quantity.ToString(""), font_Data, Brushes.Black, new Rectangle(rectItemQuantity.X + 45, rectItemQuantity.Y - 30 + itemHeight, rectItemQuantity.Width, rowHeight2), sfAlignCenter);
                             e.Graphics.DrawString(unitRateToDraw.ToString("N2"), font_Data, Brushes.Black, new Rectangle(rectItemUnitPrice.X + 45, rectItemUnitPrice.Y - 30 + itemHeight, rectItemUnitPrice.Width, rowHeight2), sfAlignCenterRight);
                             e.Graphics.DrawString(combinedAmount.ToString("N2"), font_Data, Brushes.Black, new Rectangle(rectItemAmount.X + 45, rectItemAmount.Y - 30 + itemHeight, rectItemAmount.Width, rowHeight2), sfAlignCenterRight);
 
@@ -202,7 +202,7 @@ namespace Custom_QBSI.Clients.MET
 
                         // ---------- Case 4: Regular ----------
                         e.Graphics.DrawString(descText, font_Data, Brushes.Black, new Rectangle(rectItemDescription.X + 45, rectItemDescription.Y - 30 + itemHeight, rectItemDescription.Width, rowHeight), sfAlignLeftCenter);
-                        e.Graphics.DrawString(item.Quantity.ToString("N2"), font_Data, Brushes.Black, new Rectangle(rectItemQuantity.X + 45, rectItemQuantity.Y - 30 + itemHeight, rectItemQuantity.Width, rowHeight), sfAlignCenter);
+                        e.Graphics.DrawString(item.Quantity.ToString(""), font_Data, Brushes.Black, new Rectangle(rectItemQuantity.X + 45, rectItemQuantity.Y - 30 + itemHeight, rectItemQuantity.Width, rowHeight), sfAlignCenter);
                         e.Graphics.DrawString(unitRateToDraw.ToString("N2"), font_Data, Brushes.Black, new Rectangle(rectItemUnitPrice.X + 45, rectItemUnitPrice.Y - 30 + itemHeight, rectItemUnitPrice.Width, rowHeight), sfAlignCenterRight);
                         e.Graphics.DrawString(adjustedAmount.ToString("N2"), font_Data, Brushes.Black, new Rectangle(rectItemAmount.X + 45 , rectItemAmount.Y - 30 + itemHeight, rectItemAmount.Width, rowHeight), sfAlignCenterRight);
 
@@ -416,6 +416,226 @@ namespace Custom_QBSI.Clients.MET
 
             e.Graphics.DrawString(Signatory, font_Data, Brushes.Black, rectAuthorized, sfAlignCenter);
 
+
+        }
+
+        public void Layout_DeliveryReceipt(PrintPageEventArgs e,List<InvoiceData> invoiceData, string note,string businessStyle,string pwdSignature,string address,string terms,string storeCode,string poNumber,string tin,bool isEnableExpDateChecked,bool allowPriceEditing, string customerName,string signatoryName,DataGridView dataGridView = null)
+        {
+            /*Image image = Properties.Resources.viber_image_2026_01_14_13_36_47_109;
+            e.Graphics.DrawImage(image, e.PageBounds);*/
+
+            Font font_Data = font_Eight;
+
+            Rectangle rectDate = new Rectangle(470, 135 + 25, 120, 25);
+            Rectangle rectSoldTo = new Rectangle(150, 135 + 25, 285, 20);
+            Rectangle rectBusinessStyle = new Rectangle(150, 138 + 25, 205, 20);
+            Rectangle rectTIN = new Rectangle(125, 155 + 25, 285, 20);
+            Rectangle rectBusinessAdd = new Rectangle(130, 175 + 25, 500, 25);
+
+            string date = invoiceData[0].DueDate?.ToString("MM/dd/yyyy") ?? "";
+            string invoiceTin = "";
+
+            foreach (var inv in invoiceData)
+            {
+                invoiceTin = inv.GetCustomField("TIN");
+            }
+
+            string invoiceBusinessStyle = businessStyle;
+            string invoiceBusinessAdd = invoiceData[0].ShipAddress1.ToString() + invoiceData[0].ShipAddress2.ToString() + invoiceData[0].ShipAddress3.ToString() + invoiceData[0].ShipAddress4.ToString() + invoiceData[0].ShipAddress5.ToString();
+            string invoiceSoldTo = invoiceData[0].CustomerName;
+            if (invoiceSoldTo.Contains(":"))
+            {
+                invoiceSoldTo = invoiceSoldTo.Split(':')[0].Trim();
+            }
+
+
+            e.Graphics.DrawString(invoiceSoldTo, font_Data, Brushes.Black, rectSoldTo);
+            e.Graphics.DrawString(date, font_Data, Brushes.Black, rectDate, sfAlignCenter);
+            e.Graphics.DrawString(invoiceTin, font_Data, Brushes.Black, rectTIN);
+            e.Graphics.DrawString(invoiceBusinessStyle, font_Data, Brushes.Black, rectBusinessStyle);
+            e.Graphics.DrawString(invoiceBusinessAdd, font_Data, Brushes.Black, rectBusinessAdd);
+
+            Rectangle rectPoNo = new Rectangle(125, 205 + 25, 285, 15);
+            Rectangle rectStoreCode = new Rectangle(125, 220, 285, 15);
+            Rectangle rectTerms = new Rectangle(500, 155 + 25, 285, 15);
+
+            /*e.Graphics.DrawRectangle(Pens.Red, rectPoNo);
+            e.Graphics.DrawRectangle(Pens.Yellow, rectStoreCode);
+            e.Graphics.DrawRectangle(Pens.Pink, rectTerms);*/
+
+            string invoiceTerms = invoiceData[0].Terms.ToString();
+            string invoicePoNo = invoiceData[0].PONumber.ToString();
+
+            e.Graphics.DrawString(invoicePoNo, font_Data, Brushes.Black, rectPoNo);
+            e.Graphics.DrawString(invoiceTerms, font_Data, Brushes.Black, rectTerms);
+
+            // TABLE MIDDLE CALCULATION
+            int tabXStart = 50;
+            int tabYStart = 285;
+
+            int tabDataHeight = 23;
+
+            int widthItemNo = 67;
+            int widthItemQuantity = 75;
+            int widthItemUnit = 45;
+            int widthItemDescription = 520;
+
+            int xStartItemQuantity = tabXStart;
+            int xStartItemUnit = tabXStart + widthItemQuantity;
+            int xStartItemDescription = tabXStart + widthItemNo + widthItemQuantity + widthItemUnit - 67;
+            int xStartItemAmount = tabXStart + widthItemNo + widthItemQuantity + widthItemUnit - 67;
+
+            Rectangle rectItemQuantity = new Rectangle(xStartItemQuantity, tabYStart, widthItemQuantity, tabDataHeight);
+            Rectangle rectItemUnit = new Rectangle(xStartItemUnit, tabYStart, widthItemUnit, tabDataHeight);
+            Rectangle rectItemDescription = new Rectangle(xStartItemDescription, tabYStart, widthItemDescription, tabDataHeight);
+            Rectangle rectItemAmount = new Rectangle(xStartItemAmount, tabYStart, widthItemDescription, tabDataHeight);
+
+            int itemHeight = 0;
+
+            foreach (var invoice in invoiceData)
+            {
+                int lineIndex = 0;
+                decimal totalAmount = 0m; // Sum of all REAL transfer amounts
+
+                foreach (var lineItem in invoice.Lines)
+                {
+                    string expDateEdited = null;
+                    string priceEdited = null;
+
+                    // 🔹 Read user edits from DataGridView (if available)
+                    if (dataGridView != null && dataGridView.Visible && lineIndex < dataGridView.Rows.Count)
+                    {
+                        var row = dataGridView.Rows[lineIndex];
+                        if (!row.IsNewRow)
+                        {
+                            expDateEdited = row.Cells["ExpirationDate"]?.Value?.ToString();
+                            priceEdited = row.Cells["Price"]?.Value?.ToString();
+                        }
+                    }
+
+                    // 🔹 Build item description including EXP date
+                    string description = lineItem.Description ?? "";
+                    string finalDescription = description;
+
+                    if (isEnableExpDateChecked && !string.IsNullOrWhiteSpace(expDateEdited))
+                        finalDescription += $" (EXP: {expDateEdited})";
+                    else if (isEnableExpDateChecked && !string.IsNullOrWhiteSpace(lineItem.ExpirationDate))
+                        finalDescription += $" (EXP: {lineItem.ExpirationDate})";
+
+                    SizeF descSize = e.Graphics.MeasureString(finalDescription, font_Data, widthItemDescription);
+                    int rowHeight = Math.Max(tabDataHeight, (int)Math.Ceiling(descSize.Height));
+
+                    // 🔹 Draw Quantity
+                    e.Graphics.DrawString(lineItem.Quantity.ToString(), font_Data, Brushes.Black,
+                        new Rectangle(xStartItemQuantity + 20, tabYStart - 20 + itemHeight, widthItemQuantity, rowHeight), sfAlignCenter);
+
+                    // 🔹 Draw Unit
+                    e.Graphics.DrawString(lineItem.UnitOfMeasure, font_Data, Brushes.Black,
+                        new Rectangle(xStartItemUnit + 20, tabYStart - 20 + itemHeight, widthItemUnit, rowHeight), sfAlignCenter);
+
+                    // 🔹 Draw Description (with EXP)
+                    e.Graphics.DrawString(finalDescription, font_Data, Brushes.Black,
+                        new Rectangle(xStartItemDescription + 20, tabYStart - 20 + itemHeight, widthItemDescription, rowHeight), sfAlignLeftCenter);
+
+                    // 🔹 Handle printing Amount column
+                    if (isEnableExpDateChecked)
+                    {
+                        // Default = correct transfer amount from QuickBooks:
+                        decimal itemAmount = (decimal)lineItem.Amount;
+
+                        // If editing is allowed and user typed a new price → override
+                        if (allowPriceEditing &&
+                            !string.IsNullOrWhiteSpace(priceEdited) &&
+                            decimal.TryParse(priceEdited, out decimal edited))
+                        {
+                            itemAmount = edited;
+                        }
+
+                        // Draw amount
+                        Rectangle amountRect = new Rectangle(
+                            xStartItemAmount + widthItemDescription - 40,
+                            tabYStart + itemHeight,
+                            100,
+                            rowHeight
+                        );
+
+                        e.Graphics.DrawString(itemAmount.ToString("N2"), font_Data, Brushes.Black, amountRect, sfAlignCenterRight);
+
+                        // Add to total
+                        totalAmount += itemAmount;
+                    }
+
+                    itemHeight += rowHeight;
+                    lineIndex++;
+                }
+
+                // 🔹 Print TOTAL
+                if (isEnableExpDateChecked)
+                {
+                    decimal printedTotal = totalAmount;
+
+                    // Check if user edited TOTAL row
+                    if (allowPriceEditing && dataGridView != null && dataGridView.Visible)
+                    {
+                        foreach (DataGridViewRow row in dataGridView.Rows)
+                        {
+                            if (!row.IsNewRow && row.Cells["Description"]?.Value?.ToString() == "TOTAL")
+                            {
+                                string editedTotalText = row.Cells["Price"]?.Value?.ToString();
+                                if (decimal.TryParse(editedTotalText, out decimal editedTotal))
+                                {
+                                    printedTotal = editedTotal;
+                                }
+                                break;
+                            }
+                        }
+                    }
+
+                    // Draw Total Line
+                    int totalRowHeight = 25;
+                    int totalY = tabYStart + itemHeight + 10;
+
+                    Rectangle totalLabel = new Rectangle(
+                        xStartItemAmount + widthItemDescription - 140,
+                        totalY,
+                        100,
+                        totalRowHeight
+                    );
+
+                    Rectangle totalValue = new Rectangle(
+                        xStartItemAmount + widthItemDescription - 40,
+                        totalY,
+                        100,
+                        totalRowHeight
+                    );
+
+                    e.Graphics.DrawString("TOTAL:", font_EightBold, Brushes.Black, totalLabel, sfAlignCenterRight);
+                    e.Graphics.DrawString(printedTotal.ToString("N2"), font_EightBold, Brushes.Black, totalValue, sfAlignCenterRight);
+
+                    itemHeight += totalRowHeight + 10;
+                }
+            }
+
+
+
+
+
+            // Draw Note
+            if (!string.IsNullOrEmpty(note))
+            {
+                Rectangle rectNote = new Rectangle(50, tabYStart + itemHeight, widthItemDescription, tabDataHeight);
+                e.Graphics.DrawString("Note: " + note, font_EightBold, Brushes.Black, rectNote, sfAlignLeftCenter);
+            }
+
+
+            // Signatory
+            string Signatory = signatoryName;
+
+            Rectangle rectAuthorized = new Rectangle(555, 915, 230, 18);
+
+            //e.Graphics.DrawRectangle(Pens.Black, rectAuthorized);
+
+            e.Graphics.DrawString(Signatory, font_Data, Brushes.Black, rectAuthorized, sfAlignCenter);
 
         }
 

@@ -412,18 +412,36 @@ namespace Custom_QBSI.Clients.MET
                         // --- Line Items ---
                         if (qbInvoice.ORInvoiceLineRetList != null)
                         {
+                            // Create a local cache to store ListID -> Abbreviation mappings for this invoice
+                            Dictionary<string, string> uomCache = new Dictionary<string, string>();
+
                             for (int j = 0; j < qbInvoice.ORInvoiceLineRetList.Count; j++)
                             {
                                 var orLine = qbInvoice.ORInvoiceLineRetList.GetAt(j);
                                 if (orLine?.InvoiceLineRet != null)
                                 {
                                     var line = orLine.InvoiceLineRet;
+
+                                    // Get the ListID of the Unit of Measure Set used on this line
+                                    string uomListID = line.OverrideUOMSetRef?.ListID?.GetValue();
+                                    string finalUOM = line.UnitOfMeasure?.GetValue() ?? string.Empty;
+
+                                    // If there is a UOM ListID, fetch the BaseUnitAbbreviation
+                                    if (!string.IsNullOrEmpty(uomListID))
+                                    {
+                                        if (!uomCache.ContainsKey(uomListID))
+                                        {
+                                            uomCache[uomListID] = GetUOMAbbreviation(sessionManager, uomListID);
+                                        }
+                                        finalUOM = uomCache[uomListID];
+                                    }
+
                                     var lineData = new InvoiceLineData
                                     {
                                         ItemName = line.ItemRef?.FullName?.GetValue() ?? string.Empty,
                                         Description = line.Desc?.GetValue() ?? string.Empty,
                                         Quantity = line.Quantity?.GetValue() ?? 0,
-                                        UnitOfMeasure = line.UnitOfMeasure?.GetValue() ?? string.Empty,
+                                        UnitOfMeasure = finalUOM, // This will now be "kg", "pc", etc.
                                         Rate = (decimal?)(line.ORRate?.Rate?.GetValue()) ?? 0m,
                                         Amount = (decimal?)(line.Amount?.GetValue()) ?? 0m,
                                         TotalAmount = (decimal?)(line.Amount?.GetValue()) ?? 0m,
@@ -462,6 +480,39 @@ namespace Custom_QBSI.Clients.MET
             }
 
             return invoices;
+        }
+
+        public static string GetUOMAbbreviation(QBSessionManager sessionManager, string uomListID)
+        {
+            if (string.IsNullOrEmpty(uomListID)) return string.Empty;
+
+            try
+            {
+                IMsgSetRequest requestMsgSet = sessionManager.CreateMsgSetRequest("US", 13, 0);
+                requestMsgSet.Attributes.OnError = ENRqOnError.roeStop;
+
+                // Query the UnitOfMeasureSet
+                IUnitOfMeasureSetQuery uomQuery = requestMsgSet.AppendUnitOfMeasureSetQueryRq();
+                uomQuery.ORListQuery.ListIDList.Add(uomListID);
+
+                IMsgSetResponse responseMsgSet = sessionManager.DoRequests(requestMsgSet);
+                IResponse response = responseMsgSet.ResponseList.GetAt(0);
+                IUnitOfMeasureSetRetList uomList = response.Detail as IUnitOfMeasureSetRetList;
+
+                if (uomList != null && uomList.Count > 0)
+                {
+                    IUnitOfMeasureSetRet uom = uomList.GetAt(0);
+                    // Access the Abbreviation from the BaseUnit aggregate
+                    return uom.BaseUnit?.Abbreviation?.GetValue() ?? string.Empty;
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log the error using your existing LogDataSync method
+                LogDataSync($"Error fetching UOM Abbreviation for {uomListID}: {ex.Message}");
+            }
+
+            return string.Empty;
         }
 
         private static Dictionary<string, string> GetCustomerCustomFields(QBSessionManager sessionManager, string customerListID)
