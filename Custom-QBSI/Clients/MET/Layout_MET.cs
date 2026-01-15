@@ -542,7 +542,7 @@ namespace Custom_QBSI.Clients.MET
 
                         // Draw amount
                         Rectangle amountRect = new Rectangle(
-                            xStartItemAmount - 50 + widthItemDescription - 40,
+                            xStartItemAmount - 100 + widthItemDescription - 40,
                             tabYStart - 20 + itemHeight,
                             100,
                             rowHeight
@@ -585,14 +585,14 @@ namespace Custom_QBSI.Clients.MET
                     int totalY = tabYStart + itemHeight + 10;
 
                     Rectangle totalLabel = new Rectangle(
-                        xStartItemAmount - 50 + widthItemDescription - 140,
+                        xStartItemAmount - 100 + widthItemDescription - 140,
                         totalY,
                         100,
                         totalRowHeight
                     );
 
                     Rectangle totalValue = new Rectangle(
-                        xStartItemAmount - 50 + widthItemDescription - 40,
+                        xStartItemAmount - 100 + widthItemDescription - 40,
                         totalY,
                         100,
                         totalRowHeight
