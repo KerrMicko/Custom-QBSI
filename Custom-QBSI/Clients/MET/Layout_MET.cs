@@ -416,11 +416,11 @@ namespace Custom_QBSI.Clients.MET
 
             Font font_Data = font_Eight;
 
-            Rectangle rectDate = new Rectangle(470, 135 + 25, 120, 25);
-            Rectangle rectSoldTo = new Rectangle(150, 135 + 25, 285, 20);
-            Rectangle rectBusinessStyle = new Rectangle(150, 138 + 25, 205, 20);
-            Rectangle rectTIN = new Rectangle(125, 155 + 25, 285, 20);
-            Rectangle rectBusinessAdd = new Rectangle(130, 175 + 25, 500, 25);
+            Rectangle rectDate = new Rectangle(470, 135 + 10, 120, 25);
+            Rectangle rectSoldTo = new Rectangle(150, 135 + 10, 285, 20);
+            Rectangle rectBusinessStyle = new Rectangle(150, 138 + 10, 205, 20);
+            Rectangle rectTIN = new Rectangle(125, 155 + 10, 285, 20);
+            Rectangle rectBusinessAdd = new Rectangle(130, 175 + 10, 500, 25);
 
             string date = invoiceData[0].DueDate?.ToString("MM/dd/yyyy") ?? "";
             string invoiceTin = "";
@@ -445,9 +445,8 @@ namespace Custom_QBSI.Clients.MET
             e.Graphics.DrawString(invoiceBusinessStyle, font_Data, Brushes.Black, rectBusinessStyle);
             e.Graphics.DrawString(invoiceBusinessAdd, font_Data, Brushes.Black, rectBusinessAdd);
 
-            Rectangle rectPoNo = new Rectangle(125, 205 + 25, 285, 15);
-            Rectangle rectStoreCode = new Rectangle(125, 220, 285, 15);
-            Rectangle rectTerms = new Rectangle(500, 155 + 25, 285, 15);
+            Rectangle rectPoNo = new Rectangle(125, 205 + 10, 285, 15);
+            Rectangle rectTerms = new Rectangle(500, 155 + 10, 285, 15);
 
             /*e.Graphics.DrawRectangle(Pens.Red, rectPoNo);
             e.Graphics.DrawRectangle(Pens.Yellow, rectStoreCode);
@@ -543,8 +542,8 @@ namespace Custom_QBSI.Clients.MET
 
                         // Draw amount
                         Rectangle amountRect = new Rectangle(
-                            xStartItemAmount + widthItemDescription - 40,
-                            tabYStart + itemHeight,
+                            xStartItemAmount - 50 + widthItemDescription - 40,
+                            tabYStart - 20 + itemHeight,
                             100,
                             rowHeight
                         );
@@ -586,14 +585,14 @@ namespace Custom_QBSI.Clients.MET
                     int totalY = tabYStart + itemHeight + 10;
 
                     Rectangle totalLabel = new Rectangle(
-                        xStartItemAmount + widthItemDescription - 140,
+                        xStartItemAmount - 50 + widthItemDescription - 140,
                         totalY,
                         100,
                         totalRowHeight
                     );
 
                     Rectangle totalValue = new Rectangle(
-                        xStartItemAmount + widthItemDescription - 40,
+                        xStartItemAmount - 50 + widthItemDescription - 40,
                         totalY,
                         100,
                         totalRowHeight
