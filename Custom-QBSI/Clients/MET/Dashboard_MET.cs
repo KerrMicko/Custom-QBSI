@@ -648,13 +648,22 @@ namespace Custom_QBSI.Clients.MET
                     // 6️⃣ Run QuickBooks query asynchronously
                     var result = await Task.Run(() =>
                     {
-                        List<Custom_QBSI.Clients.MET.AltDataclass.InvoiceData> invoice = null;
+                        List<Custom_QBSI.Clients.MET.AltDataclass.InvoiceData> data = null;
 
-                        // Use >= 1 or specifically check for 1 and 2
                         if (selectedFormIndex == 1 || selectedFormIndex == 2)
-                            invoice = QBDataSync_MET.GetInvoiceByRefNumber(refNumber);
+                        {
+                            // 1. Try to find an Invoice first
+                            data = QBDataSync_MET.GetInvoiceByRefNumber(refNumber);
 
-                        return new { Invoice = invoice };
+                            // 2. Fallback: If no invoice found, search Sales Orders
+                            if (data == null || data.Count == 0)
+                            {
+                                LogMessage($"Invoice {refNumber} not found. Trying Sales Order...");
+                                data = QBDataSync_MET.GetSalesOrderByRefNumber(refNumber);
+                            }
+                        }
+
+                        return new { Invoice = data };
                     });
 
                     // Stop progress

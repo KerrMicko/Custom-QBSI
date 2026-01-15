@@ -482,6 +482,113 @@ namespace Custom_QBSI.Clients.MET
             return invoices;
         }
 
+
+        public static List<InvoiceData> GetSalesOrderByRefNumber(string refNumber)
+        {
+            QBSessionManager sessionManager = new QBSessionManager();
+            List<InvoiceData> invoices = new List<InvoiceData>(); // Reusing InvoiceData class for layout
+
+            try
+            {
+                string AppName = "QBSI";
+                sessionManager.OpenConnection("", AppName);
+                sessionManager.BeginSession("", ENOpenMode.omDontCare);
+
+                IMsgSetRequest requestMsgSet = sessionManager.CreateMsgSetRequest("US", 13, 0);
+                requestMsgSet.Attributes.OnError = ENRqOnError.roeStop;
+
+                // Change: Build SalesOrderQuery instead of InvoiceQuery
+                ISalesOrderQuery soQuery = requestMsgSet.AppendSalesOrderQueryRq();
+                soQuery.IncludeLineItems.SetValue(true);
+                soQuery.OwnerIDList.Add("0");
+
+                soQuery.ORTxnNoAccountQuery.TxnFilterNoAccount.ORRefNumberFilter.RefNumberFilter.MatchCriterion.SetValue(ENMatchCriterion.mcStartsWith);
+                soQuery.ORTxnNoAccountQuery.TxnFilterNoAccount.ORRefNumberFilter.RefNumberFilter.RefNumber.SetValue(refNumber);
+
+                IMsgSetResponse responseMsgSet = sessionManager.DoRequests(requestMsgSet);
+                IResponse response = responseMsgSet.ResponseList.GetAt(0);
+                ISalesOrderRetList soList = response.Detail as ISalesOrderRetList;
+
+                if (soList != null && soList.Count > 0)
+                {
+                    for (int i = 0; i < soList.Count; i++)
+                    {
+                        ISalesOrderRet qbSO = soList.GetAt(i);
+
+                        InvoiceData soData = new InvoiceData
+                        {
+                            RefNumber = qbSO?.RefNumber?.GetValue() ?? string.Empty,
+                            TxnDate = qbSO?.TxnDate?.GetValue() ?? DateTime.MinValue,
+                            CustomerName = qbSO?.CustomerRef?.FullName?.GetValue() ?? string.Empty,
+                            Subtotal = qbSO?.Subtotal?.GetValue() ?? 0,
+                            TotalAmount = qbSO?.TotalAmount?.GetValue() ?? 0,
+                            Terms = qbSO?.TermsRef?.FullName?.GetValue() ?? string.Empty,
+                            DueDate = qbSO?.DueDate?.GetValue() ?? DateTime.MinValue,
+                            PONumber = qbSO?.PONumber?.GetValue() ?? string.Empty,
+                            ShipAddress1 = qbSO?.ShipAddressBlock?.Addr1?.GetValue() ?? string.Empty,
+                            ShipAddress2 = qbSO?.ShipAddressBlock?.Addr2?.GetValue() ?? string.Empty,
+                            ShipAddress3 = qbSO?.ShipAddressBlock?.Addr3?.GetValue() ?? string.Empty,
+                            ShipAddress4 = qbSO?.ShipAddressBlock?.Addr4?.GetValue() ?? string.Empty,
+                            ShipAddress5 = qbSO?.ShipAddressBlock?.Addr5?.GetValue() ?? string.Empty,
+                        };
+
+                        // Custom Fields Logic
+                        if (qbSO.DataExtRetList != null)
+                        {
+                            soData.CustomerCustomFields = new Dictionary<string, string>();
+                            for (int k = 0; k < qbSO.DataExtRetList.Count; k++)
+                            {
+                                IDataExtRet dataExt = qbSO.DataExtRetList.GetAt(k);
+                                soData.CustomerCustomFields[dataExt.DataExtName.GetValue()] = dataExt.DataExtValue.GetValue();
+                            }
+                        }
+
+                        // Line Items Logic
+                        if (qbSO.ORSalesOrderLineRetList != null)
+                        {
+                            Dictionary<string, string> uomCache = new Dictionary<string, string>();
+                            for (int j = 0; j < qbSO.ORSalesOrderLineRetList.Count; j++)
+                            {
+                                var orLine = qbSO.ORSalesOrderLineRetList.GetAt(j);
+                                if (orLine?.SalesOrderLineRet != null)
+                                {
+                                    var line = orLine.SalesOrderLineRet;
+                                    string uomListID = line.OverrideUOMSetRef?.ListID?.GetValue();
+                                    string finalUOM = line.UnitOfMeasure?.GetValue() ?? string.Empty;
+
+                                    if (!string.IsNullOrEmpty(uomListID))
+                                    {
+                                        if (!uomCache.ContainsKey(uomListID)) uomCache[uomListID] = GetUOMAbbreviation(sessionManager, uomListID);
+                                        finalUOM = uomCache[uomListID];
+                                    }
+
+                                    soData.Lines.Add(new InvoiceLineData
+                                    {
+                                        ItemName = line.ItemRef?.FullName?.GetValue() ?? string.Empty,
+                                        Description = line.Desc?.GetValue() ?? string.Empty,
+                                        Quantity = line.Quantity?.GetValue() ?? 0,
+                                        UnitOfMeasure = finalUOM,
+                                        Rate = (decimal?)(line.ORRate?.Rate?.GetValue()) ?? 0m,
+                                        Amount = (decimal?)(line.Amount?.GetValue()) ?? 0m,
+                                        SkuCode = line.Other1?.GetValue() ?? string.Empty,
+                                        ExpirationDate = line.Other2?.GetValue() ?? string.Empty
+                                    });
+                                }
+                            }
+                        }
+                        invoices.Add(soData);
+                    }
+                }
+                sessionManager.EndSession();
+                sessionManager.CloseConnection();
+            }
+            catch (Exception ex)
+            {
+                LogDataSync($"Sales Order Query Error: {ex.Message}");
+            }
+            return invoices;
+        }
+
         public static string GetUOMAbbreviation(QBSessionManager sessionManager, string uomListID)
         {
             if (string.IsNullOrEmpty(uomListID)) return string.Empty;

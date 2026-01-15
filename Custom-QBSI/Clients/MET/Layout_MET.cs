@@ -267,21 +267,11 @@ namespace Custom_QBSI.Clients.MET
 
             if (vatType == "Inclusive")
             {
-                if (invoiceData[0].TaxesName == "Output Tax")
-                {
-                    if (amountNetVat > 0)
-                        e.Graphics.DrawString(amountNetVat.ToString("N2"), font_Data, Brushes.Black, rectVATableSales, sfAlignCenterRight);
+               if (amountNetVat > 0)
+                   e.Graphics.DrawString(amountNetVat.ToString("N2"), font_Data, Brushes.Black, rectVATableSales, sfAlignCenterRight);
 
-                    if (totalVAT > 0)
-                        e.Graphics.DrawString(totalVAT.ToString("N2"), font_Data, Brushes.Black, rectVatAmount, sfAlignCenterRight);
-                }
-                else
-                {
-                    if (zeroRatedSalesTotal > 0)
-                        e.Graphics.DrawString(zeroRatedSalesTotal.ToString("N2"), font_Data, Brushes.Black, rectZeroRatedSales, sfAlignCenterRight);
-                    else if (vatExemptSalesTotal > 0)
-                        e.Graphics.DrawString(vatExemptSalesTotal.ToString("N2"), font_Data, Brushes.Black, rectVATExemptSales, sfAlignCenterRight);
-                }
+               if (totalVAT > 0)
+                   e.Graphics.DrawString(totalVAT.ToString("N2"), font_Data, Brushes.Black, rectVatAmount, sfAlignCenterRight);
             }
             else if (vatType == "Exclusive")
             {
