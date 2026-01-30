@@ -72,13 +72,16 @@ namespace Custom_QBSI.Clients.MET
 
 
             Rectangle rectTerms = new Rectangle(365 + 30, 245 - 30, 285, 15);
+            Rectangle rectPO = new Rectangle(365 + 200, 245 - 30, 285, 15);
             Rectangle rectAmountInWords = new Rectangle(50 + 30, 300 - 30, 500, 40);
 
             string invoiceTerms = invoiceData[0].Terms.ToString();
+            string invoicePO = invoiceData[0].PONumber.ToString();
             double totalamount = invoiceData[0].TotalAmount;
             string amountInWords = AmountToWordsConverter.Convert(totalamount);
 
             e.Graphics.DrawString(invoiceTerms, font_Data, Brushes.Black, rectTerms);
+            e.Graphics.DrawString(invoicePO, font_Data, Brushes.Black, rectPO);
             e.Graphics.DrawString(amountInWords, font_Data, Brushes.Black, rectAmountInWords);
 
             //MIDDLE TABLE
@@ -87,7 +90,7 @@ namespace Custom_QBSI.Clients.MET
 
             int tab1XStart = 20;
             int tab1YStart = 340;
-            int tab1DataHeight = 25;
+            int tab1DataHeight = 15; //25
 
             int widthItemQuantity = 60;
             int widthItemDesc = 340 - minus1;
@@ -157,8 +160,11 @@ namespace Custom_QBSI.Clients.MET
                         // ---------- Case 1: Discount ----------
                         if (isDiscountLine)
                         {
+                            // Added -30 to Y to match regular lines and used rowHeight
                             e.Graphics.DrawString(descText, font_Data, Brushes.Black, new Rectangle(rectItemDescription.X + 45, rectItemDescription.Y - 30 + itemHeight, rectItemDescription.Width, rowHeight), sfAlignLeftCenter);
-                            e.Graphics.DrawString(adjustedAmount.ToString("N2"), font_Data, Brushes.Black, new Rectangle(rectItemAmount.X + 45, rectItemAmount.Y + itemHeight, rectItemAmount.Width, rowHeight), sfAlignCenterRight);
+
+                            // Usually discounts don't have qty/rate, but we ensure the Amount aligns
+                            e.Graphics.DrawString(adjustedAmount.ToString("N2"), font_Data, Brushes.Black, new Rectangle(rectItemAmount.X + 45, rectItemAmount.Y - 30 + itemHeight, rectItemAmount.Width, rowHeight), sfAlignCenterRight);
 
                             totalAmount += adjustedAmount;
                             itemHeight += rowHeight;
