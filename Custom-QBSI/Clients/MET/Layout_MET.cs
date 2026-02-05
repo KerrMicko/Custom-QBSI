@@ -49,11 +49,6 @@ namespace Custom_QBSI.Clients.MET
 
             string date = invoiceData[0].TxnDate.ToString("MM/dd/yyyy");
             string invoiceSoldTo = invoiceData[0].CustomerName;
-            if (invoiceSoldTo.Contains(":"))
-            {
-                invoiceSoldTo = invoiceSoldTo.Split(':')[0].Trim();
-            }
-
 
             string invoiceTin = "";
 
@@ -64,12 +59,10 @@ namespace Custom_QBSI.Clients.MET
 
             string invoiceBusinessAdd = invoiceData[0].ShipAddress1.ToString() + invoiceData[0].ShipAddress2.ToString() + invoiceData[0].ShipAddress3.ToString() + invoiceData[0].ShipAddress4.ToString() + invoiceData[0].ShipAddress5.ToString();
 
-
             e.Graphics.DrawString(date, font_Data, Brushes.Black, rectDate, sfAlignCenter);
             e.Graphics.DrawString(invoiceSoldTo, font_Data, Brushes.Black, rectSoldTo);
             e.Graphics.DrawString(invoiceTin, font_Data, Brushes.Black, rectTIN);
             e.Graphics.DrawString(invoiceBusinessAdd, font_Data, Brushes.Black, rectBusinessAdd);
-
 
             Rectangle rectTerms = new Rectangle(365 + 30, 245 - 30, 285, 15);
             Rectangle rectPO = new Rectangle(365 + 200, 245 - 30, 285, 15);
@@ -439,10 +432,6 @@ namespace Custom_QBSI.Clients.MET
             string invoiceBusinessStyle = businessStyle;
             string invoiceBusinessAdd = invoiceData[0].ShipAddress1.ToString() + invoiceData[0].ShipAddress2.ToString() + invoiceData[0].ShipAddress3.ToString() + invoiceData[0].ShipAddress4.ToString() + invoiceData[0].ShipAddress5.ToString();
             string invoiceSoldTo = invoiceData[0].CustomerName;
-            if (invoiceSoldTo.Contains(":"))
-            {
-                invoiceSoldTo = invoiceSoldTo.Split(':')[0].Trim();
-            }
 
 
             e.Graphics.DrawString(invoiceSoldTo, font_Data, Brushes.Black, rectSoldTo);
