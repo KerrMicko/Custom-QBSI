@@ -600,6 +600,7 @@ namespace Custom_QBSI.Clients.Enclosure
             Rectangle rectACNoData = new Rectangle(xStart + 70, yStartFooterExtraFields, 250 - 58, rectHeight);
             Rectangle rectDateIssuedData = new Rectangle(xStart + 92 - 18, yStartFooterExtraFields - 10 + rectHeight, 300 - 92, rectHeight);
             Rectangle rectSeriesRangeData = new Rectangle(xStart + 94 - 15, yStartFooterExtraFields - 20 + rectHeight * 2, 350 - 94, rectHeight);
+            Rectangle rectREPRINT = new Rectangle(xStart + 594 - 15, yStartFooterExtraFields + 50 + rectHeight * 2, 350 - 94, rectHeight);
 
             /*e.Graphics.DrawRectangle(Pens.Red, rectACNo);
             e.Graphics.DrawRectangle(Pens.Red, rectDateIssued);
@@ -610,6 +611,7 @@ namespace Custom_QBSI.Clients.Enclosure
             //string seriesRange = "00001-0000000100";
 
             Font fontExtraFieldsFooter = font_Seven;
+            Font fontExtraFieldsFooter2 = font_Ten;
 
             queries_Enclosure = new Queries_Enclosure();
             var detailedEnclosure = queries_Enclosure.RetrieveACNoAndDateIssued();
@@ -626,6 +628,7 @@ namespace Custom_QBSI.Clients.Enclosure
             }
               
             e.Graphics.DrawString("000001-9999999999", fontExtraFieldsFooter, Brushes.Black, rectSeriesRangeData, sfAlignLeftCenter);
+            e.Graphics.DrawString("---REPRINT---", fontExtraFieldsFooter2, Brushes.Black, rectREPRINT, sfAlignLeftCenter);
         }
     }
 }

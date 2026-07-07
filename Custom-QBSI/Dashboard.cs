@@ -29,7 +29,7 @@ namespace Custom_QBSI
          */
 
 
-        public static string client = "MET";
+        public static string client = "Enclosure";
         public static bool isPrinting = false;
     }
     public partial class Dashboard : Form
