@@ -626,7 +626,7 @@ namespace Custom_QBSI.Clients.Enclosure
                 string formattedDate = detailedEnclosure.dateIssued.Value.ToString("MM/dd/yyyy");
                 e.Graphics.DrawString(formattedDate, fontExtraFieldsFooter, Brushes.Black, rectDateIssuedData, sfAlignLeftCenter);
             }
-              
+
             e.Graphics.DrawString("000001-9999999999", fontExtraFieldsFooter, Brushes.Black, rectSeriesRangeData, sfAlignLeftCenter);
             e.Graphics.DrawString("---REPRINT---", fontExtraFieldsFooter2, Brushes.Black, rectREPRINT, sfAlignLeftCenter);
         }
