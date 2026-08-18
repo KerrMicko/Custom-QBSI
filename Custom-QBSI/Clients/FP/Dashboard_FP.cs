@@ -824,7 +824,7 @@ namespace Custom_QBSI.Clients.FP
 
             //return $"{seriesNumber:00000}-000000000";
 
-            return $"{seriesNumber:000000}";
+            return $"{seriesNumber:00000000001}";
         }
     }
 }
