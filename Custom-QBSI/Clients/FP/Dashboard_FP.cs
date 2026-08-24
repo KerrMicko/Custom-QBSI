@@ -39,6 +39,7 @@ namespace Custom_QBSI.Clients.FP
         private TextBox textBox_PWDSignature;
         private RadioButton radioButton_VATInclusive;
         private RadioButton radioButton_VATExclusive;
+        private CheckBox checkBox_IsReprint;
 
         // Signatory
         private TextBox textBox_SignatoryPreparedBy;
@@ -104,6 +105,16 @@ namespace Custom_QBSI.Clients.FP
                 Text = "Note:",
                 TextAlign = ContentAlignment.MiddleLeft,
                 Font = font_Label,
+            };
+            // Add this alongside your other CheckBox controls in Main_PanelDetails
+            checkBox_IsReprint = new CheckBox
+            {
+                Parent = panel_Details,
+                Text = "Reprint",
+                Width = componentWidth,
+                Font = font_Label,
+                Checked = false,
+                Visible = true,
             };
 
             textBox_Note = new TextBox
@@ -585,7 +596,7 @@ namespace Custom_QBSI.Clients.FP
                         {
                             //layout_NHC.PrintPage_NHC(s, ev, invoice, comboBox_Forms.SelectedIndex, note, businessStyle, pwdSignature, isEnableExpDateChecked);
                             //if (comboBox_Forms.SelectedIndex == 1)
-                            layout_FP.Layout_SalesInvoice(ev, invoice, vatType, businessStyle, includeDateIssued, isLessEWTChecked, acNo, dateIssued, seriesNumberRef);
+                            layout_FP.Layout_SalesInvoice(ev, invoice, vatType, businessStyle, includeDateIssued, isLessEWTChecked, acNo, dateIssued, seriesNumberRef, checkBox_IsReprint.Checked);
                             /*else if (comboBox_Forms.SelectedIndex == 2)
                                 layout_Enclosure.Layout_DeliveryReceipt(ev, invoice, note, businessStyle, pwdSignature, isEnableExpDateChecked, signatoryName);*/
                         };

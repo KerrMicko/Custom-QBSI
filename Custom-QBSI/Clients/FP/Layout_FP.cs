@@ -38,7 +38,7 @@ namespace Custom_QBSI.Clients.FP
         private readonly StringFormat sfAlignLeftCenter = new StringFormat { Alignment = StringAlignment.Near, LineAlignment = StringAlignment.Center };
         private readonly StringFormat sfAlignLeftBottom = new StringFormat { Alignment = StringAlignment.Near, LineAlignment = StringAlignment.Far };
 
-        public void Layout_SalesInvoice(PrintPageEventArgs e, List<InvoiceData> invoiceData, string vatType, string businessStyle, bool includeDateIssued, bool isLessEWTChecked, string acNo, DateTime dateIssued, string seriesNumber)
+        public void Layout_SalesInvoice(PrintPageEventArgs e, List<InvoiceData> invoiceData, string vatType, string businessStyle, bool includeDateIssued, bool isLessEWTChecked, string acNo, DateTime dateIssued, string seriesNumber, bool isReprint)
         {
             int maxWidth = 750;
             int xStart = 50;
@@ -77,7 +77,7 @@ namespace Custom_QBSI.Clients.FP
 
             e.Graphics.DrawString("INVOICE", font_ThirteenBold, Brushes.Black, new PointF(xStart, yStart + 100));
 
-            e.Graphics.DrawString("NO. " + seriesNumber, font_Thirteen, Brushes.Red, new PointF(xStart + 650, yStart + 100));
+            e.Graphics.DrawString("INV. NO. " + seriesNumber, font_Thirteen, Brushes.Red, new PointF(xStart + 560, yStart + 100));
             int yStartDetails = 180;
             int rectHeight = 28;
             int rightWidth = 180;
@@ -627,7 +627,7 @@ namespace Custom_QBSI.Clients.FP
 
             Rectangle rectACNoData = new Rectangle(xStart + 70, yStartFooterExtraFields, 250 - 58, rectHeight);
             Rectangle rectDateIssuedData = new Rectangle(xStart + 92 - 18, yStartFooterExtraFields - 10 + rectHeight, 300 - 92, rectHeight);
-            Rectangle rectSeriesRangeData = new Rectangle(xStart + 94 - 15, yStartFooterExtraFields - 20 + rectHeight * 2, 350 - 94, rectHeight);
+            Rectangle rectSeriesRangeData = new Rectangle(xStart + 94 - 25, yStartFooterExtraFields - 20 + rectHeight * 2, 350 - 94, rectHeight);
             Rectangle rectREPRINT = new Rectangle(xStart + 594 - 15, yStartFooterExtraFields + 50 + rectHeight * 2, 350 - 94, rectHeight);
 
             /*e.Graphics.DrawRectangle(Pens.Red, rectACNo);
@@ -656,9 +656,12 @@ namespace Custom_QBSI.Clients.FP
             e.Graphics.DrawString(formattedDate, fontExtraFieldsFooter, Brushes.Black, rectDateIssuedData, sfAlignLeftCenter);
 
 
-            e.Graphics.DrawString("0000000001-99999999999", fontExtraFieldsFooter, Brushes.Black, rectSeriesRangeData, sfAlignLeftCenter);
+            e.Graphics.DrawString("INV.00000000001-INV.99999999999", fontExtraFieldsFooter, Brushes.Black, rectSeriesRangeData, sfAlignLeftCenter);
 
-            e.Graphics.DrawString("---REPRINT---", fontExtraFieldsFooter2, Brushes.Black, rectREPRINT, sfAlignLeftCenter);
+            if (isReprint)
+            {
+                e.Graphics.DrawString("---REPRINT---", fontExtraFieldsFooter2, Brushes.Black, rectREPRINT, sfAlignLeftCenter);
+            }
         }
     }
 }
