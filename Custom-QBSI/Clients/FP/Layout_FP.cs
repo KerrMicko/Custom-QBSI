@@ -77,7 +77,7 @@ namespace Custom_QBSI.Clients.FP
 
             e.Graphics.DrawString("INVOICE", font_ThirteenBold, Brushes.Black, new PointF(xStart, yStart + 100));
 
-            e.Graphics.DrawString("INV. NO. " + seriesNumber, font_Thirteen, Brushes.Red, new PointF(xStart + 560, yStart + 100));
+            e.Graphics.DrawString("NO. INV. " + seriesNumber, font_Thirteen, Brushes.Red, new PointF(xStart + 560, yStart + 100));
             int yStartDetails = 180;
             int rectHeight = 28;
             int rightWidth = 180;
