@@ -35,7 +35,7 @@ namespace Custom_QBSI.Clients.Enclosure
         StringFormat sfAlignCenterRight = new StringFormat { Alignment = StringAlignment.Far, LineAlignment = StringAlignment.Center };
         StringFormat sfAlignLeftCenter = new StringFormat { Alignment = StringAlignment.Near, LineAlignment = StringAlignment.Center };
         StringFormat sfAlignLeftBottom = new StringFormat { Alignment = StringAlignment.Near, LineAlignment = StringAlignment.Far };
-        public void Layout_SalesInvoice(PrintPageEventArgs e, List<InvoiceData> invoiceData, string vatType, string businessStyle, bool includeDateIssued, bool isLessEWTChecked, bool isLessEWT2Checked, string acNo, DateTime dateIssued, string seriesNumber, decimal? manualEwtAmount = null)
+        public void Layout_SalesInvoice(PrintPageEventArgs e, List<InvoiceData> invoiceData, string vatType, string businessStyle, bool includeDateIssued, bool isLessEWTChecked, bool isLessEWT2Checked, string acNo, DateTime dateIssued, string seriesNumber, decimal? manualEwtAmount = null, bool isReprint = false)
         {
             int maxWidth = 750;
             int xStart = 50 - 25;
@@ -635,7 +635,13 @@ namespace Custom_QBSI.Clients.Enclosure
             }
 
             e.Graphics.DrawString("000001-9999999999", fontExtraFieldsFooter, Brushes.Black, rectSeriesRangeData, sfAlignLeftCenter);
-            e.Graphics.DrawString("---REPRINT---", fontExtraFieldsFooter2, Brushes.Black, rectREPRINT, sfAlignLeftCenter);
+
+            // Conditionally draw reprint text
+            if (isReprint)
+            {
+                //Rectangle rectREPRINT = new Rectangle(xStart + 594 - 15, yStartFooterExtraFields + 50 + rectHeight * 2, 350 - 94, rectHeight);
+                e.Graphics.DrawString("---REPRINT---", fontExtraFieldsFooter2, Brushes.Black, rectREPRINT, sfAlignLeftCenter);
+            }
         }
     }
 }

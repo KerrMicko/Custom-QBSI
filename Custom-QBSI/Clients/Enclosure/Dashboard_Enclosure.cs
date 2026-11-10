@@ -34,6 +34,7 @@ namespace Custom_QBSI.Clients.Enclosure
         private CheckBox checkBox_LessEWT;
         private CheckBox checkBox_LessEWT2;
         private TextBox textBox_ManualEWTAmount;
+        private CheckBox checkBox_Reprint;
         private TextBox textBox_Note;
         private TextBox textBox_BusinessStyle;
         private TextBox textBox_ACNo;
@@ -263,6 +264,16 @@ namespace Custom_QBSI.Clients.Enclosure
                 Parent = panel_Details,
                 Width = componentWidth,
                 Font = font_Label,
+            };
+
+            checkBox_Reprint = new CheckBox
+            {
+                Parent = panel_Details,
+                Text = "Reprint Invoice",
+                Width = componentWidth,
+                Font = font_Label,
+                Checked = false,
+                Visible = true,
             };
 
 
@@ -589,6 +600,7 @@ namespace Custom_QBSI.Clients.Enclosure
                         bool isEnableExpDateChecked = checkBox_EnableExpDate.Checked;
                         bool isLessEWTChecked = checkBox_LessEWT.Checked;
                         bool isLessEWT2Checked = checkBox_LessEWT2.Checked;
+                        bool isReprintChecked = checkBox_Reprint.Checked;
 
                         // Try parse manual EWT amount
                         decimal? manualEwtAmount = null;
@@ -622,7 +634,7 @@ namespace Custom_QBSI.Clients.Enclosure
                         {
                             //layout_NHC.PrintPage_NHC(s, ev, invoice, comboBox_Forms.SelectedIndex, note, businessStyle, pwdSignature, isEnableExpDateChecked);
                             //if (comboBox_Forms.SelectedIndex == 1)
-                            layout_Enclosure.Layout_SalesInvoice(ev, invoice, vatType, businessStyle, includeDateIssued, isLessEWTChecked, isLessEWT2Checked, acNo, dateIssued, seriesNumberRef, manualEwtAmount);
+                            layout_Enclosure.Layout_SalesInvoice(ev, invoice, vatType, businessStyle, includeDateIssued, isLessEWTChecked, isLessEWT2Checked, acNo, dateIssued, seriesNumberRef, manualEwtAmount, isReprintChecked);
                             /*else if (comboBox_Forms.SelectedIndex == 2)
                                 layout_Enclosure.Layout_DeliveryReceipt(ev, invoice, note, businessStyle, pwdSignature, isEnableExpDateChecked, signatoryName);*/
                         };
