@@ -35,7 +35,7 @@ namespace Custom_QBSI.Clients.Enclosure
         StringFormat sfAlignCenterRight = new StringFormat { Alignment = StringAlignment.Far, LineAlignment = StringAlignment.Center };
         StringFormat sfAlignLeftCenter = new StringFormat { Alignment = StringAlignment.Near, LineAlignment = StringAlignment.Center };
         StringFormat sfAlignLeftBottom = new StringFormat { Alignment = StringAlignment.Near, LineAlignment = StringAlignment.Far };
-        public void Layout_SalesInvoice(PrintPageEventArgs e, List<InvoiceData> invoiceData, string vatType, string businessStyle, bool includeDateIssued, bool isLessEWTChecked, string acNo, DateTime dateIssued, string seriesNumber)
+        public void Layout_SalesInvoice(PrintPageEventArgs e, List<InvoiceData> invoiceData, string vatType, string businessStyle, bool includeDateIssued, bool isLessEWTChecked, bool isLessEWT2Checked, string acNo, DateTime dateIssued, string seriesNumber, decimal? manualEwtAmount = null)
         {
             int maxWidth = 750;
             int xStart = 50 - 25;
@@ -495,24 +495,31 @@ namespace Custom_QBSI.Clients.Enclosure
             if (firstLineItem.SalesTaxTotal > 0)
                 e.Graphics.DrawString(firstLineItem.SalesTaxTotal.ToString("N2"), font_Data, Brushes.Black, rectAddVAT, sfAlignCenterRight);
 
-            // NEED EWT 1% button
+            // EWT Calculation
             decimal ewtAmount = 0;
-            if (isLessEWTChecked)
+
+            if (manualEwtAmount.HasValue && manualEwtAmount.Value > 0)
             {
-                ewtAmount = amountNetVat2 * 0.01m;
+                // Directly uses the user-defined amount
+                ewtAmount = manualEwtAmount.Value;
+            }
+            else if (isLessEWTChecked)
+            {
+                ewtAmount = amountNetVat * 0.01m;
+            }
+            else if (isLessEWT2Checked)
+            {
+                ewtAmount = amountNetVat * 0.02m;
             }
 
-            if (isLessEWTChecked)
+            // Draw Withholding Tax if an EWT amount was set
+            if (ewtAmount > 0)
             {
                 e.Graphics.DrawString(ewtAmount.ToString("N2"), font_Data, Brushes.Black, rectLessWithholdingTax, sfAlignCenterRight);
             }
 
             // Calculate final Total Amount Due
-            decimal totalAmountDue = firstLineItem.TotalAmount;
-            if (isLessEWTChecked)
-            {
-                totalAmountDue -= ewtAmount;
-            }
+            decimal totalAmountDue = firstLineItem.TotalAmount - ewtAmount;
 
             // TOTAL AMOUNT DUE
             Rectangle rectTotalAmountDue = new Rectangle(xStart, yStartTable + tableDataHeight * 17, maxWidth, tableDataHeight);

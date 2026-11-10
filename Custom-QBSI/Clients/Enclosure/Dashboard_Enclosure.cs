@@ -32,6 +32,8 @@ namespace Custom_QBSI.Clients.Enclosure
         // Details
         private CheckBox checkBox_EnableExpDate;
         private CheckBox checkBox_LessEWT;
+        private CheckBox checkBox_LessEWT2;
+        private TextBox textBox_ManualEWTAmount;
         private TextBox textBox_Note;
         private TextBox textBox_BusinessStyle;
         private TextBox textBox_ACNo;
@@ -237,6 +239,32 @@ namespace Custom_QBSI.Clients.Enclosure
                 Font = font_Label,
                 Checked = false,
             };
+            checkBox_LessEWT2 = new CheckBox
+            {
+                Parent = panel_Details,
+                Text = "Less EWT (2%) ?",
+                Width = componentWidth,
+                Font = font_Label,
+                Checked = false,
+            };
+
+            // --- Manual EWT Amount Override ---
+            Label label_ManualEWT = new Label
+            {
+                Parent = panel_Details,
+                Width = componentWidth,
+                Text = "Manual EWT Amount:",
+                TextAlign = ContentAlignment.MiddleLeft,
+                Font = font_Label,
+            };
+
+            textBox_ManualEWTAmount = new TextBox
+            {
+                Parent = panel_Details,
+                Width = componentWidth,
+                Font = font_Label,
+            };
+
 
             radioButton_VATInclusive = new RadioButton
             {
@@ -560,6 +588,14 @@ namespace Custom_QBSI.Clients.Enclosure
                         bool includeDateIssued = checkBox_IncludeDateIssued.Checked;
                         bool isEnableExpDateChecked = checkBox_EnableExpDate.Checked;
                         bool isLessEWTChecked = checkBox_LessEWT.Checked;
+                        bool isLessEWT2Checked = checkBox_LessEWT2.Checked;
+
+                        // Try parse manual EWT amount
+                        decimal? manualEwtAmount = null;
+                        if (decimal.TryParse(textBox_ManualEWTAmount.Text.Trim(), out decimal parsedValue))
+                        {
+                            manualEwtAmount = parsedValue;
+                        }
 
                         string seriesNumberRef = textBox_SeriesNumber.Text;
 
@@ -586,7 +622,7 @@ namespace Custom_QBSI.Clients.Enclosure
                         {
                             //layout_NHC.PrintPage_NHC(s, ev, invoice, comboBox_Forms.SelectedIndex, note, businessStyle, pwdSignature, isEnableExpDateChecked);
                             //if (comboBox_Forms.SelectedIndex == 1)
-                            layout_Enclosure.Layout_SalesInvoice(ev, invoice, vatType, businessStyle, includeDateIssued, isLessEWTChecked, acNo, dateIssued, seriesNumberRef);
+                            layout_Enclosure.Layout_SalesInvoice(ev, invoice, vatType, businessStyle, includeDateIssued, isLessEWTChecked, isLessEWT2Checked, acNo, dateIssued, seriesNumberRef, manualEwtAmount);
                             /*else if (comboBox_Forms.SelectedIndex == 2)
                                 layout_Enclosure.Layout_DeliveryReceipt(ev, invoice, note, businessStyle, pwdSignature, isEnableExpDateChecked, signatoryName);*/
                         };
@@ -793,6 +829,7 @@ namespace Custom_QBSI.Clients.Enclosure
                 //panel_Details.Width = 0;
                 checkBox_EnableExpDate.Visible = false;
                 checkBox_LessEWT.Visible = true;
+                checkBox_LessEWT2.Visible = true;
             }
             else if (comboBox_Forms.SelectedIndex == 2)
             {
@@ -800,6 +837,7 @@ namespace Custom_QBSI.Clients.Enclosure
                 //panel_Details.Width = sideBarWidth + 30;
                 checkBox_EnableExpDate.Visible = true;
                 checkBox_LessEWT.Visible = false;
+                checkBox_LessEWT2.Visible = false;
             }
             else
             {
