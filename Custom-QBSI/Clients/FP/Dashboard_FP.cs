@@ -31,6 +31,7 @@ namespace Custom_QBSI.Clients.FP
         // Details
         private CheckBox checkBox_EnableExpDate;
         private CheckBox checkBox_LessEWT;
+        private CheckBox checkBox_LessEWT2;
         private TextBox textBox_Note;
         private TextBox textBox_BusinessStyle;
         private TextBox textBox_ACNo;
@@ -248,6 +249,24 @@ namespace Custom_QBSI.Clients.FP
                 Width = componentWidth,
                 Font = font_Label,
                 Checked = false,
+            };
+            checkBox_LessEWT2 = new CheckBox
+            {
+                Parent = panel_Details,
+                Text = "Less EWT (2%) ?",
+                Width = componentWidth / 2 - 10,
+                Font = font_Label,
+                Checked = false,
+            };
+
+            checkBox_LessEWT.CheckedChanged += (s, e) =>
+            {
+                if (checkBox_LessEWT.Checked) checkBox_LessEWT2.Checked = false;
+            };
+
+            checkBox_LessEWT2.CheckedChanged += (s, e) =>
+            {
+                if (checkBox_LessEWT2.Checked) checkBox_LessEWT.Checked = false;
             };
 
             radioButton_VATInclusive = new RadioButton
@@ -570,6 +589,7 @@ namespace Custom_QBSI.Clients.FP
                         bool includeDateIssued = checkBox_IncludeDateIssued.Checked;
                         bool isEnableExpDateChecked = checkBox_EnableExpDate.Checked;
                         bool isLessEWTChecked = checkBox_LessEWT.Checked;
+                        bool isLessEWT2Checked = checkBox_LessEWT2.Checked;
 
                         string seriesNumberRef = textBox_SeriesNumber.Text;
 
@@ -596,7 +616,7 @@ namespace Custom_QBSI.Clients.FP
                         {
                             //layout_NHC.PrintPage_NHC(s, ev, invoice, comboBox_Forms.SelectedIndex, note, businessStyle, pwdSignature, isEnableExpDateChecked);
                             //if (comboBox_Forms.SelectedIndex == 1)
-                            layout_FP.Layout_SalesInvoice(ev, invoice, vatType, businessStyle, includeDateIssued, isLessEWTChecked, acNo, dateIssued, seriesNumberRef, checkBox_IsReprint.Checked);
+                            layout_FP.Layout_SalesInvoice(ev, invoice, vatType, businessStyle, includeDateIssued, isLessEWTChecked, isLessEWT2Checked, acNo, dateIssued, seriesNumberRef, checkBox_IsReprint.Checked);
                             /*else if (comboBox_Forms.SelectedIndex == 2)
                                 layout_Enclosure.Layout_DeliveryReceipt(ev, invoice, note, businessStyle, pwdSignature, isEnableExpDateChecked, signatoryName);*/
                         };
@@ -799,17 +819,15 @@ namespace Custom_QBSI.Clients.FP
         {
             if (comboBox_Forms.SelectedIndex == 1)
             {
-                //panel_Details.Visible = false;
-                //panel_Details.Width = 0;
                 checkBox_EnableExpDate.Visible = false;
                 checkBox_LessEWT.Visible = true;
+                checkBox_LessEWT2.Visible = true;
             }
             else if (comboBox_Forms.SelectedIndex == 2)
             {
-                //panel_Details.Visible = true;
-                //panel_Details.Width = sideBarWidth + 30;
                 checkBox_EnableExpDate.Visible = true;
                 checkBox_LessEWT.Visible = false;
+                checkBox_LessEWT2.Visible = false;
             }
             else
             {

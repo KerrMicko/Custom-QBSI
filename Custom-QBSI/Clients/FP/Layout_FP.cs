@@ -38,7 +38,7 @@ namespace Custom_QBSI.Clients.FP
         private readonly StringFormat sfAlignLeftCenter = new StringFormat { Alignment = StringAlignment.Near, LineAlignment = StringAlignment.Center };
         private readonly StringFormat sfAlignLeftBottom = new StringFormat { Alignment = StringAlignment.Near, LineAlignment = StringAlignment.Far };
 
-        public void Layout_SalesInvoice(PrintPageEventArgs e, List<InvoiceData> invoiceData, string vatType, string businessStyle, bool includeDateIssued, bool isLessEWTChecked, string acNo, DateTime dateIssued, string seriesNumber, bool isReprint)
+        public void Layout_SalesInvoice(PrintPageEventArgs e, List<InvoiceData> invoiceData, string vatType, string businessStyle, bool includeDateIssued, bool isLessEWTChecked, bool isLessEWT2Checked, string acNo, DateTime dateIssued, string seriesNumber, bool isReprint)
         {
             int maxWidth = 750;
             int xStart = 50;
@@ -128,7 +128,7 @@ namespace Custom_QBSI.Clients.FP
             // join with single newline (you can use "\n\n" for extra spacing)
             string indentedAddress = "                                        " + string.Join("\n\n", partsList);
 
-            string date = invoiceData[0].TxnDate.ToString("MM/dd/yyyy");
+            string date = invoiceData[0].TxnDate.ToString("MMM dd, yyyy");
             string tin = invoiceData[0].TINNO.ToString();
             string terms = invoiceData[0].Terms.ToString();
 
@@ -490,7 +490,7 @@ namespace Custom_QBSI.Clients.FP
             e.Graphics.DrawString("Less: VAT", font_Seven, Brushes.Black, new Rectangle(xStartItemQuantity, yStartTable + tableDataHeight * 13, widthItemQuantity, tableDataHeight), sfAlignCenterRight);
             e.Graphics.DrawString("Amount: Net of VAT", font_Seven, Brushes.Black, new Rectangle(xStartItemQuantity, yStartTable + tableDataHeight * 14, widthItemQuantity, tableDataHeight), sfAlignCenterRight);
             e.Graphics.DrawString("Add: VAT", font_Seven, Brushes.Black, new Rectangle(xStartItemQuantity, yStartTable + tableDataHeight * 15, widthItemQuantity, tableDataHeight), sfAlignCenterRight);
-            e.Graphics.DrawString("Less: Witholding Tax", font_Seven, Brushes.Black, new Rectangle(xStartItemQuantity, yStartTable + tableDataHeight * 16, widthItemQuantity, tableDataHeight), sfAlignCenterRight);
+            e.Graphics.DrawString("Less: Withholding Tax", font_Seven, Brushes.Black, new Rectangle(xStartItemQuantity, yStartTable + tableDataHeight * 16, widthItemQuantity, tableDataHeight), sfAlignCenterRight);
 
             decimal amountNetVat2 = 0;
             foreach (var invoice in invoiceData)
@@ -523,21 +523,25 @@ namespace Custom_QBSI.Clients.FP
             if (firstLineItem.SalesTaxTotal > 0)
                 e.Graphics.DrawString(firstLineItem.SalesTaxTotal.ToString("N2"), font_Data, Brushes.Black, rectAddVAT, sfAlignCenterRight);
 
-            // NEED EWT 1% button
+            // Calculate EWT (1% or 2%)
             decimal ewtAmount = 0;
             if (isLessEWTChecked)
             {
                 ewtAmount = amountNetVat2 * 0.01m;
             }
+            else if (isLessEWT2Checked)
+            {
+                ewtAmount = amountNetVat2 * 0.02m;
+            }
 
-            if (isLessEWTChecked)
+            if (isLessEWTChecked || isLessEWT2Checked)
             {
                 e.Graphics.DrawString(ewtAmount.ToString("N2"), font_Data, Brushes.Black, rectLessWithholdingTax, sfAlignCenterRight);
             }
 
             // Calculate final Total Amount Due
             decimal totalAmountDue = firstLineItem.TotalAmount;
-            if (isLessEWTChecked)
+            if (isLessEWTChecked || isLessEWT2Checked)
             {
                 totalAmountDue -= ewtAmount;
             }
